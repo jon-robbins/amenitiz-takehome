@@ -1,0 +1,74 @@
+description: "Global Cursor rules for an EDA-focused Python project. Enforce PEP8, type hints, brief function docstrings, modular code, and reproducible analysis."
+alwaysApply: true
+globs:
+  - "notebooks/**"
+  - "notebooks/eda/**"
+  - "notebooks/eda/utils/**"
+  - "ml_pipeline/**"
+  - "visualization/**"
+  - "tests/**"
+  - "data/**"
+
+rules:
+
+  - id: enforce-pep8
+    intent: "All generated Python code must follow PEP8 strictly."
+    examples:
+      - "Use snake_case for variables and functions."
+      - "Keep line length <= 88."
+      - "Imports grouped: stdlib, third-party, local."
+
+  - id: enforce-type-hints
+    intent: "All functions must include full Python type hints for arguments and return values."
+    examples:
+      - |
+        def load_data(path: str) -> pd.DataFrame:
+            ...
+
+  - id: enforce-docstring
+    intent: "Every function must include a short, 1–3 sentence description summarizing its purpose and behavior."
+    examples:
+      - |
+        def summarize(df: pd.DataFrame) -> pd.DataFrame:
+            """
+            Computes descriptive statistics for the input DataFrame.
+            Returns a DataFrame of summary metrics.
+            """
+            ...
+
+  - id: module-first
+    intent: "Cursor should place reusable EDA logic into notebooks/eda/utils/*.py; notebooks should only orchestrate and visualize."
+    examples:
+      - "Good: create clean, reusable functions in utils/"
+      - "Bad: heavy transformation code inside notebook cells"
+
+  - id: prefer-vectorized
+    intent: "Prefer pandas vectorized operations over DataFrame.apply or Python loops unless strictly unavoidable. When apply is used, explain why."
+
+  - id: plotting-defaults
+    intent: "Use matplotlib for default plotting. Functions should accept an optional 'ax' parameter and return the axis or figure object."
+    examples:
+      - |
+        def plot_hist(df: pd.DataFrame, column: str, ax: plt.Axes | None = None) -> plt.Axes:
+
+  - id: reproducibility
+    intent: "Any sampling, random splitting, or stochastic behavior must include a 'random_state' argument with a default value."
+    examples:
+      - "df.sample(frac=0.1, random_state=42)"
+
+  - id: dataframe-safety
+    intent: "Before expensive operations, warn or optimize if dataframes exceed ~2M rows. Suggest downcasting, chunked reads, or sampling."
+
+  - id: notebook-friendly
+    intent: "Analysis scripts should use '# %%' cell markers to enable seamless conversion between .py and Jupyter notebooks."
+
+  - id: tests
+    intent: "Whenever Cursor generates a transformation function, it should also suggest a minimal pytest example using a small DataFrame fixture."
+
+preferences:
+  python_version: "3.10+"
+  formatting: "PEP8"
+  default_imports:
+    - "import pandas as pd"
+    - "import numpy as np"
+    - "from matplotlib import pyplot as plt"
