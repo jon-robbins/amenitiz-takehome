@@ -20,7 +20,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.append(str(PROJECT_ROOT))
 
-GEOSPAIN_PATH = PROJECT_ROOT / "notebooks" / "eda" / "GeoSpain"
+GEOSPAIN_PATH = PROJECT_ROOT / "notebooks" / "eda" / "geo_data" / "GeoSpain"
 if GEOSPAIN_PATH.exists():
     sys.path.insert(0, str(GEOSPAIN_PATH))
     pkg_path = GEOSPAIN_PATH / "geospain"
@@ -32,7 +32,7 @@ try:
 except ImportError:
     GADM = None  # type: ignore
 
-from notebooks.eda.utils.spatial import (  # noqa: E402
+from notebooks.eda.hotspots.spatial_utils import (  # noqa: E402
     ensure_output_dir,
     load_clean_booking_locations,
 )

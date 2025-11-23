@@ -23,15 +23,15 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.append(str(PROJECT_ROOT))
 
-from notebooks.utils.db import init_db  # noqa: E402
-from notebooks.utils.data_validator import validate_and_clean  # noqa: E402
-from notebooks.eda.utils.spatial import (  # noqa: E402
+from lib.db import init_db  # noqa: E402
+from lib.data_validator import validate_and_clean  # noqa: E402
+from notebooks.eda.hotspots.spatial_utils import (  # noqa: E402
     ensure_output_dir,
     load_clean_booking_locations,
 )
-from notebooks.eda.hotspots_grid import assign_grid_bins  # noqa: E402
-from notebooks.eda.hotspots_dbscan import run_dbscan, summarize_clusters  # noqa: E402
-from notebooks.eda.utils.city_matcher import (  # noqa: E402
+from notebooks.eda.hotspots.hotspots_grid import assign_grid_bins  # noqa: E402
+from notebooks.eda.hotspots.hotspots_dbscan import run_dbscan, summarize_clusters  # noqa: E402
+from notebooks.data_prep.city_consolidation import (  # noqa: E402
     create_city_mapping,
     apply_city_mapping,
     print_mapping_examples,

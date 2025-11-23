@@ -2,9 +2,9 @@
 # Analyze capacity (max_occupancy, max_adults) and policy flags
 
 import sys
-sys.path.insert(0, '.')
-from notebooks.utils.db import init_db
-from notebooks.utils.data_validator import validate_and_clean
+sys.path.insert(0, '../../..')
+from lib.db import init_db
+from lib.data_validator import validate_and_clean
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt

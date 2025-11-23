@@ -17,7 +17,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.append(str(PROJECT_ROOT))
 
-from notebooks.eda.utils.spatial import (  # noqa: E402
+from notebooks.eda.hotspots.spatial_utils import (  # noqa: E402
     ensure_output_dir,
     load_clean_booking_locations,
 )

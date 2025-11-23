@@ -5,16 +5,14 @@ Shows the percentage of dirty data in the raw database.
 """
 
 import sys
-sys.path.append('../..')
+sys.path.insert(0, '../..')
 
-from notebooks.utils.db import get_connection
-from notebooks.utils.data_validator import check_data_quality
-from notebooks.utils.db import init_db
-from notebooks.utils.data_validator import validate_and_clean
+from lib.db import init_db
+from lib.data_validator import check_data_quality, validate_and_clean
 
 # %%
 # Load raw data
-con = get_connection()
+con = init_db()
 
 # %%
 # Check data quality

@@ -11,8 +11,8 @@ import duckdb
 import numpy as np
 import pandas as pd
 
-from notebooks.utils.db import init_db
-from notebooks.utils.data_validator import validate_and_clean
+from lib.db import init_db
+from lib.data_validator import validate_and_clean
 
 
 def load_clean_booking_locations(
