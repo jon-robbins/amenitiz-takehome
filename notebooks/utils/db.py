@@ -1,7 +1,16 @@
 import duckdb
 from pathlib import Path
 
-def init_db(db_path=":memory:"):
+
+def get_connection(db_path: str = ":memory:") -> duckdb.DuckDBPyConnection:
+    """
+    Load raw data from CSV files into DuckDB.
+    Returns a connection with all tables loaded.
+    """
+    return init_db(db_path)
+
+
+def init_db(db_path: str = ":memory:") -> duckdb.DuckDBPyConnection:
     con = duckdb.connect(database=db_path, read_only=False)
     project_root = Path(__file__).parent.parent.parent
     data_dir = project_root / "data"
