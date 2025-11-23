@@ -1,0 +1,1492 @@
+original_city,canonical_city,changed,original_bookings,canonical_bookings
+Madrid,Madrid,False,58255,58255
+Barcelona,Barcelona,False,27482,27482
+Sevilla,Sevilla,False,25807,25807
+Toledo,Toledo,False,19057,19057
+Málaga,Málaga,False,17060,17060
+Santo Domingo de la Calzada,Santo Domingo de la Calzada,False,10654,10654
+Valencia,Valencia,False,10555,10555
+Santiago de Compostela,Santiago de Compostela,False,9447,9447
+Tarifa,Tarifa,False,8592,8592
+Granada,Granada,False,8082,8082
+Segovia,Segovia,False,6835,6835
+Alicante,Alicante,False,6515,6515
+"Marbella, Málaga","Marbella, Málaga",False,6361,6361
+Santander,Santander,False,6131,6131
+Zaragoza,Zaragoza,False,5964,5964
+A Coruña,A Coruña,False,5953,5953
+Valladolid,Valladolid,False,5635,5635
+Salamanca,Salamanca,False,5539,5539
+Redondela ,Redondela ,False,5503,5503
+"Sarria, Lugo","Sarria, Lugo",False,5483,5483
+Manises,Manises,False,5482,5482
+Córdoba,Córdoba,False,5320,5320
+Mazagón,Mazagón,False,5236,5236
+"O Pino, A Coruña","O Pino, A Coruña",False,5227,5227
+Caldas de Reis,Caldas de Reis,False,5197,5197
+Setenil de las Bodegas,Setenil de las Bodegas,False,5162,5162
+Redondela (Pontevedra),Redondela (Pontevedra),False,5135,5135
+León,León,False,5092,5092
+Torrevieja,Torrevieja,False,5012,5012
+Miño,Miño,False,4848,4848
+Pontevedra,Pontevedra,False,4793,4793
+Soutomaior,Soutomaior,False,4775,4775
+Oviedo,Oviedo,False,4676,4676
+VALENCIA,Valencia,True,4605,10555
+Sitges,Sitges,False,4549,4549
+Nerja,Nerja,False,4506,4506
+Jerez de la Frontera,Jerez de la Frontera,False,4502,4502
+MURCIA,MURCIA,False,4488,4488
+Pedrouzo,Pedrouzo,False,4485,4485
+Puerto de la Cruz,Puerto de la Cruz,False,4385,4385
+O Pino,O Pino,False,4192,4192
+Castro-Urdiales,Castro-Urdiales,False,3868,3868
+"Nerja, Málaga","Nerja, Málaga",False,3792,3792
+Portomarín,Portomarín,False,3685,3685
+Valderrobres,Valderrobres,False,3678,3678
+València,Valencia,True,3570,10555
+Cervera,Cervera,False,3563,3563
+"Maó, Illes Balears","Maó, Illes Balears",False,3511,3511
+San Sebastián-Donostia,San Sebastián-Donostia,False,3435,3435
+Cullera,Cullera,False,3432,3432
+Guadalajara,Guadalajara,False,3424,3424
+Yecla,Yecla,False,3411,3411
+Burgos,Burgos,False,3266,3266
+Las Palmas de Gran Canaria,Las Palmas de Gran Canaria,False,3227,3227
+El Médano,El Médano,False,3188,3188
+"Tarifa, Cádiz","Tarifa, Cádiz",False,3182,3182
+Nájera,Nájera,False,3157,3157
+"L'Escala, Girona","L'Escala, Girona",False,3144,3144
+"Belchite, Zaragoza","Belchite, Zaragoza",False,3084,3084
+Mojácar,Mojácar,False,3059,3059
+Tarragona,Tarragona,False,3025,3025
+Vejer de la frontera,Vejer de la frontera,False,2997,2997
+Roses,Roses,False,2973,2973
+"Jerez de la Frontera, Cádiz","Jerez de la Frontera, Cádiz",False,2940,2940
+"Redondela, Pontevedra","Redondela, Pontevedra",False,2928,2928
+"Pedrafita do Cebreiro, Lugo","Pedrafita do Cebreiro, Lugo",False,2899,2899
+Salou,Salou,False,2785,2785
+"Isla Cristina, Huelva","Isla Cristina, Huelva",False,2768,2768
+Padrón,Padrón,False,2757,2757
+"Alacant, Alicante,","Alacant, Alicante,",False,2755,2755
+Pamplona,Pamplona,False,2750,2750
+Denia,Denia,False,2745,2745
+Cádiz,Cádiz,False,2712,2712
+Matalascañas,Matalascañas,False,2643,2643
+La Savina,La Savina,False,2637,2637
+"Zubiri, Navarra","Zubiri, Navarra",False,2612,2612
+Almagro,Almagro,False,2550,2550
+Fornells,Fornells,False,2495,2495
+"Las Cabezas de San Juan, Sevilla","Las Cabezas de San Juan, Sevilla",False,2473,2473
+Carboneras,Carboneras,False,2409,2409
+Bergara,Bergara,False,2405,2405
+Calpe,Calpe,False,2387,2387
+MALAGA,Málaga,True,2386,17060
+ZAFRA,ZAFRA,False,2370,2370
+"Tudela, Navarra","Tudela, Navarra",False,2353,2353
+Muxia,Muxia,False,2312,2312
+Alhaurín el Grande,Alhaurín el Grande,False,2271,2271
+"Vall-llobrega, Girona","Vall-llobrega, Girona",False,2202,2202
+Cambrils,Cambrils,False,2162,2162
+Tossa de Mar,Tossa de Mar,False,2156,2156
+"Candás, Asturias","Candás, Asturias",False,2143,2143
+Castillo Caleta de Fuste,Castillo Caleta de Fuste,False,2110,2110
+Muxía,Muxia,True,2089,2312
+Sarria,Sarria,False,2085,2085
+Las Negras,Las Negras,False,2078,2078
+Sos del Rey Católico,Sos del Rey Católico,False,2062,2062
+L'Alcúdia,L'Alcúdia,False,2049,2049
+Santa cruz de Tenerife,Santa cruz de Tenerife,False,2017,2017
+Corralejo,Corralejo,False,2003,2003
+"El Puerto de Sta María, Cádiz","El Puerto de Sta María, Cádiz",False,1975,1975
+Montoro,Córdoba,True,1966,5320
+Logroño,Nájera,True,1960,3157
+La Guardia,Toledo,True,1956,19057
+Ronda,Setenil de las Bodegas,True,1950,5162
+Murcia,MURCIA,True,1935,4488
+"Las Herrerías, León,","Pedrafita do Cebreiro, Lugo",True,1913,2899
+"Vic, Barcelona,","Vic, Barcelona,",False,1913,1913
+MADRID,Madrid,True,1891,58255
+El Altet (Elche) Alicante,"Alacant, Alicante,",True,1876,2755
+Zamora,Zamora,False,1876,1876
+Guardo,Guardo,False,1875,1875
+"Vicolozano, Ávila","Vicolozano, Ávila",False,1870,1870
+CASTELLON DE PLANA,CASTELLON DE PLANA,False,1856,1856
+Cañaveral,Cañaveral,False,1800,1800
+Aspe,"Alacant, Alicante,",True,1785,2755
+Portonovo,Pontevedra,True,1783,4793
+Talavera de la Reina,Talavera de la Reina,False,1782,1782
+"Castellfollit de la Roca, Girona","Castellfollit de la Roca, Girona",False,1782,1782
+GRANADA,Granada,True,1759,8082
+Ferrol,Miño,True,1757,4848
+"La Cistérniga, Valladolid",Valladolid,True,1754,5635
+"Villanúa, Huesca","Villanúa, Huesca",False,1738,1738
+Girona,"L'Escala, Girona",True,1731,3144
+"Sigüenza, Guadalajara","Sigüenza, Guadalajara",False,1728,1728
+La Cabrera,Segovia,True,1705,6835
+REDONDELA,Redondela ,True,1694,5503
+Almazán,Almazán,False,1694,1694
+Cuenca,Cuenca,False,1689,1689
+Banyalbufar,Banyalbufar,False,1675,1675
+Épila,Zaragoza,True,1662,5964
+Manacor,Manacor,False,1654,1654
+"Donostia, Gipuzkoa",San Sebastián-Donostia,True,1640,3435
+"Getxo, Bizkaia",Castro-Urdiales,True,1601,3868
+"Tejina, Santa Cruz de Tenerife","Tejina, Santa Cruz de Tenerife",False,1601,1601
+Benissa,Calpe,True,1601,2387
+Fuencaliente de La Palma,Fuencaliente de La Palma,False,1594,1594
+Córdoba ,Córdoba,True,1588,5320
+"Rupit, Barcelona","Rupit, Barcelona",False,1559,1559
+"Espot, Lleida","Espot, Lleida",False,1549,1549
+"Alcalá de Henares, Madrid",Guadalajara,True,1542,3424
+"Cambrils, Tarragona",Cambrils,True,1542,2162
+Calafell,Sitges,True,1535,4549
+San Sebastian ,San Sebastián-Donostia,True,1532,3435
+Jaén,Jaén,False,1518,1518
+Negreira,Santiago de Compostela,True,1500,9447
+Blanes,Tossa de Mar,True,1497,2156
+Sant Andreu De Llavaneres,Barcelona,True,1495,27482
+San pedro de alcantara,"Marbella, Málaga",True,1488,6361
+"Mijas, Málaga",Alhaurín el Grande,True,1486,2271
+"Girona,","Vall-llobrega, Girona",True,1484,2202
+"Usurbil, Gipuzkoa",San Sebastián-Donostia,True,1471,3435
+"Sitges, Barcelona",Sitges,True,1469,4549
+"San José de los Llanos, Santa Cruz de Tenerife","San José de los Llanos, Santa Cruz de Tenerife",False,1460,1460
+Can Picafort,Can Picafort,False,1455,1455
+"Sepúlveda, Segovia",Segovia,True,1453,6835
+"Ochagavía, Navarra","Zubiri, Navarra",True,1438,2612
+Cacabelos,"Pedrafita do Cebreiro, Lugo",True,1434,2899
+El Chorro,Alhaurín el Grande,True,1430,2271
+Espinosa de los Monteros,Castro-Urdiales,True,1428,3868
+"Los Santos de la Humosa, Madrid",Guadalajara,True,1420,3424
+"Cazorla, Jaén","Cazorla, Jaén",False,1412,1412
+Artà,Artà,False,1394,1394
+Barcelona ,Barcelona,True,1391,27482
+Estepona,"Marbella, Málaga",True,1388,6361
+Sos Del Rey Catolico,Sos del Rey Católico,True,1385,2062
+"Tossa de Mar, Girona",Tossa de Mar,True,1381,2156
+Cabrils,Barcelona,True,1378,27482
+Jaén ,Jaén ,False,1371,1371
+"Dénia, Alicante",Denia,True,1365,2745
+Aínsa,Aínsa,False,1354,1354
+TOSSA DE MAR,Tossa de Mar,True,1332,2156
+Oasis del Sur,Oasis del Sur,False,1328,1328
+Cadiz,Cádiz,True,1325,2712
+Palma de Mallorca ,Palma de Mallorca ,False,1318,1318
+Estación de Mora - Albentosa,Estación de Mora - Albentosa,False,1312,1312
+"Llanes, Asturias","Llanes, Asturias",False,1311,1311
+"Cala en Porter, Illes Balears","Maó, Illes Balears",True,1302,3511
+Beranga,Santander,True,1297,6131
+"Vilanova de la Muga, Girona",Roses,True,1294,2973
+"Úbeda, Jaén","Úbeda, Jaén",False,1294,1294
+Marbella,"Marbella, Málaga",True,1283,6361
+Villaciervos,Villaciervos,False,1279,1279
+Tudela ,"Tudela, Navarra",True,1277,2353
+Las Regueras,Oviedo,True,1269,4676
+Estellencs,Estellencs,False,1269,1269
+"Santiago de Compostela, A Coruña",Santiago de Compostela,True,1267,9447
+Alaró,Alaró,False,1263,1263
+Punta Prima,"Maó, Illes Balears",True,1263,3511
+Mondoñedo,Mondoñedo,False,1255,1255
+Alcañiz,Valderrobres,True,1243,3678
+"O Pedrouzo, A Coruña",O Pino,True,1239,4192
+Badalona,Barcelona,True,1239,27482
+Puente Villarente,León,True,1235,5092
+"Canfranc-Estación, Huesca","Canfranc-Estación, Huesca",False,1227,1227
+Aldeanueva del Camino,Aldeanueva del Camino,False,1225,1225
+Zafra,ZAFRA,True,1222,2370
+Getaria,San Sebastián-Donostia,True,1204,3435
+"Navaconcejo, Cáceres","Navaconcejo, Cáceres",False,1195,1195
+Urdaniz,"Zubiri, Navarra",True,1172,2612
+"Cabo de Palos, Murcia",Torrevieja,True,1170,5012
+Arzúa,"O Pino, A Coruña",True,1153,5227
+Mallabia,Bergara,True,1141,2405
+"Comillas, Cantabria",Santander,True,1139,6131
+Alaior,"Maó, Illes Balears",True,1138,3511
+Moscari,Moscari,False,1131,1131
+Ceuta,"Tarifa, Cádiz",True,1130,3182
+"Llafranc, Girona","Vall-llobrega, Girona",True,1130,2202
+"Arsèguel, Lleida","Arsèguel, Lleida",False,1125,1125
+Vilanova de Arousa,Caldas de Reis,True,1114,5197
+"Almagro, Ciudad Real",Almagro,True,1109,2550
+"Tolox, Málaga","Marbella, Málaga",True,1109,6361
+Novelda,"Alacant, Alicante,",True,1107,2755
+"Sanxexo, Pontevedra",Pontevedra,True,1103,4793
+Hermandad de Campoo de Suso,Hermandad de Campoo de Suso,False,1099,1099
+Malpica,A Coruña,True,1094,5953
+Valle de Abdalajís,Málaga,True,1093,17060
+Blocona,Burgos,True,1091,3266
+Puerto de Mogán (Lomoquiebre),Puerto de Mogán (Lomoquiebre),False,1085,1085
+Güejar Sierra,Granada,True,1084,8082
+Meranges,Meranges,False,1083,1083
+"Deba, Pais Vasco",Bergara,True,1079,2405
+"Salvatierra de Tormes, Salamanca",Salamanca,True,1074,5539
+Archidona,Málaga,True,1074,17060
+"San Ambrosio, Barbate",Vejer de la frontera,True,1067,2997
+Alhaurín de la Torre,Alhaurín el Grande,True,1058,2271
+Magallon,"Tudela, Navarra",True,1052,2353
+PAMPLONA,Pamplona,True,1050,2750
+Candeleda,Candeleda,False,1048,1048
+"Anglès, Girona",Tossa de Mar,True,1045,2156
+Lugo,"O Pino, A Coruña",True,1028,5227
+Manzanares,Almagro,True,1022,2550
+O Pedrouzo,O Pino,True,1018,4192
+"Gaucin, Malaga","Marbella, Málaga",True,1016,6361
+Bilbao,Castro-Urdiales,True,1011,3868
+SAN PEDRO ALCANTARA,"Marbella, Málaga",True,1000,6361
+Tresviso,Tresviso,False,989,989
+"Vélez Blanco, Almeria","Vélez Blanco, Almeria",False,982,982
+Algeciras,"Tarifa, Cádiz",True,975,3182
+"Garganta la Olla, Cáceres","Garganta la Olla, Cáceres",False,972,972
+San Carlos de Peralta,La Savina,True,970,2637
+"Santa Pau, Girona,","Santa Pau, Girona,",False,967,967
+"Baiona, Pontevedra","Redondela, Pontevedra",True,966,2928
+El Bruc,Sitges,True,961,4549
+"Camprodon, Girona,","Camprodon, Girona,",False,958,958
+Úbeda,Úbeda,False,958,958
+Benalmádena,Málaga,True,958,17060
+Santillana Del Mar,Santander,True,958,6131
+Mérida,Mérida,False,954,954
+Sant Marti de Centelles (Barcelona),Barcelona,True,949,27482
+"PESQUERA DE DUERO, VALLADOLID",Valladolid,True,949,5635
+Arcos de la Frontera(Cádiz),"Las Cabezas de San Juan, Sevilla",True,940,2473
+ALMANSA,Yecla,True,930,3411
+"Fortià, Girona",Roses,True,926,2973
+AVILA,AVILA,False,925,925
+Malaga,Málaga,True,924,17060
+"Puigcerdà, Girona","Puigcerdà, Girona",False,921,921
+Garai,Bergara,True,912,2405
+Arnedillo,Nájera,True,912,3157
+Adeje,Adeje,False,903,903
+"Oropesa, Toledo","Oropesa, Toledo",False,890,890
+Maó,"Maó, Illes Balears",True,887,3511
+"Espinavell, Girona,","Vall-llobrega, Girona",True,884,2202
+Vélez Málaga ,"Nerja, Málaga",True,882,3792
+La Laguna,La Laguna,False,874,874
+"Llers, Girona",Roses,True,874,2973
+Cudillero,"Candás, Asturias",True,871,2143
+Ferreries,Fornells,True,870,2495
+"Estepona, Málaga,","Marbella, Málaga",True,870,6361
+"Sant Feliu de Guíxols, Girona,",Tossa de Mar,True,867,2156
+Mogro,Santander,True,867,6131
+Cala Figuera ,Cala Figuera ,False,854,854
+Larraga,Pamplona,True,851,2750
+Canet de Adri,"Vall-llobrega, Girona",True,851,2202
+Costitx,Costitx,False,845,845
+"El Pedroso, Sevilla","El Pedroso, Sevilla",False,844,844
+"Rascafría, Madrid",Segovia,True,843,6835
+EMPURIABRAVA,Roses,True,841,2973
+Balmaseda,Castro-Urdiales,True,840,3868
+Cadaqués,Roses,True,840,2973
+Cartagena,MURCIA,True,839,4488
+Vega de San Mateo,Vega de San Mateo,False,836,836
+Granadilla,Granadilla,False,834,834
+Antequera,Málaga,True,834,17060
+TARIFA,Tarifa,True,831,8592
+Oropesa (Toledo),Oropesa (Toledo),False,829,829
+Marbella ,"Marbella, Málaga",True,828,6361
+Ponferrada,"Pedrafita do Cebreiro, Lugo",True,827,2899
+Campelles,Campelles,False,826,826
+Benialí,Denia,True,822,2745
+Xàtiva,L'Alcúdia,True,814,2049
+"Conil de la Frontera, Cádiz",Vejer de la frontera,True,813,2997
+Donamaria,"Zubiri, Navarra",True,806,2612
+Cabezón de Liébana,Cabezón de Liébana,False,792,792
+Pesquera de Duero,Valladolid,True,787,5635
+Graus,Graus,False,784,784
+"Alfondeguilla, Castellón",Valencia,True,782,10555
+Ea,Bergara,True,781,2405
+"A Guarda, Pontevedra","Redondela, Pontevedra",True,771,2928
+"Ventolà, Girona","Vall-llobrega, Girona",True,766,2202
+Puigcerdà,Puigcerdà,False,765,765
+Alcarràs,Alcarràs,False,764,764
+Pedraza,Segovia,True,763,6835
+"Güímar, Santa Cruz de Tenerife","Güímar, Santa Cruz de Tenerife",False,759,759
+Santa Maria de Palautordera,Tossa de Mar,True,757,2156
+cordoba,Córdoba,True,757,5320
+"Porqueres, Girona,","L'Escala, Girona",True,755,3144
+Alhama de Aragón,Alhama de Aragón,False,754,754
+"Alcalá la Real, Jaén",Granada,True,749,8082
+Inca,Inca,False,747,747
+Benifallet,Valderrobres,True,747,3678
+"Abanillas, Cantabria",Santander,True,747,6131
+Arona,Arona,False,744,744
+"Vecindario, Gran Canaria. ","Vecindario, Gran Canaria. ",False,744,744
+"Terrades, Girona",Roses,True,740,2973
+"Castissent, Lleida","Castissent, Lleida",False,739,739
+"San José, Almería",Las Negras,True,737,2078
+Arenas de San Pedro,Arenas de San Pedro,False,732,732
+Las Palmas de Gran Canarias,Las Palmas de Gran Canaria,True,728,3227
+Bellver de la Cerdanya,Bellver de la Cerdanya,False,727,727
+"Las Rozas, Asturias","Las Rozas, Asturias",False,721,721
+Playa Honda,Playa Honda,False,718,718
+Sigüenza,Sigüenza,False,717,717
+Oleiros,Miño,True,713,4848
+"Vilaverd, Tarragona",Tarragona,True,708,3025
+El Burgo de Osma,El Burgo de Osma,False,704,704
+Cantabria,Cantabria,False,704,704
+SANTO DOMINGO DE LA CALZADA,Santo Domingo de la Calzada,True,702,10654
+La Orotava,La Orotava,False,700,700
+Caldes D Estrac,Barcelona,True,699,27482
+Cabo de Palos,Torrevieja,True,695,5012
+"Cañadas del Romero, Mazarrón",MURCIA,True,694,4488
+"Vejer de la Frontera, Cádiz",Vejer de la frontera,True,693,2997
+Santiago de Compostela - La Coruña,Santiago de Compostela,True,693,9447
+Capileira,Granada,True,681,8082
+Morro Jable,Morro Jable,False,680,680
+"Punta Umbría, Huelva",Mazagón,True,679,5236
+Alajeró - La Gomera,Alajeró - La Gomera,False,676,676
+Covas - Ames,Santiago de Compostela,True,666,9447
+El Provencio,El Provencio,False,665,665
+"Mogarraz, Salamanca","Mogarraz, Salamanca",False,665,665
+MOLINASECA,"Pedrafita do Cebreiro, Lugo",True,662,2899
+Villarreal de San Carlos,Villarreal de San Carlos,False,662,662
+Santo Domingo de la Cazada,Santo Domingo de la Calzada,True,661,10654
+"Laspaúles, Huesca","Laspaúles, Huesca",False,660,660
+Santa Cruz de Tenerife,Santa cruz de Tenerife,True,658,2017
+"Santillana del Mar, Cantabria",Santander,True,657,6131
+ La Vall de Laguar,Denia,True,654,2745
+Eivissa,La Savina,True,645,2637
+Ulldemolins,Cambrils,True,644,2162
+JEREZ DE LA FRONTERA,Jerez de la Frontera,True,641,4502
+Vimbodí i Poblet,Tarragona,True,640,3025
+"Busquístar, Granada",Granada,True,640,8082
+"Cubells, Lleida",Cervera,True,636,3563
+La Aldea de San Nicolás,La Aldea de San Nicolás,False,634,634
+Hondarribia,San Sebastián-Donostia,True,633,3435
+Cuellar,Valladolid,True,633,5635
+Toledo ,Toledo,True,631,19057
+Arroyo de la Encomienda,Valladolid,True,630,5635
+Argés,Toledo,True,624,19057
+Peñafiel,Valladolid,True,624,5635
+Deltebre,Cambrils,True,623,2162
+"Planoles, Girona","Planoles, Girona",False,621,621
+"Villalón de Campos, Valladolid","Villalón de Campos, Valladolid",False,620,620
+Playa del Ingles,Playa del Ingles,False,618,618
+"El Algar, Cartagena",Torrevieja,True,616,5012
+LA CÁNDANA DE CURUEÑO - LEÓN,León,True,612,5092
+Teruel,Teruel,False,609,609
+Villalba de Rioja,Santo Domingo de la Calzada,True,602,10654
+"Setenil  de las bodegas, Cádiz,",Setenil de las Bodegas,True,600,5162
+Eljas,Eljas,False,594,594
+Campllong,Tossa de Mar,True,592,2156
+Oronz,"Zubiri, Navarra",True,592,2612
+"Cóbreces, Cantabria,",Santander,True,592,6131
+"Ossa de Montiel, Albacete, ","Ossa de Montiel, Albacete, ",False,586,586
+Santa Eulalia del Río (Ibiza),La Savina,True,580,2637
+Sunbilla,"Zubiri, Navarra",True,576,2612
+Dehesa de Campoamor,Torrevieja,True,573,5012
+Colmenar del Arroyo,Madrid,True,571,58255
+RONDA,Setenil de las Bodegas,True,563,5162
+Getxo,Castro-Urdiales,True,561,3868
+Prado del Rey ,Setenil de las Bodegas,True,561,5162
+Redondela,Redondela ,True,559,5503
+Las Breñas,Las Breñas,False,559,559
+Riu de Cerdanya,Riu de Cerdanya,False,558,558
+Maspalomas,Maspalomas,False,555,555
+"Puntagorda, La Palma","Puntagorda, La Palma",False,552,552
+MARBELLA,"Marbella, Málaga",True,547,6361
+"Las Rozas, Madrid",Madrid,True,547,58255
+Llubí,Llubí,False,543,543
+Abaurrepea / Abaurrea Baja,"Zubiri, Navarra",True,543,2612
+Villavieja del Lozoya,Segovia,True,543,6835
+"Talavera de la Reina, Toledo,","Talavera de la Reina, Toledo,",False,541,541
+"Grazalema, Cádiz",Setenil de las Bodegas,True,539,5162
+"Calaceite, Teruel",Valderrobres,True,539,3678
+"Canet de Mar, Barcelona",Barcelona,True,539,27482
+Albarracín,Albarracín,False,537,537
+Maria de la Salut,Maria de la Salut,False,537,537
+Cap d'Artrutx,Fornells,True,536,2495
+" Dúrcal, Granada",Granada,True,534,8082
+Vilallonga de Ter (Girona),Vilallonga de Ter (Girona),False,534,534
+Santa Eulària des Riu,La Savina,True,530,2637
+"Ciutadella de Menorca, Illes Balears",Fornells,True,519,2495
+Frontera,Frontera,False,517,517
+"Xàbia, Alicante,",Denia,True,512,2745
+Llançà,Roses,True,510,2973
+"El Mallol, Girona","El Mallol, Girona",False,509,509
+"Soo, Las Palmas","Soo, Las Palmas",False,508,508
+"Congostro, Province of Ourense","Congostro, Province of Ourense",False,507,507
+Aren,Madrid,True,506,58255
+Valldemossa,Valldemossa,False,502,502
+Pandiello. Cabrales,Pandiello. Cabrales,False,502,502
+SAN ROMAN - SANTANDER,Santander,True,502,6131
+"San Isidro, Santa Cruz de Tenerife,","San Isidro, Santa Cruz de Tenerife,",False,501,501
+"Argoños, Cantabria,",Castro-Urdiales,True,500,3868
+Guernica,Bergara,True,499,2405
+Arguineguin,Arguineguin,False,498,498
+La Puebla de los Infantes,La Puebla de los Infantes,False,497,497
+Formentera,La Savina,True,494,2637
+HUÉSCAR,HUÉSCAR,False,494,494
+Alcalà ,Alcalà ,False,492,492
+Puebla de Alcocer,Puebla de Alcocer,False,491,491
+"El Pla Del Penedès, Barcelona",Sitges,True,491,4549
+Banyeres del Penedès,Sitges,True,490,4549
+ Freixinet,Cervera,True,489,3563
+Santa Colomba de las Arrimadas,León,True,487,5092
+Castell de Castells,Calpe,True,486,2387
+GARGANTILLA de LOZOYA,Segovia,True,485,6835
+Elizondo,"Zubiri, Navarra",True,484,2612
+"Santa María del Tiétar,","Santa María del Tiétar,",False,483,483
+Pau,Roses,True,483,2973
+"Güejar Sierra, Granada",Granada,True,482,8082
+Villafranca del Bierzo,"Pedrafita do Cebreiro, Lugo",True,482,2899
+"Candeleda, Ávila","Candeleda, Ávila",False,481,481
+Sa Cabaneta,Sa Cabaneta,False,481,481
+Cuevas del Almanzora,Mojácar,True,480,3059
+Miranda De Ebro,Santo Domingo de la Calzada,True,480,10654
+Aracena,Aracena,False,478,478
+"Hiendelaencina, Guadalajara","Hiendelaencina, Guadalajara",False,478,478
+Fuenteheridos,Fuenteheridos,False,478,478
+Borredà,Borredà,False,477,477
+Alcalà de Xivert,Alcalà de Xivert,False,477,477
+"El Medano, Santa Cruz de Tenerife","El Medano, Santa Cruz de Tenerife",False,476,476
+Viladrau,Tossa de Mar,True,476,2156
+Garós,Garós,False,475,475
+"Baeza, Jaén","Baeza, Jaén",False,473,473
+Algemesi,L'Alcúdia,True,471,2049
+Bizkaia,Bergara,True,468,2405
+Breña Alta,Breña Alta,False,468,468
+Fontanilles,"L'Escala, Girona",True,465,3144
+Avinyonet de Puigventós,Roses,True,462,2973
+Sineu,Sineu,False,462,462
+L'estartit,"L'Escala, Girona",True,462,3144
+Osuna,Setenil de las Bodegas,True,461,5162
+Banyoles,"L'Escala, Girona",True,461,3144
+Salinas,"Candás, Asturias",True,460,2143
+" Vigo, Zamora,"," Vigo, Zamora,",False,459,459
+El Tiemblo (Avila),El Tiemblo (Avila),False,456,456
+TIAS,TIAS,False,454,454
+Santa Eulalia del Río,La Savina,True,454,2637
+Caldes d'Estrac,Barcelona,True,454,27482
+"Altron, Lleida","Altron, Lleida",False,454,454
+"Es Camp de Mar, Balearic Islands","Es Camp de Mar, Balearic Islands",False,453,453
+"Torrox Pueblo, Málaga","Nerja, Málaga",True,449,3792
+Monachil,Granada,True,448,8082
+Múnter (Muntanyola),Múnter (Muntanyola),False,447,447
+"Berlanga del Duero, Soria","Berlanga del Duero, Soria",False,446,446
+Sant Lluís,"Maó, Illes Balears",True,446,3511
+Almería,Almería,False,445,445
+Astudillo,Astudillo,False,444,444
+Terrassa,Barcelona,True,441,27482
+Estella-Lizarra,Pamplona,True,440,2750
+castalla,Alicante,True,440,6515
+Benidorm,Calpe,True,439,2387
+"Canet d'Adri, Girona","Vall-llobrega, Girona",True,437,2202
+Cortes de la Frontera ,Setenil de las Bodegas,True,435,5162
+Villalba de la Sierra ,Villalba de la Sierra ,False,433,433
+San Bartolomé de Tirajana,San Bartolomé de Tirajana,False,432,432
+"Rota, Cádiz",Cádiz,True,431,2712
+"Taranilla, León,","Taranilla, León,",False,431,431
+Silleda,O Pino,True,431,4192
+Ayora,Yecla,True,426,3411
+Tudes,Tudes,False,425,425
+Valle,"Candás, Asturias",True,423,2143
+Llanes,Llanes,False,421,421
+"Sada, A Coruña",Miño,True,420,4848
+"Navarrete, ",Nájera,True,420,3157
+Turre - Almeria,Mojácar,True,419,3059
+L'Ampolla,Cambrils,True,418,2162
+Pereiro de Aguiar,Pereiro de Aguiar,False,417,417
+Baiona,"Redondela, Pontevedra",True,416,2928
+"38700 Santa Cruz de la Palma , Santa Cruz de Tenerife ","38700 Santa Cruz de la Palma , Santa Cruz de Tenerife ",False,416,416
+Benissivà,Denia,True,415,2745
+Urrea de Gaen,"Belchite, Zaragoza",True,414,3084
+Guadix,Granada,True,413,8082
+"Mourisca, Province of Ourense",Soutomaior,True,413,4775
+BAZA,BAZA,False,413,413
+"Lukiano, Araba",Bergara,True,411,2405
+Bóveda ,"Sarria, Lugo",True,410,5483
+Daroca,Daroca,False,407,407
+Pinto,Madrid,True,406,58255
+Larrión,Pamplona,True,405,2750
+"Constantina, Sevilla","Constantina, Sevilla",False,403,403
+Legazpi,Bergara,True,403,2405
+El Valle,"Candás, Asturias",True,400,2143
+"Benidorm, Alicante",Calpe,True,400,2387
+Briñas,Santo Domingo de la Calzada,True,398,10654
+"Reíllo, Cuenca","Reíllo, Cuenca",False,397,397
+Goizueta,San Sebastián-Donostia,True,397,3435
+"Freixenet de Segarra, Lleida",Cervera,True,397,3563
+Canet de Mar,Tossa de Mar,True,396,2156
+Orihuela Costa,Torrevieja,True,394,5012
+ Guzmán, Guzmán,False,392,392
+Cazorla,Cazorla,False,390,390
+"Santa Margarida de Montbui, Barcelona",Cervera,True,389,3563
+Altea,Calpe,True,386,2387
+Cabrera de Mar,Barcelona,True,386,27482
+Maturana - Barrundia,Bergara,True,386,2405
+Les Useres,Les Useres,False,382,382
+Els Masos de Pals,"L'Escala, Girona",True,379,3144
+Sant Salvador de Bianya,Sant Salvador de Bianya,False,379,379
+Talaván,Talaván,False,379,379
+"Sant Martí Vell, Girona","Vall-llobrega, Girona",True,378,2202
+Villablino ,Villablino ,False,378,378
+"Orba, Alicante",Denia,True,369,2745
+"Ribes de Freser,","Ribes de Freser,",False,369,369
+"Chulilla, Valencia",Manises,True,365,5482
+Leon,León,True,365,5092
+"Salobreña, Granada",Nerja,True,365,4506
+Guadalcanal,Guadalcanal,False,361,361
+TEULADA,Calpe,True,361,2387
+GIJÓN,"Candás, Asturias",True,361,2143
+"Tramacastilla de Tena, Huesca","Tramacastilla de Tena, Huesca",False,360,360
+Manzanal de los Infantes,Manzanal de los Infantes,False,360,360
+ Matalascañas (Almonte),Matalascañas,True,359,2643
+Cala Rajada,Cala Rajada,False,357,357
+"El Mas de Gerembí, Tarragona",Tarragona,True,357,3025
+Ripoll,Ripoll,False,355,355
+Santa Maria de Nava,Santa Maria de Nava,False,354,354
+Badajoz ,Badajoz ,False,354,354
+"Rodezno, La Rioja,",Santo Domingo de la Calzada,True,353,10654
+CANGAS DE ONIS,CANGAS DE ONIS,False,352,352
+Torrelles de Foix,Sitges,True,352,4549
+El Castell de Guadalest,Calpe,True,352,2387
+"Cabó, Lleida,","Cabó, Lleida,",False,352,352
+Ingenio,Ingenio,False,351,351
+Arcos de la Frontera,"Las Cabezas de San Juan, Sevilla",True,350,2473
+"Sos del Rey Católico, Zaragoza",Zaragoza,True,348,5964
+Rota,"El Puerto de Sta María, Cádiz",True,347,1975
+Miyares (Piloña),Oviedo,True,346,4676
+Siguenza Guadalajara,Siguenza Guadalajara,False,345,345
+Arbancon,Guadalajara,True,344,3424
+Capellades,Sitges,True,343,4549
+Blanes ,Tossa de Mar,True,343,2156
+El Palm-Mar,El Palm-Mar,False,343,343
+"Portocolom, Illes Balears","Portocolom, Illes Balears",False,343,343
+"Deltebre, Tarragona",Valderrobres,True,342,3678
+Vigo,"Redondela, Pontevedra",True,341,2928
+Llucmajor,Llucmajor,False,340,340
+Ayamonte,"Isla Cristina, Huelva",True,340,2768
+Bullas,MURCIA,True,339,4488
+Mas de Barberans,Valderrobres,True,339,3678
+Arnedo,"Tudela, Navarra",True,337,2353
+Arbúcies,Tossa de Mar,True,335,2156
+URDA,URDA,False,333,333
+Rubí,Barcelona,True,332,27482
+Santa Ursula,Santa Ursula,False,329,329
+Ariany,Ariany,False,329,329
+BAIONA,"Redondela, Pontevedra",True,329,2928
+Teverga,Oviedo,True,325,4676
+La Frontera,La Frontera,False,324,324
+Saldes,Saldes,False,324,324
+Cazalla de la sierra,Cazalla de la sierra,False,323,323
+Felanitx,Felanitx,False,322,322
+"Moraira, Alicante",Calpe,True,322,2387
+BARCELONA,Barcelona,True,321,27482
+Barreiros,Barreiros,False,321,321
+Toledo Castilla-La Mancha España,Toledo Castilla-La Mancha España,False,321,321
+"El Burgo de Osma, Soria","El Burgo de Osma, Soria",False,320,320
+Higuera de las Dueñas,Higuera de las Dueñas,False,320,320
+Ibi,Alicante,True,318,6515
+L'Escala,"L'Escala, Girona",True,318,3144
+"Playa la Arena, Santa Cruz de Tenerife","Playa la Arena, Santa Cruz de Tenerife",False,317,317
+"Adeje, Santa Cruz de Tenerife","Adeje, Santa Cruz de Tenerife",False,316,316
+Torrellas,"Tudela, Navarra",True,314,2353
+Quintana de Soba,Castro-Urdiales,True,313,3868
+San Pedro del Pinatar,Torrevieja,True,311,5012
+"La Laguna, Santa Cruz de Tenerife","La Laguna, Santa Cruz de Tenerife",False,311,311
+Ochagavia,"Zubiri, Navarra",True,310,2612
+Zarratón,Santo Domingo de la Calzada,True,309,10654
+"Los Caños de Meca, Cádiz",Vejer de la frontera,True,309,2997
+" Masopalmas, Las Palmas"," Masopalmas, Las Palmas",False,307,307
+"Puente Nuevo, El Tiemblo","Puente Nuevo, El Tiemblo",False,304,304
+"Castroviejo, La Rioja",Nájera,True,303,3157
+Arguedas,"Tudela, Navarra",True,302,2353
+"Oiartzun, Gipuzkoa",San Sebastián-Donostia,True,300,3435
+Valverde,Valverde,False,300,300
+Iznatoraf,Iznatoraf,False,299,299
+"Cesantes, Pontevedra",Redondela ,True,299,5503
+Las palmas,Las palmas,False,299,299
+"Castellanos de Villiquera, Salamanca",Salamanca,True,297,5539
+A CORUÑA,A Coruña,True,295,5953
+"Molló, Girona","Molló, Girona",False,295,295
+Muros ,Padrón,True,293,2757
+El cotillo,El cotillo,False,292,292
+Cabanes,Cabanes,False,292,292
+Tudela,"Tudela, Navarra",True,291,2353
+"Balaguer, Lleida",Cervera,True,289,3563
+"A Granxa, Ourense","A Granxa, Ourense",False,289,289
+Chipiona,"El Puerto de Sta María, Cádiz",True,288,1975
+Roques Daurades,Cambrils,True,286,2162
+Jorba,Cervera,True,285,3563
+Puerto Santa Maria,"El Puerto de Sta María, Cádiz",True,285,1975
+Pollença,Pollença,False,285,285
+"El Vilosell, Lleida",Cambrils,True,284,2162
+Chulilla,Manises,True,281,5482
+Sant Jaume de Llierca,Roses,True,280,2973
+CALETA DE SEBO,CALETA DE SEBO,False,280,280
+Vejer de la Frontera,Vejer de la frontera,True,278,2997
+"Ardales, Málaga",Setenil de las Bodegas,True,277,5162
+Chiclana de la Frontera,Cádiz,True,277,2712
+L'Estartit,"L'Escala, Girona",True,276,3144
+Torroella de Montgrí,"L'Escala, Girona",True,275,3144
+Lèrida,Lèrida,False,274,274
+"Libros, Teruel","Libros, Teruel",False,272,272
+La Isla,"Candás, Asturias",True,271,2143
+Molló,Cervera,True,271,3563
+Ribes de Freser,Ribes de Freser,False,269,269
+"Costa Adeje, Tenerife","Costa Adeje, Tenerife",False,269,269
+San Jorge de Heres,"Candás, Asturias",True,268,2143
+Motril,MURCIA,True,267,4488
+Alicante ,Alicante,True,267,6515
+Almuradiel,Almagro,True,265,2550
+SANTILLANA DEL MAR,Santander,True,263,6131
+Castellbisbal ,Barcelona,True,263,27482
+POLOP DE LA MARINA,Calpe,True,262,2387
+"Albuñol, Granada,","Albuñol, Granada,",False,260,260
+Cangas,"Redondela, Pontevedra",True,260,2928
+Leganes,Madrid,True,256,58255
+"Calp, Alicante",Calpe,True,256,2387
+Liérganes,Santander,True,256,6131
+Los Cristianos,Los Cristianos,False,254,254
+Mahon,"Maó, Illes Balears",True,253,3511
+"Puntallana, Santa Cruz de Tenerife","Puntallana, Santa Cruz de Tenerife",False,250,250
+San Vicente de la Sonsierra,Nájera,True,250,3157
+Elgoibar,Bergara,True,248,2405
+Costa Teguise,Costa Teguise,False,242,242
+Mijas pueblo,Alhaurín el Grande,True,242,2271
+"Darnius, Girona",Roses,True,242,2973
+"Fermoselle, Zamora","Fermoselle, Zamora",False,241,241
+Arriondas (Parres),Arriondas (Parres),False,241,241
+Cala Millor,Cala Millor,False,241,241
+Beuda,Roses,True,241,2973
+"Las Palmas de Gran Canaria, Las Palmas,","Las Palmas de Gran Canaria, Las Palmas,",False,240,240
+Casaio,"Pedrafita do Cebreiro, Lugo",True,239,2899
+Puerto del Carmen,Puerto del Carmen,False,237,237
+Albacete,Albacete,False,237,237
+Cantonigròs,Cantonigròs,False,237,237
+Cazalla de la Sierra,Cazalla de la Sierra,False,237,237
+Llaroles Nevada - Granada ,Llaroles Nevada - Granada ,False,237,237
+Felechosa,Oviedo,True,237,4676
+Aia,San Sebastián-Donostia,True,236,3435
+"Medina-Sidonia, Cadiz",Vejer de la frontera,True,236,2997
+La Pera,"L'Escala, Girona",True,236,3144
+San Cristóbal De La Laguna,San Cristóbal De La Laguna,False,234,234
+Granada ,Granada,True,232,8082
+"Donas, A Coruña",O Pino,True,231,4192
+Jávea/Xàbia,Denia,True,228,2745
+Palamós,"Vall-llobrega, Girona",True,226,2202
+"Caldas de Reis, Pontevedra",Caldas de Reis,True,226,5197
+Arafo,Arafo,False,225,225
+"Ruidera, Ciudad Real","Ruidera, Ciudad Real",False,225,225
+ Santa Susanna,Tossa de Mar,True,225,2156
+LLÍVIA,LLÍVIA,False,222,222
+La Riera de Covadonga,La Riera de Covadonga,False,221,221
+Arnuero,Santander,True,220,6131
+Lugo ,Portomarín,True,219,3685
+"Fernán Pérez, Almería",Las Negras,True,218,2078
+La Sénia,Valderrobres,True,213,3678
+Cuesta Eusebia,Segovia,True,212,6835
+"Jédula, Cádiz","Jerez de la Frontera, Cádiz",True,208,2940
+Avila,Avila,False,208,208
+"Corralejo, Las Palmas","Corralejo, Las Palmas",False,208,208
+Caravaca de la Cruz,Caravaca de la Cruz,False,208,208
+Los Cristianos ,Los Cristianos ,False,207,207
+"Dehesa de Cuéllar, Segovia","Dehesa de Cuéllar, Segovia",False,207,207
+Àger,Àger,False,206,206
+Jaen,Jaen,False,205,205
+Helechosa de los Montes,Helechosa de los Montes,False,204,204
+Coll de Nargó,Coll de Nargó,False,203,203
+Morella,Valderrobres,True,202,3678
+VILLAVICIOSA,"Candás, Asturias",True,202,2143
+Cangas de Onis ,Cangas de Onis ,False,201,201
+JAÉN,JAÉN,False,201,201
+"El Paso, Santa Cruz de Tenerife","El Paso, Santa Cruz de Tenerife",False,199,199
+SANTA EULALIA DE OSCOS,SANTA EULALIA DE OSCOS,False,199,199
+"Cubla, Teruel","Cubla, Teruel",False,197,197
+El Ventorrillo,Granada,True,193,8082
+Villagonzalo Pedernales,Burgos,True,192,3266
+Pollensa,Pollensa,False,191,191
+"Tavascan, Lleida","Tavascan, Lleida",False,191,191
+Zuheros,Zuheros,False,190,190
+San Jose,La Savina,True,188,2637
+ALDEA DEL CANO,ALDEA DEL CANO,False,188,188
+San Agustín (Mas Palomas),San Agustín (Mas Palomas),False,187,187
+"Campo de Criptana, Ciudad Real","Campo de Criptana, Ciudad Real",False,187,187
+Cardona,Cervera,True,186,3563
+Ansovell,Ansovell,False,186,186
+Guadalupe (Cáceres),Guadalupe (Cáceres),False,185,185
+Alpera,Yecla,True,185,3411
+"Caspueñas, Guadalajara",Guadalajara,True,185,3424
+Noguera de Albarracín,Noguera de Albarracín,False,184,184
+Carbonero el Mayor,Segovia,True,183,6835
+"Elche de la Sierra, Albacete","Elche de la Sierra, Albacete",False,182,182
+Viveiro,Viveiro,False,181,181
+"Daimiel, Ciudad Real",Almagro,True,180,2550
+Cullar Vega,Granada,True,177,8082
+San Juan de la Arena,"Candás, Asturias",True,175,2143
+"Carballo, A Coruña",A Coruña,True,175,5953
+Constantina,Constantina,False,174,174
+El Rasillo de Cameros,Nájera,True,174,3157
+"El Rompido, Huelva,","Isla Cristina, Huelva",True,174,2768
+Callosa de Ensarria,Calpe,True,172,2387
+Freila,Freila,False,171,171
+"Gor, Granada","Gor, Granada",False,171,171
+Valle Guerra,Valle Guerra,False,171,171
+Punta del Hidalgo,Punta del Hidalgo,False,170,170
+Alajeró,Alajeró,False,170,170
+"Santa Elena, Jaén","Santa Elena, Jaén",False,170,170
+"Blanes, Girona",Tossa de Mar,True,169,2156
+Peñíscola,Peñíscola,False,169,169
+Melilla,Melilla,False,168,168
+BOT,Valderrobres,True,168,3678
+Llagostera,Tossa de Mar,True,168,2156
+San Vicente del Raspeig ,Alicante,True,167,6515
+Ciudad Real,Madrid,True,167,58255
+Ibiza,Ibiza,False,166,166
+Villargordo del Cabriel,Villargordo del Cabriel,False,165,165
+"Mijas Costa, (Málaga)",Alhaurín el Grande,True,164,2271
+Piedrafita,"Pedrafita do Cebreiro, Lugo",True,163,2899
+Olot,Olot,False,163,163
+Cehegín,Cehegín,False,162,162
+Fregenal de la Sierra,ZAFRA,True,162,2370
+Cahecho,Cahecho,False,160,160
+Port de Pollença,Port de Pollença,False,160,160
+Cabanelles,Roses,True,160,2973
+"La Esperanza,","La Esperanza,",False,159,159
+Arucas,Arucas,False,157,157
+Very Cool Cool City,Very Cool Cool City,False,156,156
+"Roquetas de Mar, Almería,","Roquetas de Mar, Almería,",False,155,155
+"Lanjarón, Granada",Granada,True,154,8082
+villanueva de la cañada,Madrid,True,154,58255
+Cariño,Cariño,False,153,153
+Gaucín,"Marbella, Málaga",True,152,6361
+Benamaurel,Benamaurel,False,151,151
+Corduente,Corduente,False,150,150
+Villaverde,Villaverde,False,150,150
+"Playa del Inglés, Las Palmas","Playa del Inglés, Las Palmas",False,149,149
+Mondariz,Redondela (Pontevedra),True,148,5135
+Candás,"Candás, Asturias",True,148,2143
+Vilagarcía de Arousa,Caldas de Reis,True,147,5197
+Sobremazas,Santander,True,147,6131
+Castilleja de la Cuesta,Sevilla,True,146,25807
+"Tejeda de Tiétar, Cáceres","Tejeda de Tiétar, Cáceres",False,146,146
+Madrid ,Madrid,True,145,58255
+FALSET,Cambrils,True,144,2162
+Marratxi,Marratxi,False,143,143
+Valldevia,Valldevia,False,143,143
+"El Barraco, Ávila","El Barraco, Ávila",False,143,143
+"Albaicín, Granada, ",Granada,True,143,8082
+Ojén,"Marbella, Málaga",True,142,6361
+iznatoraf,iznatoraf,False,141,141
+Begur,"L'Escala, Girona",True,141,3144
+"Cortelazor, HUELVA","Cortelazor, HUELVA",False,141,141
+Benidorm ,Calpe,True,141,2387
+"La Guardia, Toledo",Toledo,True,140,19057
+Sant Jordi,Cervera,True,140,3563
+"San Miguel de Castro, Pontevedra",O Pino,True,140,4192
+Yeste,Yeste,False,140,140
+Torroja del Priorat,Cambrils,True,140,2162
+Isla del Hierro,Isla del Hierro,False,140,140
+"Tomeza, Pontevedra",Pontevedra,True,140,4793
+Mieres,Roses,True,139,2973
+"Olot, Girona","Olot, Girona",False,139,139
+Pozuelo de Calatrava,Almagro,True,139,2550
+"Sant Joan de les Abadesses, Girona,","Sant Joan de les Abadesses, Girona,",False,138,138
+"Cañamero, Cáceres,","Cañamero, Cáceres,",False,138,138
+"Arona, Santa Cruz de Tenerife","Arona, Santa Cruz de Tenerife",False,138,138
+"Candelario, Salamanca","Candelario, Salamanca",False,137,137
+Berlanga de Duero,Berlanga de Duero,False,136,136
+Portilla de la Reina,Portilla de la Reina,False,136,136
+Gipuzkoa,San Sebastián-Donostia,True,134,3435
+"Benalmádena, Málaga,",Málaga,True,133,17060
+ADEJE,ADEJE,False,133,133
+Argelaguer,Roses,True,131,2973
+Benalmadena Costa,Málaga,True,130,17060
+Socuéllamos,Socuéllamos,False,130,130
+Arguis,Arguis,False,129,129
+"Pontedeume, A Coruña,",Miño,True,129,4848
+O Barqueiro,O Barqueiro,False,129,129
+"El Roque, Las Palmas","El Roque, Las Palmas",False,128,128
+TORRELLES DEFOIX,Sitges,True,128,4549
+Sarroqueta (El Pont de Suert),Sarroqueta (El Pont de Suert),False,128,128
+"Torremolinos, Málaga",Málaga,True,128,17060
+Santa Coloma de Farners,Tossa de Mar,True,127,2156
+Chiclana De La Frontera,Cádiz,True,127,2712
+sevilla,Sevilla,True,126,25807
+San Roque - Alcaidesa,"Tarifa, Cádiz",True,126,3182
+"Estepar, Burgos",Burgos,True,125,3266
+Santa Pola,"Alacant, Alicante,",True,125,2755
+Gata,Gata,False,125,125
+Aldeadavila De La Ribera,Aldeadavila De La Ribera,False,124,124
+Castril,Castril,False,123,123
+Arcos de la frontera,"Las Cabezas de San Juan, Sevilla",True,122,2473
+Fuengirola,Alhaurín el Grande,True,122,2271
+Montgat,Barcelona,True,122,27482
+Castrillón,"Candás, Asturias",True,121,2143
+"Les Mines d'Osor, Girona",Tossa de Mar,True,121,2156
+Puerto de Mazarrón,MURCIA,True,120,4488
+Ciutadella de Menorca ,Fornells,True,120,2495
+Claverol,Claverol,False,119,119
+"Regencós, Girona","Vall-llobrega, Girona",True,119,2202
+Ourense,Ourense,False,118,118
+BENIDORM,Calpe,True,117,2387
+Alcover,Tarragona,True,117,3025
+"Fuentes de Oñoro, Salamanca","Fuentes de Oñoro, Salamanca",False,116,116
+El Rourell,Tarragona,True,116,3025
+Alcaucin ,"Nerja, Málaga",True,116,3792
+Frigiliana,Nerja,True,115,4506
+VALDERROBRES,Valderrobres,True,114,3678
+Llavorsí,Llavorsí,False,114,114
+ La Laguna- Guamasa-Tenerife, La Laguna- Guamasa-Tenerife,False,114,114
+Monells,"Vall-llobrega, Girona",True,113,2202
+Asturias,Oviedo,True,113,4676
+La Cala de Mijas,Alhaurín el Grande,True,112,2271
+Villena ,Yecla,True,112,3411
+Adra,Adra,False,111,111
+"O Courel ,  Quiroga ,  Lugo",Sarria,True,111,2085
+Siejo,Siejo,False,111,111
+Gargantilla del Lozoya,Segovia,True,110,6835
+Pontedeume,Miño,True,110,4848
+LUARCA,LUARCA,False,110,110
+Lekeitio (Bizkaia),Bergara,True,109,2405
+San Martín de Teverga,Oviedo,True,109,4676
+Vallgorguina,Tossa de Mar,True,108,2156
+Montehermoso,Montehermoso,False,108,108
+Guaso,Guaso,False,108,108
+Cee,Muxia,True,107,2312
+"La Plana de Mont-Ros, Lleida, ","La Plana de Mont-Ros, Lleida, ",False,106,106
+"Pantón, Lugo",Portomarín,True,105,3685
+Vilagarcia de Arousa,Caldas de Reis,True,104,5197
+Cóbreces,Santander,True,104,6131
+Panticosa,Panticosa,False,103,103
+Vinyols i Els Arcs,Cambrils,True,103,2162
+San Cristóbal de Segovia,Segovia,True,103,6835
+"La Pobla de Cérvoles, Lleida",Cambrils,True,102,2162
+Prioro,Prioro,False,102,102
+la fresneda siero,Oviedo,True,102,4676
+Tagamanent,Barcelona,True,102,27482
+Ruente,Santander,True,102,6131
+O Grove,Pontevedra,True,101,4793
+RUIDERA,RUIDERA,False,100,100
+Las Rozas de Madrid,Madrid,True,100,58255
+"Colònia de Sant Jordi, Illes Balears","Colònia de Sant Jordi, Illes Balears",False,100,100
+Gombrèn,Gombrèn,False,98,98
+Campdevànol,Campdevànol,False,98,98
+Cordoba ,Córdoba,True,98,5320
+Les Pereres,Les Pereres,False,98,98
+Munebrega,Munebrega,False,98,98
+ Durón,Guadalajara,True,98,3424
+SANT JULIA DE RAMIS,"Vall-llobrega, Girona",True,97,2202
+Arlanza,"Pedrafita do Cebreiro, Lugo",True,97,2899
+Benia de Onis,Benia de Onis,False,97,97
+GIRONA,"Vall-llobrega, Girona",True,96,2202
+Vielha,Vielha,False,96,96
+Quesa,L'Alcúdia,True,96,2049
+San Justo de la Vega,León,True,96,5092
+"Bustares, Guadalajara","Bustares, Guadalajara",False,95,95
+SEVILLA,Sevilla,True,95,25807
+Playa de las Americas,Playa de las Americas,False,95,95
+Las Palmas de Gran Canaria ,Las Palmas de Gran Canaria,True,95,3227
+Patro,Denia,True,95,2745
+Coín,Alhaurín el Grande,True,95,2271
+"Aldeaquemada, Jaén","Aldeaquemada, Jaén",False,94,94
+Villarejo,Santo Domingo de la Calzada,True,94,10654
+Herrán,Santo Domingo de la Calzada,True,94,10654
+Jerez de la Frontera ,Jerez de la Frontera,True,94,4502
+"Celrà, Girona","Vall-llobrega, Girona",True,93,2202
+La Puerta de Segura Jaén ,La Puerta de Segura Jaén ,False,92,92
+L'Hospitalet de Llobregat,Barcelona,True,91,27482
+Navaluenga,Navaluenga,False,91,91
+Guitiriz,Guitiriz,False,91,91
+"Playa Blanca, Las Palmas","Playa Blanca, Las Palmas",False,91,91
+Laspaúles,Laspaúles,False,91,91
+"El Morche, Malága","Nerja, Málaga",True,91,3792
+Pals,"L'Escala, Girona",True,90,3144
+Rosas,Roses,True,90,2973
+Puerto del Carmen (Tias) ,Puerto del Carmen (Tias) ,False,89,89
+"Vilassar de Dalt, Barcelona,",Barcelona,True,89,27482
+"Calzada de Calatrava, Ciudad Real",Almagro,True,88,2550
+Montejaque,Setenil de las Bodegas,True,88,5162
+"Fondón, Almería",Las Negras,True,87,2078
+Bellver de Cerdanya,Bellver de Cerdanya,False,87,87
+Aldeanueva de la Serrezuela,Aldeanueva de la Serrezuela,False,87,87
+"Arbancón, Guadalajara",Guadalajara,True,86,3424
+Ardales,Alhaurín el Grande,True,86,2271
+Caleta de Fuste,Caleta de Fuste,False,86,86
+"Espot, Lleida,","Espot, Lleida,",False,86,86
+Jérica,Manises,True,85,5482
+El Hierro,El Hierro,False,85,85
+Sant Celoni,Tossa de Mar,True,85,2156
+"Olveira, A Coruña",Miño,True,85,4848
+"Guadalupe, Cáceres,","Guadalupe, Cáceres,",False,84,84
+Ciutadella de Menorca,Fornells,True,84,2495
+Matadepera,Barcelona,True,83,27482
+Benilloba,Alicante,True,83,6515
+Burjassot,Valencia,True,83,10555
+"Montseny, Barcelona",Tossa de Mar,True,83,2156
+Viveiro (Lugo),Viveiro (Lugo),False,82,82
+Montanchez,Montanchez,False,81,81
+Almarza,Almarza,False,81,81
+Prades,Cervera,True,81,3563
+Huerta de Vero,Huerta de Vero,False,81,81
+Besalú,Roses,True,81,2973
+Valdoviño,Miño,True,80,4848
+"Vielha, Lleida,","Vielha, Lleida,",False,80,80
+Valdelaguna,Madrid,True,80,58255
+cadiz,Cádiz,True,79,2712
+Villaviciosa,"Candás, Asturias",True,78,2143
+"Tarifa, Cádiz (El Bujeo)","Tarifa, Cádiz",True,77,3182
+Arsèguel,Arsèguel,False,77,77
+"Garray, Soria","Garray, Soria",False,77,77
+Playa De L'Ingles - Maspalomas,Playa De L'Ingles - Maspalomas,False,76,76
+Pozo Alcón,Pozo Alcón,False,76,76
+"La Donzell, Lleida",Cervera,True,76,3563
+"La Xara, Alicante",Denia,True,75,2745
+Medina de Pomar,Medina de Pomar,False,75,75
+"Taull, Lleida","Taull, Lleida",False,75,75
+"Susqueda, Girona",Tossa de Mar,True,74,2156
+Pozán de Vero,Pozán de Vero,False,74,74
+"Arguedas, Navarra","Tudela, Navarra",True,73,2353
+"Altès, Lleida",Cervera,True,73,3563
+El Pont de Suert,El Pont de Suert,False,72,72
+"Arenales Del Sol, Elche","Alacant, Alicante,",True,71,2755
+"Monachil, Granada",Granada,True,71,8082
+"Argamasilla de Alba, Ciudad Real,","Argamasilla de Alba, Ciudad Real,",False,71,71
+"Jimena de la Frontera, Cádiz","Tarifa, Cádiz",True,71,3182
+Izal,"Zubiri, Navarra",True,70,2612
+Oropesa,Oropesa,False,70,70
+Hostafrancs,Cervera,True,70,3563
+"San Bartolomé, Las Palmas,","San Bartolomé, Las Palmas,",False,70,70
+El Torno,El Torno,False,70,70
+Amieva,Amieva,False,69,69
+"Moral de Calatrava, Ciudad Real",Almagro,True,69,2550
+Teguise,Teguise,False,69,69
+Los Llanos de Aridane,Los Llanos de Aridane,False,69,69
+Villarrobledo,Villarrobledo,False,69,69
+Fuengirola ,Alhaurín el Grande,True,68,2271
+Sant Climenç,Sitges,True,68,4549
+BALDELLOU,BALDELLOU,False,68,68
+La Orotava- Tenerife / España,La Orotava- Tenerife / España,False,68,68
+Llabiá,"L'Escala, Girona",True,68,3144
+"Torreguadiaro, Cádiz","Marbella, Málaga",True,67,6361
+La Santa,La Santa,False,67,67
+El Pueyo de Jaca,El Pueyo de Jaca,False,67,67
+Sant Marti de Centelles,Barcelona,True,67,27482
+"Icod de los Vinos, Santa Cruz de Tenerife","Icod de los Vinos, Santa Cruz de Tenerife",False,67,67
+Estación de Cortes de la Frontera,Estación de Cortes de la Frontera,False,66,66
+"Grañas do Sor, Mañón",Miño,True,66,4848
+"Puerto del Carmen, Tías ","Puerto del Carmen, Tías ",False,66,66
+Naron,Miño,True,65,4848
+ecija,Córdoba,True,65,5320
+Valldoreix,Barcelona,True,65,27482
+"El Papiol, Barcelona",Barcelona,True,65,27482
+GARRUCHA,Mojácar,True,65,3059
+Corbera d'Ebre,Valderrobres,True,65,3678
+Los Alcázares,Torrevieja,True,65,5012
+Secadura,Santander,True,65,6131
+Navia,Navia,False,65,65
+"Gandia, 46730, Valencia",Cullera,True,65,3432
+Grau de Gandia,Cullera,True,65,3432
+Las Palmas,Las Palmas,False,65,65
+Aldea,Valderrobres,True,64,3678
+"Burgohondo, Ávila","Burgohondo, Ávila",False,64,64
+Casas del Castañar,Casas del Castañar,False,64,64
+Fuente de Piedra,Setenil de las Bodegas,True,64,5162
+Cataluña,Tarragona,True,64,3025
+Baralla,Sarria,True,64,2085
+ALEDO,MURCIA,True,64,4488
+Corullón,"Pedrafita do Cebreiro, Lugo",True,64,2899
+Guadalupe,Guadalupe,False,63,63
+"Lodares de Osma, Soria,","Lodares de Osma, Soria,",False,63,63
+Borriana,Borriana,False,63,63
+"Suárbol, Léon","Pedrafita do Cebreiro, Lugo",True,63,2899
+Cáceres,Cáceres,False,62,62
+La Torre de Claramunt,Sitges,True,62,4549
+Nomad Malaga,Málaga,True,62,17060
+"Vigo, Zamora","Vigo, Zamora",False,62,62
+Alcalá del Júcar,Alcalá del Júcar,False,62,62
+"San Martín de Castañeda, Zamora","San Martín de Castañeda, Zamora",False,61,61
+"San Juan de Plan, Huesca","San Juan de Plan, Huesca",False,61,61
+Ribadesella,Ribadesella,False,61,61
+"Casarabonela, Málaga",Alhaurín el Grande,True,61,2271
+"Montecorto, Málaga",Setenil de las Bodegas,True,60,5162
+Roni,Roni,False,60,60
+San Cristóbal de la Laguna,San Cristóbal de la Laguna,False,60,60
+Ullastrell,Barcelona,True,60,27482
+"Villanueva del Trabuco, Málaga",Málaga,True,60,17060
+Villajoyosa,Alicante,True,59,6515
+Santa Linya,Cervera,True,59,3563
+"Vilaronte, Lugo","Vilaronte, Lugo",False,58,58
+"Motril, Granada",Nerja,True,58,4506
+Orellana la Vieja ,Orellana la Vieja ,False,58,58
+Los Delfines,Fornells,True,58,2495
+Murcia ,MURCIA,True,58,4488
+"Talarn, Lérida","Talarn, Lérida",False,58,58
+"Biescas, Valdes, Asturias",Oviedo,True,58,4676
+Rellinars,Barcelona,True,57,27482
+"Celanova, Ourense","Celanova, Ourense",False,57,57
+Cala d'0r,Cala d'0r,False,57,57
+L´'Aldea,Valderrobres,True,57,3678
+El Poble Nou de Benitatxell,Calpe,True,57,2387
+salamanca ,Salamanca,True,57,5539
+Alcaidesa,"Tarifa, Cádiz",True,57,3182
+vada,vada,False,56,56
+Caravaca de la Cruz ,Caravaca de la Cruz ,False,56,56
+Tornavacas,Tornavacas,False,56,56
+Corral de Ayllón,Corral de Ayllón,False,56,56
+Villahermosa del rio,Villahermosa del rio,False,56,56
+Hospitalet de Llobregat ,Barcelona,True,55,27482
+Borau,Borau,False,55,55
+Ituren,"Zubiri, Navarra",True,55,2612
+EL CARMOLI,Torrevieja,True,55,5012
+Taüll,Taüll,False,54,54
+Penaguila,Calpe,True,54,2387
+Villanueva de Colombres,Villanueva de Colombres,False,54,54
+"Higueruelas, Valencia",Manises,True,54,5482
+"Adamuz, Córdoba",Córdoba,True,54,5320
+"Dos Hermanas, Sevilla",Sevilla,True,53,25807
+"El Palo, Málaga",Málaga,True,53,17060
+"Ramirás, Ourense",Redondela (Pontevedra),True,52,5135
+La Fatarella,Valderrobres,True,52,3678
+"Fene, A Coruña",Miño,True,52,4848
+"Hervás, Cáceres","Hervás, Cáceres",False,52,52
+Mancor de la Vall,Mancor de la Vall,False,52,52
+Ezcaray,Santo Domingo de la Calzada,True,52,10654
+Mallorca,Mallorca,False,52,52
+"Alhaurin El Grande, Málaga",Alhaurín el Grande,True,51,2271
+"Porto Cristo, Manacor","Porto Cristo, Manacor",False,51,51
+Rades de Abajo,Segovia,True,51,6835
+Santa Cruz de Pinares (Ávila),Santa Cruz de Pinares (Ávila),False,51,51
+Níjar ,Las Negras,True,51,2078
+"Higuera De La Sierra, Huelva","Higuera De La Sierra, Huelva",False,50,50
+Maçanet de Cabrenys,Roses,True,50,2973
+Villanueva de Tapia,Villanueva de Tapia,False,50,50
+san juan playa,Alicante,True,50,6515
+Carmona,Sevilla,True,49,25807
+Puerto Pollensa,Puerto Pollensa,False,49,49
+ValDespino de Sanabria ,ValDespino de Sanabria ,False,49,49
+"Abárzuza, Navarra,",Pamplona,True,49,2750
+LA PENILLA,Santander,True,49,6131
+La Salzadella,La Salzadella,False,49,49
+Figueres,Roses,True,48,2973
+"Abarca de Campos, Palencia",Valladolid,True,48,5635
+Valencina de la Concepcion,Sevilla,True,48,25807
+Betren,Betren,False,47,47
+"Teo, Santiago de Compostela",Santiago de Compostela,True,47,9447
+Bolulla,Calpe,True,47,2387
+Paderne,Miño,True,46,4848
+Collbató,Barcelona,True,46,27482
+Málaga ( Campanillas),Málaga,True,46,17060
+Islas Canarias,Islas Canarias,False,46,46
+Tenerife ,Tenerife ,False,46,46
+Alcúdia,Alcúdia,False,46,46
+Malón,"Tudela, Navarra",True,46,2353
+Santa Cruz de Tenerife ,Santa cruz de Tenerife,True,45,2017
+SANTA MARIA DE PALAUTORDERA,Barcelona,True,45,27482
+El Paso,El Paso,False,45,45
+Playa Blanca,Playa Blanca,False,45,45
+Calella de Palafrugell,"Vall-llobrega, Girona",True,45,2202
+San Sebastián,San Sebastián-Donostia,True,45,3435
+Fisterra,Santiago de Compostela,True,45,9447
+Vera,Mojácar,True,44,3059
+Cala d'Or,Cala d'Or,False,44,44
+"Lloret de Mar, Girona",Tossa de Mar,True,44,2156
+Legutio,Bergara,True,44,2405
+Sant Fost de Campsentelles,Barcelona,True,44,27482
+Cambados,Pontevedra,True,44,4793
+Cabrales,Cabrales,False,43,43
+Maià de Montcal,Roses,True,43,2973
+Vecindario,Vecindario,False,43,43
+"Camuñas, Toledo","Camuñas, Toledo",False,43,43
+"San Luis de Sabinillas, Manilva","Marbella, Málaga",True,43,6361
+COSTA TEGUISE,COSTA TEGUISE,False,42,42
+"Les Masies de Voltregà, Barcelona","Les Masies de Voltregà, Barcelona",False,42,42
+Bielsa,Bielsa,False,42,42
+Binibona,Binibona,False,42,42
+Mal Partida de Plasencia,Mal Partida de Plasencia,False,42,42
+La Estrella (Toledo),La Estrella (Toledo),False,41,41
+"Saldes, Catalunya","Saldes, Catalunya",False,41,41
+Isla Canela,"Isla Cristina, Huelva",True,41,2768
+Torremolinos ,Málaga,True,41,17060
+ Alicante,Alicante,True,40,6515
+Pinilla Del Valle,Segovia,True,40,6835
+Aldeadávila de la Ribera,Aldeadávila de la Ribera,False,40,40
+Rabós,Roses,True,40,2973
+Molina de Aragón,Molina de Aragón,False,40,40
+ El Médano,El Médano,True,40,3188
+Calp,Calpe,True,40,2387
+"Pantano de Cijara, Cáceres","Pantano de Cijara, Cáceres",False,39,39
+Tezanos,Santander,True,39,6131
+Ortiguero de cabrales,Ortiguero de cabrales,False,39,39
+El Altet,"Alacant, Alicante,",True,39,2755
+Gandía,Cullera,True,38,3432
+"Sahagún, León","Sahagún, León",False,38,38
+"Vilabella, Tarragona",Tarragona,True,38,3025
+Arroyo Frío,Arroyo Frío,False,37,37
+Guardiola de Fontrubí,Sitges,True,37,4549
+Benimantell,Calpe,True,36,2387
+"Rubió, Barcelona ",Barcelona,True,36,27482
+Llivia,Llivia,False,36,36
+TORRES,TORRES,False,36,36
+Elviria,"Marbella, Málaga",True,36,6361
+Busturi-Axpe,Bergara,True,35,2405
+Moriles,Moriles,False,35,35
+Almonaster La Real,Almonaster La Real,False,35,35
+Peñiscola,Peñiscola,False,35,35
+Olerdola,Sitges,True,34,4549
+Torres del Río,Nájera,True,34,3157
+Cistella,"Vall-llobrega, Girona",True,34,2202
+"Paulenca, Granada",Granada,True,34,8082
+Suances,Santander,True,34,6131
+"Carrizo de la Ribera, León,",León,True,34,5092
+Son Carrió i Cala Millor,Son Carrió i Cala Millor,False,34,34
+la Marina,Torrevieja,True,33,5012
+Sanchidrian,Segovia,True,33,6835
+Lucena,Lucena,False,33,33
+Lajares - La Oliva Fuerteventura,Lajares - La Oliva Fuerteventura,False,33,33
+Puigcerda,Puigcerda,False,33,33
+Azuelo,Nájera,True,33,3157
+Águilas,Mojácar,True,33,3059
+YESTE,YESTE,False,33,33
+TAZACORTE,TAZACORTE,False,33,33
+Fanzara,Fanzara,False,32,32
+Sepúlveda,Segovia,True,32,6835
+Fernán Perez,Las Negras,True,32,2078
+Lerín,Pamplona,True,32,2750
+Xavestre,Pedrouzo,True,32,4485
+Vélez Blanco,Vélez Blanco,False,31,31
+Radazul,Radazul,False,31,31
+"Padul, Granada",Granada,True,31,8082
+Foz,Foz,False,31,31
+Moià,Barcelona,True,31,27482
+"Hostafrancs, Els plans de sió, LLEIDA",Cervera,True,31,3563
+"Benaojan, Malaga",Setenil de las Bodegas,True,30,5162
+"Serdio, Cantabria","Candás, Asturias",True,30,2143
+Horche,Guadalajara,True,30,3424
+"San Sebastián de La Gomera, Santa Cruz de Tenerife","San Sebastián de La Gomera, Santa Cruz de Tenerife",False,30,30
+"Polop, Alicante",Calpe,True,30,2387
+"Ferrol, A Coruña, ",Miño,True,30,4848
+Finestrat,Manises,True,29,5482
+Los Palacios y Villafranca,"Las Cabezas de San Juan, Sevilla",True,29,2473
+Telde,Telde,False,29,29
+Maçanet de la selva ,Tossa de Mar,True,29,2156
+Iznájar,Iznájar,False,28,28
+"Lubrín, Almería",Mojácar,True,28,3059
+Casas del Rey,Casas del Rey,False,28,28
+Cómpeta,"Nerja, Málaga",True,27,3792
+Málaga ,Málaga,True,27,17060
+Olmedo,Valladolid,True,27,5635
+"San Carlos del Valle, Ciudad Real",Almagro,True,27,2550
+Garachico,Garachico,False,27,27
+"GUIXERS, Lleida","GUIXERS, Lleida",False,27,27
+fuengirola,Alhaurín el Grande,True,27,2271
+Mogón (Villacarrillo),Mogón (Villacarrillo),False,26,26
+Costa Calma (Fuerteventura),Costa Calma (Fuerteventura),False,26,26
+Villalcázar de Sirga,Villalcázar de Sirga,False,26,26
+Belmonte,Belmonte,False,26,26
+El Torno Caceres,El Torno Caceres,False,26,26
+Alboraya,Valencia,True,26,10555
+Dobro (Burgos),Dobro (Burgos),False,26,26
+"Maspalomas, Las Palmas","Maspalomas, Las Palmas",False,26,26
+El Real de San Vicente,El Real de San Vicente,False,26,26
+Colmenar de Oreja,Madrid,True,26,58255
+"Ribera de Cardós, Lleida","Ribera de Cardós, Lleida",False,26,26
+"Fuentespina, Burgos","Fuentespina, Burgos",False,25,25
+Sanxenxo,Pontevedra,True,25,4793
+Vilademuls,"L'Escala, Girona",True,25,3144
+"Hinojales, Huelva",ZAFRA,True,25,2370
+Lloseta,Lloseta,False,24,24
+SA RAPITA,SA RAPITA,False,24,24
+Sueca,Cullera,True,24,3432
+Son Ferrer,Son Ferrer,False,24,24
+Vic,Vic,False,24,24
+"RENAU, Tarragona",Tarragona,True,24,3025
+"Valentín, Murcia,","Valentín, Murcia,",False,24,24
+Mazcuerras,Santander,True,23,6131
+CALPE,Calpe,True,23,2387
+Carnota,Muxia,True,23,2312
+Bagà,Bagà,False,23,23
+Biescas,Biescas,False,23,23
+Sierra de Fuentes,Sierra de Fuentes,False,22,22
+"San Juan del Molinillo, Ávila","San Juan del Molinillo, Ávila",False,22,22
+Linares de Mora,Linares de Mora,False,22,22
+ Cadalso de los Vidrios, Cadalso de los Vidrios,False,22,22
+"Alhaurin el Grande,",Alhaurín el Grande,True,22,2271
+"Baralla, Lugo",Sarria,True,22,2085
+Ribeira,Caldas de Reis,True,22,5197
+"Teia, BARCELONA",Barcelona,True,21,27482
+La Lastrilla,Segovia,True,21,6835
+Cadiz ,Cádiz,True,21,2712
+Huesca,Huesca,False,21,21
+Lladurs,Cervera,True,21,3563
+Barcience,Toledo,True,21,19057
+"San Pere de Ribes, Barcelona",Barcelona,True,21,27482
+Valdepeñas,Almagro,True,21,2550
+Peníscola,Peníscola,False,20,20
+Chiclana,Cádiz,True,20,2712
+Rozalen del Monte,Rozalen del Monte,False,20,20
+Osma,Bergara,True,20,2405
+Massalfassar,Valencia,True,19,10555
+Vera de Moncayo,"Tudela, Navarra",True,19,2353
+"San Martín de la Vega del Alberche, Ávila","San Martín de la Vega del Alberche, Ávila",False,19,19
+Maia de Moncal,Roses,True,19,2973
+"Carpio de Azaba, Salamanca","Carpio de Azaba, Salamanca",False,19,19
+Carcabuey,Carcabuey,False,19,19
+Camprodon ,Camprodon ,False,19,19
+"Tacoronte, Santa Cruz de Tenerife ","Tacoronte, Santa Cruz de Tenerife ",False,19,19
+Haro,Santo Domingo de la Calzada,True,19,10654
+ Pulgar,Toledo,True,18,19057
+Argentona,Barcelona,True,18,27482
+Cobisa (Toledo),Toledo,True,18,19057
+ATAPUERCA,Burgos,True,18,3266
+Petra,Petra,False,18,18
+Alcúdia ,Alcúdia ,False,18,18
+Bollullos de la Mitación,Sevilla,True,18,25807
+Caleta De fuste,Caleta De fuste,False,18,18
+Unquera,Unquera,False,18,18
+Trevélez,Granada,True,18,8082
+Campillo de Dueñas,Campillo de Dueñas,False,18,18
+Calaceite,Valderrobres,True,18,3678
+Benissa ,Calpe,True,18,2387
+Villanueva de la Serena,Villanueva de la Serena,False,17,17
+Meaño,Pontevedra,True,17,4793
+Benasque ,Benasque ,False,17,17
+Javea,Denia,True,17,2745
+"Los Molinos, Madrid",Segovia,True,17,6835
+Sabero,León,True,17,5092
+Sant Josep de sa Talaia,La Savina,True,17,2637
+BENICARLO,BENICARLO,False,17,17
+Malgrat de Mar,Tossa de Mar,True,17,2156
+Zarautz y Fuerteventura,San Sebastián-Donostia,True,16,3435
+Cubelles,Sitges,True,16,4549
+Mijas Costa  (Málaga),Alhaurín el Grande,True,16,2271
+Benajarafe,Málaga,True,16,17060
+GÜÍMAR,GÜÍMAR,False,16,16
+Gerindote,Toledo,True,16,19057
+Puebla de Don Fadrique,Puebla de Don Fadrique,False,16,16
+L'Hospitalet de Llobregat ,Barcelona,True,16,27482
+Soto en cameros,Nájera,True,16,3157
+Aler,Aler,False,16,16
+Baraibar,Pamplona,True,16,2750
+Santa Cruz de las Serós,Sos del Rey Católico,True,16,2062
+Almogía (Málaga),Málaga,True,15,17060
+Albarracin,Albarracin,False,15,15
+"Pechina, ALMERIA",Las Negras,True,15,2078
+Delt Ebre,"Tudela, Navarra",True,15,2353
+Moraira,Calpe,True,15,2387
+Arure,Arure,False,15,15
+Bor,Bor,False,15,15
+ MARBELLA ,"Marbella, Málaga",True,15,6361
+" Altura, Castellón",Manises,True,14,5482
+Puebla de Almenara,Puebla de Almenara,False,14,14
+Castillo Pedroso,Santander,True,14,6131
+Los Alcázares - Región de Murcia,Torrevieja,True,14,5012
+Agaete,Agaete,False,14,14
+Sant Llorenç des Cardassar,Sant Llorenç des Cardassar,False,14,14
+GAUTEGIZ-ARTEAGA   VIZCAYA,Bergara,True,14,2405
+Los Realejos,Los Realejos,False,14,14
+Playa honda San Bartolome Lanzarote,Playa honda San Bartolome Lanzarote,False,14,14
+Pobladura de las Regueras,Pobladura de las Regueras,False,14,14
+Almeria,Almeria,False,14,14
+Atxondo,Bergara,True,14,2405
+ALICANTEALACANT,"Alacant, Alicante,",True,14,2755
+Costa Adeje ,Costa Adeje ,False,13,13
+"Trefacio, Zamora, Spain","Trefacio, Zamora, Spain",False,13,13
+San Miguel,La Savina,True,13,2637
+Bargas,Toledo,True,13,19057
+Porrera,Cambrils,True,13,2162
+Gratallops,Cambrils,True,13,2162
+Álguilas,MURCIA,True,13,4488
+Subirats,Sitges,True,12,4549
+Labuerda,Labuerda,False,12,12
+Mercadal,Fornells,True,12,2495
+Villabrágima,Valladolid,True,12,5635
+TALAVERUELA DE LA VERA,TALAVERUELA DE LA VERA,False,12,12
+"Olivenza, Badajoz","Olivenza, Badajoz",False,12,12
+Playa Paraiso,Playa Paraiso,False,12,12
+Valencia ,Valencia,True,12,10555
+Benahavís,"Marbella, Málaga",True,12,6361
+Mogan,Mogan,False,12,12
+Campello,Alicante,True,12,6515
+Costa Adeje,Costa Adeje,False,12,12
+Morón de la Frontera,Setenil de las Bodegas,True,12,5162
+La Bisbal,"Vall-llobrega, Girona",True,11,2202
+Salou ,Salou,True,11,2785
+"Vilanova De Arousa, Pontevedra",Caldas de Reis,True,11,5197
+Páramo del Sil,"Pedrafita do Cebreiro, Lugo",True,11,2899
+"Son Parc, Es Mercadal",Fornells,True,11,2495
+Astorga,León,True,11,5092
+"El Casar de Talavera, Toledo","El Casar de Talavera, Toledo",False,11,11
+barcelona,Barcelona,True,11,27482
+NAVARREDONDA DE GREDOS,NAVARREDONDA DE GREDOS,False,11,11
+Perafita,Perafita,False,11,11
+Grazalema,Setenil de las Bodegas,True,11,5162
+Santillana del Mar,Santander,True,10,6131
+Matute de la Sierra,Matute de la Sierra,False,10,10
+CALANA,Valderrobres,True,10,3678
+Cangas de Onís,Cangas de Onís,False,10,10
+Alojera - la Gomera ,Alojera - la Gomera ,False,10,10
+chiclana de la frontera ,Cádiz,True,10,2712
+Camprodón,Camprodón,False,10,10
+Caimari,Caimari,False,10,10
+Valdealgorfa,Valderrobres,True,10,3678
+Hoyos del Espino,Hoyos del Espino,False,10,10
+Lloret de Mar ,Tossa de Mar,True,10,2156
+Cuntis,Caldas de Reis,True,9,5197
+"Oreña, Alfoz de Lloredo",Santander,True,9,6131
+"San Miguel de Abona, Santa Cruz de Tenerife","San Miguel de Abona, Santa Cruz de Tenerife",False,9,9
+"La Parrilla, Valladolid",Valladolid,True,9,5635
+Binisalem,Binisalem,False,9,9
+HOSPITALET DE LLOBREGAT ,Barcelona,True,9,27482
+Sant Pere de Vilamajor,Barcelona,True,9,27482
+Gudar,Gudar,False,9,9
+Barbadillo del Pez,Santo Domingo de la Calzada,True,9,10654
+La Pobla de Segur,La Pobla de Segur,False,9,9
+Montellano,"Las Cabezas de San Juan, Sevilla",True,8,2473
+Hoyo de Manzanares,Madrid,True,8,58255
+Colonia de Sant Jordi,Colonia de Sant Jordi,False,8,8
+Castejón de Sos,Castejón de Sos,False,8,8
+Cervera del Rio Alhama,"Tudela, Navarra",True,8,2353
+Cornellà de Terri ,"L'Escala, Girona",True,8,3144
+Campanillas,Málaga,True,8,17060
+Mijas Costa,Alhaurín el Grande,True,8,2271
+Mora De Luna,León,True,8,5092
+Porreres,Porreres,False,8,8
+Bot,Valderrobres,True,8,3678
+Camós,"L'Escala, Girona",True,8,3144
+Ubrique,Setenil de las Bodegas,True,8,5162
+Ávila,Ávila,False,8,8
+San Martín de Valdeiglesias,San Martín de Valdeiglesias,False,8,8
+Sanlúcar de Barrameda,"Jerez de la Frontera, Cádiz",True,8,2940
+Icod de los Vinos,Icod de los Vinos,False,7,7
+Altafulla,Tarragona,True,7,3025
+El Albir,Calpe,True,7,2387
+"Abades, Segovia",Segovia,True,7,6835
+Roquetas de Mar Almeria,Roquetas de Mar Almeria,False,7,7
+Becerril de Guía,Becerril de Guía,False,7,7
+Ponteveda,Pontevedra,True,7,4793
+Gijón,"Candás, Asturias",True,7,2143
+"Urbanización La Alcaidesa,La Linea de la Concepción","Tarifa, Cádiz",True,7,3182
+Os De Civís,Os De Civís,False,7,7
+La Coruña,A Coruña,True,7,5953
+Gautegiz Arteaga,Bergara,True,7,2405
+Nava,Oviedo,True,7,4676
+El Tarrós,Cervera,True,7,3563
+Juncosa de Les Garrigues,Cambrils,True,6,2162
+Campos,Campos,False,6,6
+Priorat de Banyeres,Sitges,True,6,4549
+Trevejo,Trevejo,False,6,6
+Sotoserrano,Sotoserrano,False,6,6
+"Castellar de la Muntanya, Girona","Castellar de la Muntanya, Girona",False,6,6
+Albanchez de Magina,Albanchez de Magina,False,6,6
+Canet de Berenguer,Valencia,True,6,10555
+Vilafranca de Bonany,Vilafranca de Bonany,False,6,6
+Chiclana de la frontera,Cádiz,True,6,2712
+"Los Llanos de Aridane, La Palma","Los Llanos de Aridane, La Palma",False,6,6
+Ortigueira,Miño,True,6,4848
+Riofrío - Escalonilla (Ávila),Riofrío - Escalonilla (Ávila),False,5,5
+L'Esquirol,L'Esquirol,False,5,5
+Vielha ,Vielha ,False,5,5
+Capmany,Roses,True,5,2973
+Carrión de los Condes,Carrión de los Condes,False,5,5
+Rojals,Tarragona,True,5,3025
+"Argés, TOLEDO",Toledo,True,5,19057
+Cangas de Onis,Cangas de Onis,False,5,5
+Oropesa del Mar,Oropesa del Mar,False,5,5
+pitillas,Sos del Rey Católico,True,5,2062
+Gargüera de la Vera - Cáceres ,Gargüera de la Vera - Cáceres ,False,5,5
+Ponteareas - Pontevedra,"Redondela, Pontevedra",True,5,2928
+banyoles,"L'Escala, Girona",True,5,3144
+Benalmadena,Málaga,True,5,17060
+Escarrilla,Escarrilla,False,5,5
+" Lalín, Pontevedra","O Pino, A Coruña",True,4,5227
+Cangas De Onís,Cangas De Onís,False,4,4
+Guía de Isora,Guía de Isora,False,4,4
+La Nava,La Nava,False,4,4
+"Cazalla de la Sierra, Sevilla","Cazalla de la Sierra, Sevilla",False,4,4
+Riaño,Riaño,False,4,4
+"Pedrazales (Parque Natural del lago de Sanabria), Galende, Zamora","Pedrazales (Parque Natural del lago de Sanabria), Galende, Zamora",False,4,4
+"Parres, Llanes","Parres, Llanes",False,4,4
+Priego de Córdoba,Priego de Córdoba,False,4,4
+"Playa del Ingles, Maspalomas","Playa del Ingles, Maspalomas",False,4,4
+"Salou, Tarragona",Salou,True,4,2785
+Aldehuela de la Bóveda (Salamanca),Salamanca,True,4,5539
+Santa Cruz de la Palma,Santa Cruz de la Palma,False,4,4
+Orellana La Vieja,Orellana La Vieja,False,4,4
+San Agustín San Bartolome de Tirajana ,San Agustín San Bartolome de Tirajana ,False,4,4
+La Granadella,Cambrils,True,4,2162
+Alcalá de Henares,Guadalajara,True,4,3424
+"Plasenzuela, Cáceres","Plasenzuela, Cáceres",False,4,4
+"Benasque, Huescca","Benasque, Huescca",False,4,4
+Arriate,Setenil de las Bodegas,True,4,5162
+Currelos,Portomarín,True,3,3685
+Almodóvar del Río,Córdoba,True,3,5320
+Hontanar,Toledo,True,3,19057
+Porreras,Porreras,False,3,3
+Cartagena ,MURCIA,True,3,4488
+Cordoba,Córdoba,True,3,5320
+Potes,Potes,False,3,3
+Playa de Muro,Playa de Muro,False,3,3
+Pantín Valdoviño,Miño,True,3,4848
+ Córdoba,Córdoba,True,3,5320
+Alella,Barcelona,True,3,27482
+San Miguel de Luena,Santander,True,3,6131
+El Rompido,"Isla Cristina, Huelva",True,3,2768
+Caleta de Velez (Málaga),"Nerja, Málaga",True,3,3792
+Vinaròs,Vinaròs,False,3,3
+Andratx,Andratx,False,3,3
+Santa Cilia de Jaca,Sos del Rey Católico,True,3,2062
+Torreblanca,Torreblanca,False,3,3
+Burriana,Burriana,False,3,3
+Tafalla,Pamplona,True,3,2750
+Fuerteventura,Fuerteventura,False,3,3
+Vidreres,Tossa de Mar,True,2,2156
+QUATRETONDETA,Calpe,True,2,2387
+"Burela, Lugo","Burela, Lugo",False,2,2
+Caminomorisco,Caminomorisco,False,2,2
+Burriana ,Burriana ,False,2,2
+"El Acebrón, Cuenca","El Acebrón, Cuenca",False,2,2
+Ses Salines,Fornells,True,2,2495
+Dénia,Denia,True,2,2745
+Fataga,Fataga,False,2,2
+Pedreguer,Denia,True,2,2745
+Vigo. Pontevedra,"Redondela, Pontevedra",True,2,2928
+Orbaizeta,"Zubiri, Navarra",True,2,2612
+BURGOS,Burgos,True,2,3266
+ALMERIA (ROQUETAS DE MAR),ALMERIA (ROQUETAS DE MAR),False,2,2
+Benahavis,"Marbella, Málaga",True,2,6361
+Castelldefels,Sitges,True,2,4549
+Palma de Mallorca,Palma de Mallorca,False,2,2
+Estamariu,Estamariu,False,2,2
+Aín,Manises,True,2,5482
+Cartama ,Alhaurín el Grande,True,2,2271
+Forcarei,Caldas de Reis,True,1,5197
+Torredembarra,Tarragona,True,1,3025
+"Puente Arroes, 5","Candás, Asturias",True,1,2143
+MURO DE ALCOI,Calpe,True,1,2387
+Villanueva de Duero,Valladolid,True,1,5635
+Añón de Moncayo,"Tudela, Navarra",True,1,2353
+Garganta La Olla,Garganta La Olla,False,1,1
+LINARES,LINARES,False,1,1
+Polop de la Marina,Calpe,True,1,2387
+"Aldealengua, Salamanca",Salamanca,True,1,5539
+Arrecife,Arrecife,False,1,1
+Santa Susanna,Tossa de Mar,True,1,2156
+Bubión,Granada,True,1,8082
+Lloret de Mar,Tossa de Mar,True,1,2156
+La Zubia,Granada,True,1,8082
+Velada,Velada,False,1,1
+Mijas,"Marbella, Málaga",True,1,6361
+Rueda,Valladolid,True,1,5635
+"Oropesa del Mar, Castellón","Oropesa del Mar, Castellón",False,1,1
+"Puerto del Rosario, Fuerteventura","Puerto del Rosario, Fuerteventura",False,1,1
+Esterri d'Àneu,Esterri d'Àneu,False,1,1
+"Atienza, Guadalajara","Atienza, Guadalajara",False,1,1
+Villaviciosa de Odón,Madrid,True,1,58255
+el vendrell,Sitges,True,1,4549
+Arbuniel,Arbuniel,False,1,1
+"Pedro Bernardo, Ávila","Pedro Bernardo, Ávila",False,1,1
+Teia,Barcelona,True,1,27482
+"Villanueva del Ariscal, Sevilla",Sevilla,True,1,25807
+San Cristóbal de La Laguna,San Cristóbal de La Laguna,False,1,1
+"Torroella de Montgrí, Girona","L'Escala, Girona",True,1,3144
+"Monesterio, Badajoz",ZAFRA,True,1,2370
+Puig-reig,Puig-reig,False,1,1
+Palomera,Palomera,False,1,1
+Guisando,Guisando,False,1,1
+Albuñuelas (Granada),Nerja,True,1,4506
+Cazorla (Jaén),Cazorla (Jaén),False,1,1
+Lanzarote,Lanzarote,False,1,1
+Sagunto,Valencia,True,1,10555
