@@ -138,23 +138,14 @@ class DuckDBConnectionWrapper:
     def __getattr__(self, name: str):
         """Delegate all other attributes to the underlying connection."""
         attr = getattr(self._con, name)
-        # If it's a method we want to wrap, wrap it; otherwise return as-is
-        if name == 'fetchdf':
-            return self._fetchdf_wrapper
-        if callable(attr):
-            return attr
         return attr
     
-    def _fetchdf_wrapper(self, *args, **kwargs):
-        """Wrapper for fetchdf that converts None to NaN."""
-        df = self._con.fetchdf(*args, **kwargs)
-        # Convert None to NaN for all columns
-        return df.replace([None], np.nan)
-    
-    # Explicitly delegate common methods for clarity
     def execute(self, *args, **kwargs):
-        """Delegate execute to underlying connection."""
-        return self._con.execute(*args, **kwargs)
+        """
+        Execute a query and return a wrapped result that converts None to NaN in fetchdf().
+        """
+        result = self._con.execute(*args, **kwargs)
+        return _DuckDBResultWrapper(result)
     
     def fetchone(self, *args, **kwargs):
         """Delegate fetchone to underlying connection."""
@@ -163,6 +154,38 @@ class DuckDBConnectionWrapper:
     def fetchall(self, *args, **kwargs):
         """Delegate fetchall to underlying connection."""
         return self._con.fetchall(*args, **kwargs)
+
+
+class _DuckDBResultWrapper:
+    """
+    Wrapper for DuckDB query result that converts None to NaN in fetchdf().
+    """
+    
+    def __init__(self, result):
+        self._result = result
+    
+    def fetchdf(self, *args, **kwargs):
+        """Fetch DataFrame and convert None and empty strings to NaN."""
+        df = self._result.fetchdf(*args, **kwargs)
+        # Convert None and empty strings to NaN for all object columns
+        for col in df.columns:
+            if df[col].dtype == 'object':
+                # Replace None with NaN, then empty strings with NaN
+                df[col] = df[col].where(df[col].notna(), np.nan)
+                df[col] = df[col].where(df[col] != '', np.nan)
+        return df
+    
+    def fetchone(self, *args, **kwargs):
+        """Delegate fetchone to underlying result."""
+        return self._result.fetchone(*args, **kwargs)
+    
+    def fetchall(self, *args, **kwargs):
+        """Delegate fetchall to underlying result."""
+        return self._result.fetchall(*args, **kwargs)
+    
+    def __getattr__(self, name: str):
+        """Delegate all other attributes to the underlying result."""
+        return getattr(self._result, name)
 
 
 def clean_data_quality_issues(con: duckdb.DuckDBPyConnection, verbose: bool = False) -> None:
@@ -275,7 +298,8 @@ def check_data_quality(con: duckdb.DuckDBPyConnection) -> dict:
 def validate_and_clean(
     con: duckdb.DuckDBPyConnection, 
     verbose: bool = False,
-    rooms_to_exclude: list[str] | None = None
+    rooms_to_exclude: list[str] | None = None,
+    exclude_missing_location_bookings: bool = False
 ) -> DuckDBConnectionWrapper:
     """
     Check data quality, drop bad rows, fix data issues, impute policy flags, and return wrapped connection.
@@ -286,6 +310,8 @@ def validate_and_clean(
         con: DuckDB connection
         verbose: If True, log progress and summary
         rooms_to_exclude: Optional list of room_type values to exclude (e.g., ['reception_hall'])
+        exclude_missing_location_bookings: If True, exclude bookings from hotels with missing location data
+            (city IS NULL AND (latitude IS NULL OR longitude IS NULL))
     """
     if verbose:
         logger.info("Checking data quality...")
@@ -349,8 +375,132 @@ def validate_and_clean(
             if verbose:
                 logger.info(f"  Removed {orphan_count:,} orphan bookings")
     
+    # Exclude bookings from hotels with missing location data if requested
+    if exclude_missing_location_bookings:
+        if verbose:
+            logger.info("\nExcluding bookings from hotels with missing location data...")
+        
+        # Count bookings that will be affected (before deletion)
+        missing_location_count = con.execute("""
+            SELECT COUNT(DISTINCT b.id)
+            FROM bookings b
+            JOIN hotel_location hl ON b.hotel_id = hl.hotel_id
+            WHERE b.status IN ('confirmed', 'Booked')
+              AND hl.city IS NULL 
+              AND (hl.latitude IS NULL OR hl.longitude IS NULL)
+        """).fetchone()[0]
+        
+        if missing_location_count > 0:
+            # Count booked_rooms before deletion (using same logic as DELETE)
+            booked_rooms_before = con.execute("""
+                SELECT COUNT(*)
+                FROM booked_rooms br
+                WHERE EXISTS (
+                    SELECT 1
+                    FROM bookings b
+                    JOIN hotel_location hl ON b.hotel_id = hl.hotel_id
+                    WHERE CAST(br.booking_id AS BIGINT) = b.id
+                      AND b.status IN ('confirmed', 'Booked')
+                      AND hl.city IS NULL 
+                      AND (hl.latitude IS NULL OR hl.longitude IS NULL)
+                )
+            """).fetchone()[0]
+            
+            # Delete booked_rooms for bookings from hotels with missing location
+            con.execute("""
+                DELETE FROM booked_rooms
+                WHERE EXISTS (
+                    SELECT 1
+                    FROM bookings b
+                    JOIN hotel_location hl ON b.hotel_id = hl.hotel_id
+                    WHERE CAST(booked_rooms.booking_id AS BIGINT) = b.id
+                      AND b.status IN ('confirmed', 'Booked')
+                      AND hl.city IS NULL 
+                      AND (hl.latitude IS NULL OR hl.longitude IS NULL)
+                )
+            """)
+            
+            total_deleted += booked_rooms_before
+            
+            if verbose:
+                logger.info(f"  Removed {booked_rooms_before:,} booked_rooms from hotels with missing location")
+            
+            # Delete bookings from hotels with missing location (regardless of whether they have booked_rooms)
+            # Count actual bookings that will be deleted
+            actual_bookings_to_delete = con.execute("""
+                SELECT COUNT(DISTINCT b.id)
+                FROM bookings b
+                JOIN hotel_location hl ON b.hotel_id = hl.hotel_id
+                WHERE b.status IN ('confirmed', 'Booked')
+                  AND hl.city IS NULL 
+                  AND (hl.latitude IS NULL OR hl.longitude IS NULL)
+            """).fetchone()[0]
+            
+            con.execute("""
+                DELETE FROM bookings
+                WHERE id IN (
+                    SELECT DISTINCT b.id
+                    FROM bookings b
+                    JOIN hotel_location hl ON b.hotel_id = hl.hotel_id
+                    WHERE b.status IN ('confirmed', 'Booked')
+                      AND hl.city IS NULL 
+                      AND (hl.latitude IS NULL OR hl.longitude IS NULL)
+                )
+            """)
+            
+            total_deleted += actual_bookings_to_delete
+            
+            if verbose:
+                logger.info(f"  Removed {actual_bookings_to_delete:,} bookings from hotels with missing location")
+    
     # Fix data quality issues (empty strings, etc.)
     clean_data_quality_issues(con, verbose=verbose)
+    
+    # Exclude bookings with missing location AFTER cleaning empty strings
+    # (cleaning converts empty strings to NULL, which would create more missing location bookings)
+    if exclude_missing_location_bookings:
+        # Re-count and delete any bookings that now have missing location after cleaning
+        additional_missing = con.execute("""
+            SELECT COUNT(DISTINCT b.id)
+            FROM bookings b
+            JOIN hotel_location hl ON b.hotel_id = hl.hotel_id
+            WHERE b.status IN ('confirmed', 'Booked')
+              AND hl.city IS NULL 
+              AND (hl.latitude IS NULL OR hl.longitude IS NULL)
+        """).fetchone()[0]
+        
+        if additional_missing > 0:
+            # Delete booked_rooms
+            con.execute("""
+                DELETE FROM booked_rooms
+                WHERE EXISTS (
+                    SELECT 1
+                    FROM bookings b
+                    JOIN hotel_location hl ON b.hotel_id = hl.hotel_id
+                    WHERE CAST(booked_rooms.booking_id AS BIGINT) = b.id
+                      AND b.status IN ('confirmed', 'Booked')
+                      AND hl.city IS NULL 
+                      AND (hl.latitude IS NULL OR hl.longitude IS NULL)
+                )
+            """)
+            
+            # Delete bookings
+            con.execute("""
+                DELETE FROM bookings
+                WHERE id IN (
+                    SELECT DISTINCT b.id
+                    FROM bookings b
+                    JOIN hotel_location hl ON b.hotel_id = hl.hotel_id
+                    WHERE b.status IN ('confirmed', 'Booked')
+                      AND hl.city IS NULL 
+                      AND (hl.latitude IS NULL OR hl.longitude IS NULL)
+                )
+            """)
+            
+            total_deleted += additional_missing
+            
+            if verbose:
+                logger.info(f"  Removed {additional_missing:,} additional bookings with missing location (after cleaning)")
     
     # Impute policy flags from booking behavior
     impute_policy_flags(con, verbose=verbose)

@@ -102,4 +102,41 @@ print("Original df events distribution: ",rooms['events_allowed'].value_counts()
 print("New df events distribution: ",df_rooms_clean['events_allowed'].value_counts())
 print("-"*50)
 
+# %% [markdown]
+
+#Let's check to see if there are any bookings that are missing location data.
+
+con = init_db()
+
+query = "select * from hotel_location where city is null and (latitude is null or longitude is null)"
+con.execute(query).fetchdf()
+
+# %% [markdown]
+#6800 of them. Do they correspond to bookings?
+query = """
+SELECT 
+    br.*,
+    b.id as booking_id,
+    b.hotel_id,
+    b.status,
+    b.arrival_date,
+    b.departure_date,
+    b.total_price as booking_total_price,
+    hl.city,
+    hl.country,
+    hl.latitude,
+    hl.longitude
+FROM booked_rooms br
+JOIN bookings b ON CAST(br.booking_id AS BIGINT) = b.id
+JOIN hotel_location hl ON b.hotel_id = hl.hotel_id
+WHERE b.status IN ('confirmed', 'Booked')
+  AND hl.city IS NULL 
+  AND (hl.latitude IS NULL OR hl.longitude IS NULL)
+"""
+con.execute(query).fetchdf()
+
+# %% [markdown]
+# Not that many. We'll add a parameter to the data_validator to exclude bookings from hotels with missing location data.
+con = validate_and_clean(init_db(), exclude_missing_location_bookings=True)
+con.execute(query).fetchdf()
 # %%
