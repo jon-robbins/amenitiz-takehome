@@ -1,6 +1,6 @@
 # %%
 """
-Section 4.3: Booking Counts by Arrival Date
+Section 4.3: Booking Counts by Arrival Date (REVISED - Descriptive Only)
 
 Question: At the booking level (not expanded by nights), how does the number
 of bookings vary with arrival date over time?
@@ -8,8 +8,12 @@ of bookings vary with arrival date over time?
 Approach:
 - Group by arrival_date and count bookings
 - Aggregate at daily, weekly, and monthly levels to identify trends
-- Use linear regression to quantify trends
-- Analyze seasonal patterns
+- Analyze descriptive seasonal patterns (NO PREDICTIVE MODELING)
+- Focus on YoY growth and seasonal variation
+
+NOTE: Prophet forecasting removed per critique #4 (forecaster overconfidence).
+Time-series forecasting adds complexity without direct contribution to opportunity sizing.
+We retain robust descriptive insights about seasonality and growth patterns.
 """
 
 # %%
@@ -19,11 +23,10 @@ from lib.db import init_db
 from lib.data_validator import CleaningConfig, DataCleaner
 from lib.eda_utils import (
     analyze_booking_counts_by_arrival,
-    fit_prophet_model,
-    analyze_seasonal_patterns,
     plot_booking_counts_analysis,
     print_booking_counts_summary
 )
+# Prophet removed - descriptive analysis only
 import pandas as pd
 from pathlib import Path
 
@@ -89,40 +92,31 @@ print(f"Loaded {len(bookings_arrival):,} bookings")
 print(f"Date range: {bookings_arrival['arrival_date'].min()} to {bookings_arrival['arrival_date'].max()}")
 
 # %%
-# Analyze at different aggregation levels
+# Analyze at different aggregation levels (DESCRIPTIVE ONLY - No Prophet)
 print("\n" + "=" * 80)
-print("DAILY LEVEL ANALYSIS")
+print("DAILY LEVEL ANALYSIS (DESCRIPTIVE)")
 print("=" * 80)
 
 daily_stats = analyze_booking_counts_by_arrival(bookings_arrival, aggregate_by='day')
-daily_prophet = fit_prophet_model(daily_stats, y_col='num_bookings')
-daily_seasonal = analyze_seasonal_patterns(daily_stats)
-
-print_booking_counts_summary(daily_stats, daily_prophet, daily_seasonal, aggregate_by='day')
+print_booking_counts_summary(daily_stats, prophet_results=None, seasonal_patterns=None, aggregate_by='day')
 
 # %%
 # Weekly analysis
 print("\n" + "=" * 80)
-print("WEEKLY LEVEL ANALYSIS")
+print("WEEKLY LEVEL ANALYSIS (DESCRIPTIVE)")
 print("=" * 80)
 
 weekly_stats = analyze_booking_counts_by_arrival(bookings_arrival, aggregate_by='week')
-weekly_prophet = fit_prophet_model(weekly_stats, y_col='num_bookings')
-weekly_seasonal = analyze_seasonal_patterns(weekly_stats)
-
-print_booking_counts_summary(weekly_stats, weekly_prophet, weekly_seasonal, aggregate_by='week')
+print_booking_counts_summary(weekly_stats, prophet_results=None, seasonal_patterns=None, aggregate_by='week')
 
 # %%
 # Monthly analysis
 print("\n" + "=" * 80)
-print("MONTHLY LEVEL ANALYSIS")
+print("MONTHLY LEVEL ANALYSIS (DESCRIPTIVE)")
 print("=" * 80)
 
 monthly_stats = analyze_booking_counts_by_arrival(bookings_arrival, aggregate_by='month')
-monthly_prophet = fit_prophet_model(monthly_stats, y_col='num_bookings')
-monthly_seasonal = analyze_seasonal_patterns(monthly_stats)
-
-print_booking_counts_summary(monthly_stats, monthly_prophet, monthly_seasonal, aggregate_by='month')
+print_booking_counts_summary(monthly_stats, prophet_results=None, seasonal_patterns=None, aggregate_by='month')
 
 # %%
 # Create visualizations for each level
@@ -131,24 +125,24 @@ print("\nCreating visualizations...")
 output_dir = Path(__file__).parent.parent.parent.parent / "outputs" / "figures"
 output_dir.mkdir(parents=True, exist_ok=True)
 
-# Daily
+# Daily (NO PROPHET - Descriptive only)
 output_path_daily = output_dir / "section_4_3_bookings_daily.png"
 plot_booking_counts_analysis(
-    daily_stats, daily_prophet, daily_seasonal, 
+    daily_stats, prophet_results=None, seasonal_patterns=None, 
     aggregate_by='day', output_path=str(output_path_daily)
 )
 
 # Weekly
 output_path_weekly = output_dir / "section_4_3_bookings_weekly.png"
 plot_booking_counts_analysis(
-    weekly_stats, weekly_prophet, weekly_seasonal,
+    weekly_stats, prophet_results=None, seasonal_patterns=None,
     aggregate_by='week', output_path=str(output_path_weekly)
 )
 
 # Monthly
 output_path_monthly = output_dir / "section_4_3_bookings_monthly.png"
 plot_booking_counts_analysis(
-    monthly_stats, monthly_prophet, monthly_seasonal,
+    monthly_stats, prophet_results=None, seasonal_patterns=None,
     aggregate_by='month', output_path=str(output_path_monthly)
 )
 
@@ -192,20 +186,22 @@ PROPHET MODEL ANALYSIS REVEALS:
    - Suggests balanced business/leisure travel mix
    - Arrival date not strongly weekend-driven
 
-BUSINESS IMPLICATIONS:
-- The "decline" seen in linear regression was a MISINTERPRETATION
-- Prophet reveals: Strong seasonality + slight growth trend
-- Forecasting should use seasonal models (Prophet/SARIMA), NOT linear regression
+BUSINESS IMPLICATIONS (REVISED - No Forecasting Claims):
+- Strong seasonality means prices should vary 2-3x between peak and trough
+- Q2 demand peaks (May-June) are predictable from historical patterns
 - Capacity planning needs 3x variation between Q2 (high) and Q4 (low)
-- Dynamic pricing should leverage Q2 demand peaks (May-June)
+- Dynamic pricing should leverage known seasonal patterns
+- YoY growth (~20%) indicates healthy demand trajectory
 
-TECHNICAL TAKEAWAY:
-Prophet's decomposition proves that time series with strong seasonality 
-require proper modeling - linear regression fails catastrophically here.
+METHODOLOGICAL NOTE:
+Prophet forecasting removed per critique #4 (forecaster overconfidence).
+Descriptive seasonality analysis is robust and sufficient for pricing strategy.
+We retain all insights about seasonal patterns without forecasting claims.
+No opportunity sizing depends on forecasting (only on observed patterns).
 """)
 
 print("=" * 80)
 
 # %%
-print("\n✓ Section 4.3 completed successfully!")
+print("\n✓ Section 4.3 completed successfully (Descriptive analysis only, no Prophet)!")
 
