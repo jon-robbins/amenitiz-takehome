@@ -1,8 +1,64 @@
-# 1.2 Understand what a "room" actually represents
-# Note: room_id = a room configuration (unique combo of hotel + type + size + view + occupancy)
-#       room_type = category (room/apartment/villa/cottage/reception_hall)
-#       number_of_rooms = count of identical physical units for that configuration
+# %%
+"""
+Section 1.2: Hotel Supply Structure
 
+Question: What does a "room" represent, and how is hotel inventory structured?
+
+Key Concepts:
+- room_id = A room configuration (unique combo of hotel + type + size + view + occupancy)
+- room_type = Category (room/apartment/villa/cottage/reception_hall)
+- number_of_rooms = Count of identical physical units for that configuration
+"""
+
+# %%
+import sys
+sys.path.insert(0, '../../..')
+from lib.db import init_db
+from lib.data_validator import CleaningConfig, DataCleaner
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# %%
+# Initialize database with FULL cleaning configuration
+print("Initializing database with full data cleaning...")
+
+# Create configuration with ALL rules enabled
+config = CleaningConfig(
+    # Enable ALL cleaning rules
+    remove_negative_prices=True,
+    remove_zero_prices=True,
+    remove_low_prices=True,
+    remove_null_prices=True,
+    remove_extreme_prices=True,
+    remove_null_dates=True,
+    remove_null_created_at=True,
+    remove_negative_stay=True,
+    remove_negative_lead_time=True,
+    remove_null_occupancy=True,
+    remove_overcrowded_rooms=True,
+    remove_null_room_id=True,
+    remove_null_booking_id=True,
+    remove_null_hotel_id=True,
+    remove_orphan_bookings=True,
+    remove_null_status=True,
+    remove_cancelled_but_active=True,
+    remove_bookings_before_2023=True,
+    remove_bookings_after_2024=True,
+    exclude_reception_halls=True,
+    exclude_missing_location=True,
+    fix_empty_strings=True,
+    impute_children_allowed=True,
+    impute_events_allowed=True,
+    verbose=True
+)
+
+# Apply cleaning
+cleaner = DataCleaner(config)
+con = cleaner.clean(init_db())
+
+# %%
 # Get data - HOTEL-LEVEL ANALYSIS
 # Distribution of configurations per hotel
 hotel_config_distribution = con.execute("""
@@ -191,4 +247,89 @@ print("3. Category specialization: 74% of hotels offer only 1 category")
 print("4. Utilization varies by category: rooms (53) > apartments (31) > villas (21)")
 print("5. For pricing: Model at HOTEL level + room attributes (category, size, occupancy)")
 print("="*80)
+
+# %%
+"""
+## Section 1.2: Key Takeaways & Business Insights
+
+### Data Quality Impact
+After applying full data cleaning (all validation rules enabled):
+- Removed invalid bookings (negative prices, null dates, cancelled records)
+- Excluded reception_hall (not accommodation)
+- Excluded hotels with missing location data
+- Clean dataset ensures accurate hotel capacity calculations
+
+### Market Structure Findings
+
+**1. HOTEL INVENTORY COMPLEXITY**
+- Most hotels (75%) operate with MULTIPLE room configurations
+- Median hotel has 2-5 different room types/sizes/views
+- This complexity requires configuration-level pricing (not just hotel-level)
+
+**2. PROPERTY SIZE DISTRIBUTION**
+- SMALL properties dominate: Median ~5 units per hotel
+- This is a BOUTIQUE hotel market, not chain hotels
+- Smaller properties = higher occupancy volatility (one booking = 20% occupancy jump)
+
+**3. CATEGORY SPECIALIZATION**
+- 74% of hotels offer ONLY ONE category (room, apartment, villa, or cottage)
+- Single-category hotels = simpler operations, clearer positioning
+- Multi-category hotels = more complex inventory management
+
+**4. UTILIZATION PATTERNS**
+- Rooms: Highest utilization (53 bookings/unit median)
+- Apartments: Medium utilization (31 bookings/unit)
+- Villas/Cottages: Lower utilization (21 bookings/unit)
+- Suggests rooms are easier to sell (shorter stays, business travel)
+
+### Implications for Revenue Management
+
+**1. PRICING STRATEGY**
+- Cannot use simple "hotel average" price
+- Need CONFIGURATION-LEVEL pricing: 
+  - Base price by room_type (category)
+  - Adjustments for size, view, occupancy
+  - Hotel-level multipliers for location, brand
+
+**2. INVENTORY MANAGEMENT**
+- Small hotel size = high sensitivity to single bookings
+- At 5-unit hotel: Each booking = 20% occupancy change
+- Dynamic pricing is CRITICAL (unlike large chains with 100+ rooms)
+
+**3. SEGMENTATION FOR MODELING**
+- Segment 1: Single-config properties (25%) - simpler pricing
+- Segment 2: Multi-config properties (75%) - complex optimization
+- Different strategies needed for each segment
+
+**4. CAPACITY CONSTRAINTS**
+- Small properties hit capacity constraints frequently
+- Section 7.1 showed 16.6% of nights at ≥95% occupancy
+- This validates the €2.25M underpricing opportunity from Section 5.2
+
+### Actionable Recommendations
+
+1. **Immediate:** Implement occupancy-based pricing with hotel size adjustment
+   - Small hotels (<5 rooms): More aggressive surge pricing (±30%)
+   - Medium hotels (5-20 rooms): Moderate surge pricing (±20%)
+   - Large hotels (20+ rooms): Conservative surge pricing (±15%)
+
+2. **Short-term:** Build configuration-level price optimization
+   - Each room_id gets own price model
+   - Trained on historical bookings for that configuration
+   - Hotel-level constraints ensure internal consistency
+
+3. **Long-term:** Portfolio optimization across configurations
+   - For multi-config hotels: Optimize WHICH room to sell at what price
+   - Cannibalization risk: Don't undercut premium rooms with cheap rooms
+   - Revenue management: Save premium rooms for high-demand dates
+
+### Connection to Other Sections
+
+- **Section 5.2 (Underpricing):** Small hotel size explains why occupancy-based pricing is so critical
+- **Section 7.1 (Occupancy):** 778 hotels frequently at 90%+ occupancy = capacity-constrained
+- **Section 7.2 (RevPAR):** Small properties can achieve HIGH RevPAR with proper pricing
+
+**Bottom Line:** This is a boutique hotel market with complex inventory. Success requires 
+sophisticated, configuration-level dynamic pricing, NOT simple hotel-wide rates.
+"""
 

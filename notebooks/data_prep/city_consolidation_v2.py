@@ -93,8 +93,7 @@ def consolidate_cities(con=None, verbose: bool = True) -> tuple[dict[str, str], 
             AVG(hl.longitude) as avg_lon
         FROM hotel_location hl
         INNER JOIN bookings b ON hl.hotel_id = b.hotel_id
-        WHERE hl.country = 'ES' 
-          AND hl.city IS NOT NULL 
+        WHERE hl.city IS NOT NULL 
           AND hl.city != ''
           AND hl.latitude IS NOT NULL
           AND hl.longitude IS NOT NULL
