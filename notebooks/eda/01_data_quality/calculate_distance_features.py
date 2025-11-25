@@ -24,9 +24,27 @@ from lib.data_validator import validate_and_clean
 from lib.eda_utils import load_coastline_shapefile
 
 # %%
-# Constants
-MADRID_LAT = 40.4165
-MADRID_LON = -3.70256
+def get_madrid_coords() -> tuple[float, float]:
+    """
+    Retrieves the latitude and longitude of Madrid from data/cities500.json.
+
+    Returns:
+        Tuple containing (latitude, longitude) of Madrid in decimal degrees.
+    Raises:
+        ValueError if Madrid is not found in the file.
+    """
+    import json
+    from pathlib import Path
+
+    cities_fp = Path(__file__).parent.parent.parent / "data" / "cities500.json"
+    with open(cities_fp, "r", encoding="utf-8") as f:
+        cities_data = json.load(f)
+    for city in cities_data:
+        if city.get("name", "").lower() == "madrid" or city.get("asciiName", "").lower() == "madrid":
+            return float(city["lat"]), float(city["lng"])
+    raise ValueError("Madrid not found in cities500.json")
+
+MADRID_LAT, MADRID_LON = get_madrid_coords()
 
 
 def haversine_distance(

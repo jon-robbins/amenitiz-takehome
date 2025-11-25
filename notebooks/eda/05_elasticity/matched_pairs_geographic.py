@@ -59,6 +59,7 @@ def get_cleaning_config() -> CleaningConfig:
         impute_children_allowed=True,
         impute_events_allowed=True,
         match_city_names_with_tfidf=True,
+        set_empty_room_view_to_no_view_str=True,
         verbose=False
     )
 
@@ -71,7 +72,7 @@ def load_hotel_month_data(con) -> pd.DataFrame:
             b.hotel_id,
             DATE_TRUNC('month', CAST(b.arrival_date AS DATE)) AS month,
             br.room_type,
-            COALESCE(NULLIF(br.room_view, ''), 'standard') AS room_view,
+            COALESCE(NULLIF(br.room_view, ''), 'no_view') AS room_view,
             r.children_allowed,
             hl.city,
             hl.latitude,
@@ -87,9 +88,9 @@ def load_hotel_month_data(con) -> pd.DataFrame:
              CAST(MAX(r.smoking_allowed) AS INT) + CAST(MAX(r.children_allowed) AS INT)) AS amenities_score,
             MAX(r.max_occupancy) AS room_capacity_pax,
             CASE 
-                WHEN COALESCE(NULLIF(br.room_view, ''), 'standard') IN ('ocean_view', 'sea_view') THEN 3
-                WHEN COALESCE(NULLIF(br.room_view, ''), 'standard') IN ('lake_view', 'mountain_view') THEN 2
-                WHEN COALESCE(NULLIF(br.room_view, ''), 'standard') IN ('pool_view', 'garden_view') THEN 1
+                WHEN COALESCE(NULLIF(br.room_view, ''), 'no_view') IN ('ocean_view', 'sea_view') THEN 3
+                WHEN COALESCE(NULLIF(br.room_view, ''), 'no_view') IN ('lake_view', 'mountain_view') THEN 2
+                WHEN COALESCE(NULLIF(br.room_view, ''), 'no_view') IN ('pool_view', 'garden_view') THEN 1
                 ELSE 0
             END AS view_quality_score
         FROM bookings b
@@ -156,10 +157,15 @@ def create_match_blocks(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame]:
 
 
 def find_matched_pairs(df_blocked: pd.DataFrame, max_block_size: int = 100) -> pd.DataFrame:
-    """Finds matched pairs within blocks using KNN on normalized features."""
-    match_features = [
-        'avg_room_size', 'total_capacity', 'weekend_ratio', 'amenities_score',
-        'room_capacity_pax', 'view_quality_score', 'distance_from_coast', 'distance_from_madrid'
+    """Finds matched pairs within blocks using KNN on normalized features.
+    
+    Uses log-transformed capacity and segment-specific geographic features
+    to improve matching quality, especially for urban markets.
+    """
+    # Base features (always used)
+    base_features = [
+        'avg_room_size', 'weekend_ratio', 'amenities_score',
+        'room_capacity_pax', 'view_quality_score'
     ]
     
     matched_pairs = []
@@ -169,14 +175,35 @@ def find_matched_pairs(df_blocked: pd.DataFrame, max_block_size: int = 100) -> p
         if len(block) < 2 or len(block) > max_block_size:
             continue
         
-        if not all(f in block.columns for f in match_features):
+        blocks_processed += 1
+        
+        # 1. Log-transform capacity to reduce scale variance
+        block_clean = block.copy()
+        block_clean['total_capacity_log'] = np.log1p(block_clean['total_capacity'])
+        
+        # 2. Dynamic feature selection by market segment
+        market_segment = block_vars[0]  # First element is market_segment
+        is_coastal = 'True' in market_segment.split('_')[0]  # Check if coastal
+        
+        if is_coastal:
+            # Coastal segments: use distance_from_coast
+            geo_features = ['distance_from_coast']
+        else:
+            # Urban/Inland segments: use distance_from_madrid (more relevant)
+            geo_features = ['distance_from_madrid']
+        
+        # Combine base features with log capacity and segment-specific geo features
+        match_features = base_features + ['total_capacity_log'] + geo_features
+        
+        # Check all required features exist
+        if not all(f in block_clean.columns for f in match_features):
             continue
         
-        blocks_processed += 1
-        block_clean = block[match_features].fillna(0)
+        # Prepare feature matrix
+        block_features = block_clean[match_features].fillna(0)
         
         try:
-            features_norm = StandardScaler().fit_transform(block_clean)
+            features_norm = StandardScaler().fit_transform(block_features)
         except:
             continue
         
@@ -188,9 +215,10 @@ def find_matched_pairs(df_blocked: pd.DataFrame, max_block_size: int = 100) -> p
         dist_matrix = cdist(features_norm, features_norm, metric='euclidean')
         price_matrix = np.abs(prices[:, None] - prices[None, :]) / np.minimum(prices[:, None], prices[None, :])
         
+        # 3. Relaxed distance threshold (2.0 -> 3.0) for more forgiving matching
         for i in range(n):
             for j in range(i+1, n):
-                if ids[i] == ids[j] or price_matrix[i, j] < 0.10 or dist_matrix[i, j] > 2.0:
+                if ids[i] == ids[j] or price_matrix[i, j] < 0.10 or dist_matrix[i, j] > 3.0:
                     continue
                 
                 high_idx = i if prices[i] > prices[j] else j
@@ -232,12 +260,12 @@ def calculate_elasticity_and_opportunity(pairs_df: pd.DataFrame) -> pd.DataFrame
     df['occ_pct_change'] = (df['high_occupancy'] - df['low_occupancy']) / df['occ_avg']
     df['arc_elasticity'] = df['occ_pct_change'] / df['price_pct_change']
     
-    # Filter valid pairs
+    # Filter valid pairs (using relaxed distance threshold of 3.0)
     df_valid = df[
         (df['arc_elasticity'] < 0) &
         (df['arc_elasticity'] > -5) &
         (df['occ_avg'] > 0.01) &
-        (df['match_distance'] < 2.0)
+        (df['match_distance'] < 3.0)
     ]
     
     # Counterfactual opportunity
@@ -751,7 +779,10 @@ con = cleaner.clean(init_db())
 
 # %%
 print("\nLoading distance features...")
-distance_features = pd.read_csv('../../../outputs/eda/spatial/data/hotel_distance_features.csv')
+# Use script's directory to build paths (works regardless of CWD)
+script_dir = Path(__file__).parent
+distance_features_path = script_dir / '../../../outputs/eda/spatial/data/hotel_distance_features.csv'
+distance_features = pd.read_csv(distance_features_path.resolve())
 print(f"Loaded distance features for {len(distance_features):,} hotels")
 
 # %%
@@ -812,20 +843,23 @@ print_results(opp_positive)
 
 # %%
 print("\nCreating executive-style visualizations...")
-fig_path = Path("../../../outputs/eda/elasticity/figures/matched_pairs_geographic_executive.png")
+fig_path = (script_dir / '../../../outputs/eda/elasticity/figures/matched_pairs_geographic_executive.png').resolve()
+fig_path.parent.mkdir(parents=True, exist_ok=True)
 create_executive_visualizations(opp_positive, fig_path)
 print(f"Executive visual saved to: {fig_path}")
 
 # %%
 print("\nCreating individual focused plots...")
-individual_plots_dir = Path("../../../outputs/eda/elasticity/figures")
+individual_plots_dir = (script_dir / '../../../outputs/eda/elasticity/figures').resolve()
+individual_plots_dir.mkdir(parents=True, exist_ok=True)
 create_individual_plots(opp_positive, individual_plots_dir)
 
 # %%
 print_top_pairs(opp_positive, n=5)
 
 # %%
-pairs_path = Path('../../../outputs/eda/elasticity/data/matched_pairs_geographic.csv')
+pairs_path = (script_dir / '../../../outputs/eda/elasticity/data/matched_pairs_geographic.csv').resolve()
+pairs_path.parent.mkdir(parents=True, exist_ok=True)
 opp_positive.to_csv(pairs_path, index=False)
 print(f"\nSaved results to: {pairs_path}")
 

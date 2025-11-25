@@ -92,3 +92,4 @@ The median elasticity of -0.48 indicates **inelastic demand**:
 
 This supports the €1.9M revenue optimization opportunity identified in the pricing analysis.
 
+
