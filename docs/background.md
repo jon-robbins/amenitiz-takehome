@@ -64,7 +64,7 @@ The provided file is in `amenitiz/data`. There are 4 sets of tables:
 - **pets_allowed**: Boolean if pets are allowed in the room.
 - **smoking_allowed**: Boolean if smoking is allowed in the room.
 - **children_allowed**: Boolean if children are allowed in the room.
-
+ 
 ***
 
 ## Your Assignment
