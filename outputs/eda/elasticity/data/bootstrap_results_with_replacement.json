@@ -1,0 +1,123 @@
+{
+  "elasticity_median": -0.38538355246011313,
+  "elasticity_ci_lower": -0.41224426081242405,
+  "elasticity_ci_upper": -0.36241127208074436,
+  "elasticity_std": 0.012147727869177075,
+  "elasticity_ci_width": 0.049832988731679684,
+  "opportunity_mean": 1982288.951963327,
+  "opportunity_ci_lower": 1699440.9103360076,
+  "opportunity_ci_upper": 2243653.0095190178,
+  "opportunity_std": 143343.830111571,
+  "n_bootstrap": 1000,
+  "n_treatment_hotels": 470,
+  "control_reuse_mean": 2.21356783919598,
+  "control_reuse_max": 12,
+  "control_concentration_top10_pct": 10.442678774120317,
+  "revpar_metrics": {
+    "elasticity_median": -0.3858860867751441,
+    "avg_price_diff_pct": 57.62169127037453,
+    "avg_adr": 80.46288505140161,
+    "avg_occupancy": 0.44167372584342957,
+    "actual_revpar": 35.538342232764144,
+    "avg_capacity": 8.72077185017026,
+    "actual_annual_revenue": 53355400.9948162,
+    "n_hotels": 470,
+    "max_revpar_pct": 22.57386361037872,
+    "max_annual_opportunity": 12044375.449340459,
+    "max_per_room_per_night": 8.022376905013797,
+    "scenarios": {
+      "5pct": {
+        "price_increase_pct": 5.0,
+        "revpar_gain_pct": 2.9740980444304954,
+        "monthly_opportunity": 132236.82813207313,
+        "annual_opportunity": 1586841.9375848777,
+        "per_room_per_night": 1.0569451413676552
+      },
+      "10pct": {
+        "price_increase_pct": 10.0,
+        "revpar_gain_pct": 5.7552530454734185,
+        "monthly_opportunity": 255894.86172322615,
+        "annual_opportunity": 3070738.3406787138,
+        "per_room_per_night": 2.0453215236619244
+      },
+      "15pct": {
+        "price_increase_pct": 15.0,
+        "revpar_gain_pct": 8.34346500312877,
+        "monthly_opportunity": 370974.1007734591,
+        "annual_opportunity": 4451689.20928151,
+        "per_room_per_night": 2.9651291468828083
+      },
+      "20pct": {
+        "price_increase_pct": 20.0,
+        "revpar_gain_pct": 10.738733917396548,
+        "monthly_opportunity": 477474.54528277187,
+        "annual_opportunity": 5729694.543393263,
+        "per_room_per_night": 3.816368011030305
+      }
+    },
+    "recommended_revpar_pct": 5.7552530454734185,
+    "recommended_annual_opportunity": 3070738.3406787138,
+    "recommended_per_room_per_night": 2.0453215236619244
+  },
+  "underpricing_analysis": {
+    "total_market_hotels": 2255,
+    "underpriced_hotel_count": 398,
+    "underpriced_market_pct": 17.649667405764966,
+    "peer_hotel_count": 470,
+    "avg_underpriced_adr": 86.81353685763187,
+    "avg_underpriced_occupancy": 0.40074896812438965,
+    "avg_underpriced_revpar": 34.79043531492464,
+    "avg_peer_adr": 160.08872092234762,
+    "avg_peer_occupancy": 0.32696775713019693,
+    "avg_peer_revpar": 52.343850021822036,
+    "price_gap_pct": 45.77160941916607,
+    "revpar_gap_pct": 33.53481774760437,
+    "occupancy_advantage_pct": 22.565286449579002,
+    "avg_capacity": 8.743718592964823,
+    "median_elasticity": -0.4041622656249304,
+    "current_annual_per_hotel": 109511.19940336078,
+    "current_total_annual": 43585457.36253759,
+    "scenarios": {
+      "10pct": {
+        "price_increase_pct": 10,
+        "new_adr": 95.49489054339507,
+        "new_occupancy": 0.384552207033989,
+        "new_revpar": 36.72277091893178,
+        "revpar_gain_pct": 5.554215078125766,
+        "annual_opportunity": 2420830.0447001383,
+        "opportunity_per_hotel": 6082.487549497835,
+        "new_total_annual_revenue": 46006287.40723773
+      },
+      "20pct": {
+        "price_increase_pct": 20,
+        "new_adr": 104.17624422915824,
+        "new_occupancy": 0.3683554459435884,
+        "new_revpar": 38.37388689975976,
+        "revpar_gain_pct": 10.300105625001661,
+        "annual_opportunity": 4489348.14548143,
+        "opportunity_per_hotel": 11279.769209752336,
+        "new_total_annual_revenue": 48074805.50801902
+      },
+      "30pct": {
+        "price_increase_pct": 30,
+        "new_adr": 112.85759791492144,
+        "new_occupancy": 0.35215868485318774,
+        "new_revpar": 39.7437832574086,
+        "revpar_gain_pct": 14.237671640627724,
+        "annual_opportunity": 6205554.3023438975,
+        "opportunity_per_hotel": 15591.844980763562,
+        "new_total_annual_revenue": 49791011.66488149
+      },
+      "46pct": {
+        "price_increase_pct": 46,
+        "new_adr": 126.74776381214254,
+        "new_occupancy": 0.32624386710854675,
+        "new_revpar": 41.3506806134341,
+        "revpar_gain_pct": 18.856462240629675,
+        "annual_opportunity": 8218675.309972644,
+        "opportunity_per_hotel": 20649.937964755387,
+        "new_total_annual_revenue": 51804132.67251024
+      }
+    }
+  }
+}

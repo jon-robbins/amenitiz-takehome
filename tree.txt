@@ -1,0 +1,713 @@
+.
+├── data
+│   ├── cities500.json
+│   ├── ds_booked_rooms.csv
+│   ├── ds_bookings.csv
+│   ├── ds_bookings.csv.zip
+│   ├── ds_hotel_location.csv
+│   ├── ds_rooms.csv
+│   ├── GSHHS_h_L1.dbf
+│   ├── GSHHS_h_L1.prj
+│   ├── GSHHS_h_L1.shp
+│   ├── GSHHS_h_L1.shx
+│   ├── WDBII_border_f_L1.dbf
+│   ├── WDBII_border_f_L1.prj
+│   ├── WDBII_border_f_L1.shp
+│   └── WDBII_border_f_L1.shx
+├── docs
+│   ├── background.md
+│   └── Senior Data Scientist - Business Case (3).pdf
+├── gshhg.txt
+├── guidelines.md
+├── lib
+│   ├── __init__.py
+│   ├── __pycache__
+│   │   ├── __init__.cpython-312.pyc
+│   │   ├── __init__.cpython-313.pyc
+│   │   ├── data_validator.cpython-312.pyc
+│   │   ├── data_validator.cpython-313.pyc
+│   │   ├── db.cpython-312.pyc
+│   │   ├── db.cpython-313.pyc
+│   │   ├── eda_utils.cpython-313.pyc
+│   │   └── interactive_heatmap.cpython-313.pyc
+│   ├── data
+│   │   ├── COPYING.LESSERv3
+│   │   ├── gshhg-shp-2.3.7.zip
+│   │   ├── GSHHS_shp
+│   │   │   ├── c
+│   │   │   │   ├── GSHHS_c_L1.dbf
+│   │   │   │   ├── GSHHS_c_L1.prj
+│   │   │   │   ├── GSHHS_c_L1.shp
+│   │   │   │   ├── GSHHS_c_L1.shx
+│   │   │   │   ├── GSHHS_c_L2.dbf
+│   │   │   │   ├── GSHHS_c_L2.prj
+│   │   │   │   ├── GSHHS_c_L2.shp
+│   │   │   │   ├── GSHHS_c_L2.shx
+│   │   │   │   ├── GSHHS_c_L3.dbf
+│   │   │   │   ├── GSHHS_c_L3.prj
+│   │   │   │   ├── GSHHS_c_L3.shp
+│   │   │   │   ├── GSHHS_c_L3.shx
+│   │   │   │   ├── GSHHS_c_L5.dbf
+│   │   │   │   ├── GSHHS_c_L5.prj
+│   │   │   │   ├── GSHHS_c_L5.shp
+│   │   │   │   ├── GSHHS_c_L5.shx
+│   │   │   │   ├── GSHHS_c_L6.dbf
+│   │   │   │   ├── GSHHS_c_L6.prj
+│   │   │   │   ├── GSHHS_c_L6.shp
+│   │   │   │   └── GSHHS_c_L6.shx
+│   │   │   ├── f
+│   │   │   │   ├── GSHHS_f_L1.dbf
+│   │   │   │   ├── GSHHS_f_L1.prj
+│   │   │   │   ├── GSHHS_f_L1.shp
+│   │   │   │   ├── GSHHS_f_L1.shx
+│   │   │   │   ├── GSHHS_f_L2.dbf
+│   │   │   │   ├── GSHHS_f_L2.prj
+│   │   │   │   ├── GSHHS_f_L2.shp
+│   │   │   │   ├── GSHHS_f_L2.shx
+│   │   │   │   ├── GSHHS_f_L3.dbf
+│   │   │   │   ├── GSHHS_f_L3.prj
+│   │   │   │   ├── GSHHS_f_L3.shp
+│   │   │   │   ├── GSHHS_f_L3.shx
+│   │   │   │   ├── GSHHS_f_L4.dbf
+│   │   │   │   ├── GSHHS_f_L4.prj
+│   │   │   │   ├── GSHHS_f_L4.shp
+│   │   │   │   ├── GSHHS_f_L4.shx
+│   │   │   │   ├── GSHHS_f_L5.dbf
+│   │   │   │   ├── GSHHS_f_L5.prj
+│   │   │   │   ├── GSHHS_f_L5.shp
+│   │   │   │   ├── GSHHS_f_L5.shx
+│   │   │   │   ├── GSHHS_f_L6.dbf
+│   │   │   │   ├── GSHHS_f_L6.prj
+│   │   │   │   ├── GSHHS_f_L6.shp
+│   │   │   │   └── GSHHS_f_L6.shx
+│   │   │   ├── h
+│   │   │   │   ├── GSHHS_h_L1.dbf
+│   │   │   │   ├── GSHHS_h_L1.prj
+│   │   │   │   ├── GSHHS_h_L1.shp
+│   │   │   │   ├── GSHHS_h_L1.shx
+│   │   │   │   ├── GSHHS_h_L2.dbf
+│   │   │   │   ├── GSHHS_h_L2.prj
+│   │   │   │   ├── GSHHS_h_L2.shp
+│   │   │   │   ├── GSHHS_h_L2.shx
+│   │   │   │   ├── GSHHS_h_L3.dbf
+│   │   │   │   ├── GSHHS_h_L3.prj
+│   │   │   │   ├── GSHHS_h_L3.shp
+│   │   │   │   ├── GSHHS_h_L3.shx
+│   │   │   │   ├── GSHHS_h_L4.dbf
+│   │   │   │   ├── GSHHS_h_L4.prj
+│   │   │   │   ├── GSHHS_h_L4.shp
+│   │   │   │   ├── GSHHS_h_L4.shx
+│   │   │   │   ├── GSHHS_h_L5.dbf
+│   │   │   │   ├── GSHHS_h_L5.prj
+│   │   │   │   ├── GSHHS_h_L5.shp
+│   │   │   │   ├── GSHHS_h_L5.shx
+│   │   │   │   ├── GSHHS_h_L6.dbf
+│   │   │   │   ├── GSHHS_h_L6.prj
+│   │   │   │   ├── GSHHS_h_L6.shp
+│   │   │   │   └── GSHHS_h_L6.shx
+│   │   │   ├── i
+│   │   │   │   ├── GSHHS_i_L1.dbf
+│   │   │   │   ├── GSHHS_i_L1.prj
+│   │   │   │   ├── GSHHS_i_L1.shp
+│   │   │   │   ├── GSHHS_i_L1.shx
+│   │   │   │   ├── GSHHS_i_L2.dbf
+│   │   │   │   ├── GSHHS_i_L2.prj
+│   │   │   │   ├── GSHHS_i_L2.shp
+│   │   │   │   ├── GSHHS_i_L2.shx
+│   │   │   │   ├── GSHHS_i_L3.dbf
+│   │   │   │   ├── GSHHS_i_L3.prj
+│   │   │   │   ├── GSHHS_i_L3.shp
+│   │   │   │   ├── GSHHS_i_L3.shx
+│   │   │   │   ├── GSHHS_i_L4.dbf
+│   │   │   │   ├── GSHHS_i_L4.prj
+│   │   │   │   ├── GSHHS_i_L4.shp
+│   │   │   │   ├── GSHHS_i_L4.shx
+│   │   │   │   ├── GSHHS_i_L5.dbf
+│   │   │   │   ├── GSHHS_i_L5.prj
+│   │   │   │   ├── GSHHS_i_L5.shp
+│   │   │   │   ├── GSHHS_i_L5.shx
+│   │   │   │   ├── GSHHS_i_L6.dbf
+│   │   │   │   ├── GSHHS_i_L6.prj
+│   │   │   │   ├── GSHHS_i_L6.shp
+│   │   │   │   └── GSHHS_i_L6.shx
+│   │   │   ├── l
+│   │   │   │   ├── GSHHS_l_L1.dbf
+│   │   │   │   ├── GSHHS_l_L1.prj
+│   │   │   │   ├── GSHHS_l_L1.shp
+│   │   │   │   ├── GSHHS_l_L1.shx
+│   │   │   │   ├── GSHHS_l_L2.dbf
+│   │   │   │   ├── GSHHS_l_L2.prj
+│   │   │   │   ├── GSHHS_l_L2.shp
+│   │   │   │   ├── GSHHS_l_L2.shx
+│   │   │   │   ├── GSHHS_l_L3.dbf
+│   │   │   │   ├── GSHHS_l_L3.prj
+│   │   │   │   ├── GSHHS_l_L3.shp
+│   │   │   │   ├── GSHHS_l_L3.shx
+│   │   │   │   ├── GSHHS_l_L4.dbf
+│   │   │   │   ├── GSHHS_l_L4.prj
+│   │   │   │   ├── GSHHS_l_L4.shp
+│   │   │   │   ├── GSHHS_l_L4.shx
+│   │   │   │   ├── GSHHS_l_L5.dbf
+│   │   │   │   ├── GSHHS_l_L5.prj
+│   │   │   │   ├── GSHHS_l_L5.shp
+│   │   │   │   ├── GSHHS_l_L5.shx
+│   │   │   │   ├── GSHHS_l_L6.dbf
+│   │   │   │   ├── GSHHS_l_L6.prj
+│   │   │   │   ├── GSHHS_l_L6.shp
+│   │   │   │   └── GSHHS_l_L6.shx
+│   │   │   └── README.TXT
+│   │   ├── LICENSE.TXT
+│   │   ├── README.TXT
+│   │   ├── SHAPEFILES.TXT
+│   │   └── WDBII_shp
+│   │       ├── c
+│   │       │   ├── WDBII_border_c_L1.dbf
+│   │       │   ├── WDBII_border_c_L1.prj
+│   │       │   ├── WDBII_border_c_L1.shp
+│   │       │   ├── WDBII_border_c_L1.shx
+│   │       │   ├── WDBII_border_c_L2.dbf
+│   │       │   ├── WDBII_border_c_L2.prj
+│   │       │   ├── WDBII_border_c_L2.shp
+│   │       │   ├── WDBII_border_c_L2.shx
+│   │       │   ├── WDBII_border_c_L3.dbf
+│   │       │   ├── WDBII_border_c_L3.prj
+│   │       │   ├── WDBII_border_c_L3.shp
+│   │       │   ├── WDBII_border_c_L3.shx
+│   │       │   ├── WDBII_river_c_L01.dbf
+│   │       │   ├── WDBII_river_c_L01.prj
+│   │       │   ├── WDBII_river_c_L01.shp
+│   │       │   ├── WDBII_river_c_L01.shx
+│   │       │   ├── WDBII_river_c_L02.dbf
+│   │       │   ├── WDBII_river_c_L02.prj
+│   │       │   ├── WDBII_river_c_L02.shp
+│   │       │   ├── WDBII_river_c_L02.shx
+│   │       │   ├── WDBII_river_c_L03.dbf
+│   │       │   ├── WDBII_river_c_L03.prj
+│   │       │   ├── WDBII_river_c_L03.shp
+│   │       │   ├── WDBII_river_c_L03.shx
+│   │       │   ├── WDBII_river_c_L04.dbf
+│   │       │   ├── WDBII_river_c_L04.prj
+│   │       │   ├── WDBII_river_c_L04.shp
+│   │       │   ├── WDBII_river_c_L04.shx
+│   │       │   ├── WDBII_river_c_L05.dbf
+│   │       │   ├── WDBII_river_c_L05.prj
+│   │       │   ├── WDBII_river_c_L05.shp
+│   │       │   ├── WDBII_river_c_L05.shx
+│   │       │   ├── WDBII_river_c_L06.dbf
+│   │       │   ├── WDBII_river_c_L06.prj
+│   │       │   ├── WDBII_river_c_L06.shp
+│   │       │   ├── WDBII_river_c_L06.shx
+│   │       │   ├── WDBII_river_c_L07.dbf
+│   │       │   ├── WDBII_river_c_L07.prj
+│   │       │   ├── WDBII_river_c_L07.shp
+│   │       │   ├── WDBII_river_c_L07.shx
+│   │       │   ├── WDBII_river_c_L08.dbf
+│   │       │   ├── WDBII_river_c_L08.prj
+│   │       │   ├── WDBII_river_c_L08.shp
+│   │       │   ├── WDBII_river_c_L08.shx
+│   │       │   ├── WDBII_river_c_L09.dbf
+│   │       │   ├── WDBII_river_c_L09.prj
+│   │       │   ├── WDBII_river_c_L09.shp
+│   │       │   ├── WDBII_river_c_L09.shx
+│   │       │   ├── WDBII_river_c_L10.dbf
+│   │       │   ├── WDBII_river_c_L10.prj
+│   │       │   ├── WDBII_river_c_L10.shp
+│   │       │   ├── WDBII_river_c_L10.shx
+│   │       │   ├── WDBII_river_c_L11.dbf
+│   │       │   ├── WDBII_river_c_L11.prj
+│   │       │   ├── WDBII_river_c_L11.shp
+│   │       │   └── WDBII_river_c_L11.shx
+│   │       ├── f
+│   │       │   ├── WDBII_border_f_L1.dbf
+│   │       │   ├── WDBII_border_f_L1.prj
+│   │       │   ├── WDBII_border_f_L1.shp
+│   │       │   ├── WDBII_border_f_L1.shx
+│   │       │   ├── WDBII_border_f_L2.dbf
+│   │       │   ├── WDBII_border_f_L2.prj
+│   │       │   ├── WDBII_border_f_L2.shp
+│   │       │   ├── WDBII_border_f_L2.shx
+│   │       │   ├── WDBII_border_f_L3.dbf
+│   │       │   ├── WDBII_border_f_L3.prj
+│   │       │   ├── WDBII_border_f_L3.shp
+│   │       │   ├── WDBII_border_f_L3.shx
+│   │       │   ├── WDBII_river_f_L01.dbf
+│   │       │   ├── WDBII_river_f_L01.prj
+│   │       │   ├── WDBII_river_f_L01.shp
+│   │       │   ├── WDBII_river_f_L01.shx
+│   │       │   ├── WDBII_river_f_L02.dbf
+│   │       │   ├── WDBII_river_f_L02.prj
+│   │       │   ├── WDBII_river_f_L02.shp
+│   │       │   ├── WDBII_river_f_L02.shx
+│   │       │   ├── WDBII_river_f_L03.dbf
+│   │       │   ├── WDBII_river_f_L03.prj
+│   │       │   ├── WDBII_river_f_L03.shp
+│   │       │   ├── WDBII_river_f_L03.shx
+│   │       │   ├── WDBII_river_f_L04.dbf
+│   │       │   ├── WDBII_river_f_L04.prj
+│   │       │   ├── WDBII_river_f_L04.shp
+│   │       │   ├── WDBII_river_f_L04.shx
+│   │       │   ├── WDBII_river_f_L05.dbf
+│   │       │   ├── WDBII_river_f_L05.prj
+│   │       │   ├── WDBII_river_f_L05.shp
+│   │       │   ├── WDBII_river_f_L05.shx
+│   │       │   ├── WDBII_river_f_L06.dbf
+│   │       │   ├── WDBII_river_f_L06.prj
+│   │       │   ├── WDBII_river_f_L06.shp
+│   │       │   ├── WDBII_river_f_L06.shx
+│   │       │   ├── WDBII_river_f_L07.dbf
+│   │       │   ├── WDBII_river_f_L07.prj
+│   │       │   ├── WDBII_river_f_L07.shp
+│   │       │   ├── WDBII_river_f_L07.shx
+│   │       │   ├── WDBII_river_f_L08.dbf
+│   │       │   ├── WDBII_river_f_L08.prj
+│   │       │   ├── WDBII_river_f_L08.shp
+│   │       │   ├── WDBII_river_f_L08.shx
+│   │       │   ├── WDBII_river_f_L09.dbf
+│   │       │   ├── WDBII_river_f_L09.prj
+│   │       │   ├── WDBII_river_f_L09.shp
+│   │       │   ├── WDBII_river_f_L09.shx
+│   │       │   ├── WDBII_river_f_L10.dbf
+│   │       │   ├── WDBII_river_f_L10.prj
+│   │       │   ├── WDBII_river_f_L10.shp
+│   │       │   ├── WDBII_river_f_L10.shx
+│   │       │   ├── WDBII_river_f_L11.dbf
+│   │       │   ├── WDBII_river_f_L11.prj
+│   │       │   ├── WDBII_river_f_L11.shp
+│   │       │   └── WDBII_river_f_L11.shx
+│   │       ├── h
+│   │       │   ├── WDBII_border_h_L1.dbf
+│   │       │   ├── WDBII_border_h_L1.prj
+│   │       │   ├── WDBII_border_h_L1.shp
+│   │       │   ├── WDBII_border_h_L1.shx
+│   │       │   ├── WDBII_border_h_L2.dbf
+│   │       │   ├── WDBII_border_h_L2.prj
+│   │       │   ├── WDBII_border_h_L2.shp
+│   │       │   ├── WDBII_border_h_L2.shx
+│   │       │   ├── WDBII_border_h_L3.dbf
+│   │       │   ├── WDBII_border_h_L3.prj
+│   │       │   ├── WDBII_border_h_L3.shp
+│   │       │   ├── WDBII_border_h_L3.shx
+│   │       │   ├── WDBII_river_h_L01.dbf
+│   │       │   ├── WDBII_river_h_L01.prj
+│   │       │   ├── WDBII_river_h_L01.shp
+│   │       │   ├── WDBII_river_h_L01.shx
+│   │       │   ├── WDBII_river_h_L02.dbf
+│   │       │   ├── WDBII_river_h_L02.prj
+│   │       │   ├── WDBII_river_h_L02.shp
+│   │       │   ├── WDBII_river_h_L02.shx
+│   │       │   ├── WDBII_river_h_L03.dbf
+│   │       │   ├── WDBII_river_h_L03.prj
+│   │       │   ├── WDBII_river_h_L03.shp
+│   │       │   ├── WDBII_river_h_L03.shx
+│   │       │   ├── WDBII_river_h_L04.dbf
+│   │       │   ├── WDBII_river_h_L04.prj
+│   │       │   ├── WDBII_river_h_L04.shp
+│   │       │   ├── WDBII_river_h_L04.shx
+│   │       │   ├── WDBII_river_h_L05.dbf
+│   │       │   ├── WDBII_river_h_L05.prj
+│   │       │   ├── WDBII_river_h_L05.shp
+│   │       │   ├── WDBII_river_h_L05.shx
+│   │       │   ├── WDBII_river_h_L06.dbf
+│   │       │   ├── WDBII_river_h_L06.prj
+│   │       │   ├── WDBII_river_h_L06.shp
+│   │       │   ├── WDBII_river_h_L06.shx
+│   │       │   ├── WDBII_river_h_L07.dbf
+│   │       │   ├── WDBII_river_h_L07.prj
+│   │       │   ├── WDBII_river_h_L07.shp
+│   │       │   ├── WDBII_river_h_L07.shx
+│   │       │   ├── WDBII_river_h_L08.dbf
+│   │       │   ├── WDBII_river_h_L08.prj
+│   │       │   ├── WDBII_river_h_L08.shp
+│   │       │   ├── WDBII_river_h_L08.shx
+│   │       │   ├── WDBII_river_h_L09.dbf
+│   │       │   ├── WDBII_river_h_L09.prj
+│   │       │   ├── WDBII_river_h_L09.shp
+│   │       │   ├── WDBII_river_h_L09.shx
+│   │       │   ├── WDBII_river_h_L10.dbf
+│   │       │   ├── WDBII_river_h_L10.prj
+│   │       │   ├── WDBII_river_h_L10.shp
+│   │       │   ├── WDBII_river_h_L10.shx
+│   │       │   ├── WDBII_river_h_L11.dbf
+│   │       │   ├── WDBII_river_h_L11.prj
+│   │       │   ├── WDBII_river_h_L11.shp
+│   │       │   └── WDBII_river_h_L11.shx
+│   │       ├── i
+│   │       │   ├── WDBII_border_i_L1.dbf
+│   │       │   ├── WDBII_border_i_L1.prj
+│   │       │   ├── WDBII_border_i_L1.shp
+│   │       │   ├── WDBII_border_i_L1.shx
+│   │       │   ├── WDBII_border_i_L2.dbf
+│   │       │   ├── WDBII_border_i_L2.prj
+│   │       │   ├── WDBII_border_i_L2.shp
+│   │       │   ├── WDBII_border_i_L2.shx
+│   │       │   ├── WDBII_border_i_L3.dbf
+│   │       │   ├── WDBII_border_i_L3.prj
+│   │       │   ├── WDBII_border_i_L3.shp
+│   │       │   ├── WDBII_border_i_L3.shx
+│   │       │   ├── WDBII_river_i_L01.dbf
+│   │       │   ├── WDBII_river_i_L01.prj
+│   │       │   ├── WDBII_river_i_L01.shp
+│   │       │   ├── WDBII_river_i_L01.shx
+│   │       │   ├── WDBII_river_i_L02.dbf
+│   │       │   ├── WDBII_river_i_L02.prj
+│   │       │   ├── WDBII_river_i_L02.shp
+│   │       │   ├── WDBII_river_i_L02.shx
+│   │       │   ├── WDBII_river_i_L03.dbf
+│   │       │   ├── WDBII_river_i_L03.prj
+│   │       │   ├── WDBII_river_i_L03.shp
+│   │       │   ├── WDBII_river_i_L03.shx
+│   │       │   ├── WDBII_river_i_L04.dbf
+│   │       │   ├── WDBII_river_i_L04.prj
+│   │       │   ├── WDBII_river_i_L04.shp
+│   │       │   ├── WDBII_river_i_L04.shx
+│   │       │   ├── WDBII_river_i_L05.dbf
+│   │       │   ├── WDBII_river_i_L05.prj
+│   │       │   ├── WDBII_river_i_L05.shp
+│   │       │   ├── WDBII_river_i_L05.shx
+│   │       │   ├── WDBII_river_i_L06.dbf
+│   │       │   ├── WDBII_river_i_L06.prj
+│   │       │   ├── WDBII_river_i_L06.shp
+│   │       │   ├── WDBII_river_i_L06.shx
+│   │       │   ├── WDBII_river_i_L07.dbf
+│   │       │   ├── WDBII_river_i_L07.prj
+│   │       │   ├── WDBII_river_i_L07.shp
+│   │       │   ├── WDBII_river_i_L07.shx
+│   │       │   ├── WDBII_river_i_L08.dbf
+│   │       │   ├── WDBII_river_i_L08.prj
+│   │       │   ├── WDBII_river_i_L08.shp
+│   │       │   ├── WDBII_river_i_L08.shx
+│   │       │   ├── WDBII_river_i_L09.dbf
+│   │       │   ├── WDBII_river_i_L09.prj
+│   │       │   ├── WDBII_river_i_L09.shp
+│   │       │   ├── WDBII_river_i_L09.shx
+│   │       │   ├── WDBII_river_i_L10.dbf
+│   │       │   ├── WDBII_river_i_L10.prj
+│   │       │   ├── WDBII_river_i_L10.shp
+│   │       │   ├── WDBII_river_i_L10.shx
+│   │       │   ├── WDBII_river_i_L11.dbf
+│   │       │   ├── WDBII_river_i_L11.prj
+│   │       │   ├── WDBII_river_i_L11.shp
+│   │       │   └── WDBII_river_i_L11.shx
+│   │       ├── l
+│   │       │   ├── WDBII_border_l_L1.dbf
+│   │       │   ├── WDBII_border_l_L1.prj
+│   │       │   ├── WDBII_border_l_L1.shp
+│   │       │   ├── WDBII_border_l_L1.shx
+│   │       │   ├── WDBII_border_l_L2.dbf
+│   │       │   ├── WDBII_border_l_L2.prj
+│   │       │   ├── WDBII_border_l_L2.shp
+│   │       │   ├── WDBII_border_l_L2.shx
+│   │       │   ├── WDBII_border_l_L3.dbf
+│   │       │   ├── WDBII_border_l_L3.prj
+│   │       │   ├── WDBII_border_l_L3.shp
+│   │       │   ├── WDBII_border_l_L3.shx
+│   │       │   ├── WDBII_river_l_L01.dbf
+│   │       │   ├── WDBII_river_l_L01.prj
+│   │       │   ├── WDBII_river_l_L01.shp
+│   │       │   ├── WDBII_river_l_L01.shx
+│   │       │   ├── WDBII_river_l_L02.dbf
+│   │       │   ├── WDBII_river_l_L02.prj
+│   │       │   ├── WDBII_river_l_L02.shp
+│   │       │   ├── WDBII_river_l_L02.shx
+│   │       │   ├── WDBII_river_l_L03.dbf
+│   │       │   ├── WDBII_river_l_L03.prj
+│   │       │   ├── WDBII_river_l_L03.shp
+│   │       │   ├── WDBII_river_l_L03.shx
+│   │       │   ├── WDBII_river_l_L04.dbf
+│   │       │   ├── WDBII_river_l_L04.prj
+│   │       │   ├── WDBII_river_l_L04.shp
+│   │       │   ├── WDBII_river_l_L04.shx
+│   │       │   ├── WDBII_river_l_L05.dbf
+│   │       │   ├── WDBII_river_l_L05.prj
+│   │       │   ├── WDBII_river_l_L05.shp
+│   │       │   ├── WDBII_river_l_L05.shx
+│   │       │   ├── WDBII_river_l_L06.dbf
+│   │       │   ├── WDBII_river_l_L06.prj
+│   │       │   ├── WDBII_river_l_L06.shp
+│   │       │   ├── WDBII_river_l_L06.shx
+│   │       │   ├── WDBII_river_l_L07.dbf
+│   │       │   ├── WDBII_river_l_L07.prj
+│   │       │   ├── WDBII_river_l_L07.shp
+│   │       │   ├── WDBII_river_l_L07.shx
+│   │       │   ├── WDBII_river_l_L08.dbf
+│   │       │   ├── WDBII_river_l_L08.prj
+│   │       │   ├── WDBII_river_l_L08.shp
+│   │       │   ├── WDBII_river_l_L08.shx
+│   │       │   ├── WDBII_river_l_L09.dbf
+│   │       │   ├── WDBII_river_l_L09.prj
+│   │       │   ├── WDBII_river_l_L09.shp
+│   │       │   ├── WDBII_river_l_L09.shx
+│   │       │   ├── WDBII_river_l_L10.dbf
+│   │       │   ├── WDBII_river_l_L10.prj
+│   │       │   ├── WDBII_river_l_L10.shp
+│   │       │   ├── WDBII_river_l_L10.shx
+│   │       │   ├── WDBII_river_l_L11.dbf
+│   │       │   ├── WDBII_river_l_L11.prj
+│   │       │   ├── WDBII_river_l_L11.shp
+│   │       │   └── WDBII_river_l_L11.shx
+│   │       └── README.TXT
+│   ├── DATA_VALIDATOR_REFACTOR.md
+│   ├── data_validator.py
+│   ├── data_validator.py.bak
+│   ├── db.py
+│   ├── eda_utils.py
+│   ├── interactive_heatmap.py
+│   ├── README_interactive_heatmap.md
+│   └── README.md
+├── ml_pipeline
+│   ├── __init__.py
+│   ├── main.py
+│   └── preprocessing.py
+├── notebooks
+│   ├── data_prep
+│   │   ├── __pycache__
+│   │   │   ├── city_consolidation_v2.cpython-313.pyc
+│   │   │   └── city_consolidation.cpython-313.pyc
+│   │   ├── city_consolidation_improvements.png
+│   │   ├── city_consolidation_v2.py
+│   │   ├── city_consolidation_verification.py
+│   │   ├── city_consolidation.py
+│   │   ├── CITY_MATCHING_README.md
+│   │   ├── data_checks_example.py
+│   │   ├── data_checks_new.py
+│   │   ├── data_checks.ipynb
+│   │   ├── data_checks.py
+│   │   ├── js
+│   │   │   ├── heatmap_config.js
+│   │   │   ├── map_renderer.js
+│   │   │   ├── README.md
+│   │   │   ├── temporal_map.js
+│   │   │   └── ui_controls.js
+│   │   └── README.md
+│   ├── eda
+│   │   ├── __pycache__
+│   │   │   ├── hotspots_dbscan.cpython-313.pyc
+│   │   │   └── hotspots_grid.cpython-313.pyc
+│   │   ├── 01_data_quality
+│   │   │   ├── analyze_distance_features.py
+│   │   │   └── calculate_distance_features.py
+│   │   ├── 02_descriptive_analysis
+│   │   │   ├── section_1_2_hotel_supply.py
+│   │   │   ├── section_1_3_daily_price.py
+│   │   │   ├── section_2_1_room_features.py
+│   │   │   ├── section_2_2_capacity_policies.py
+│   │   │   ├── section_4_1_seasonality.py
+│   │   │   ├── section_4_2_popular_expensive.py
+│   │   │   └── section_4_3_booking_counts.py
+│   │   ├── 03_spatial
+│   │   │   ├── hotspots
+│   │   │   │   ├── __pycache__
+│   │   │   │   │   ├── hotspots_dbscan.cpython-313.pyc
+│   │   │   │   │   ├── hotspots_grid.cpython-313.pyc
+│   │   │   │   │   └── spatial_utils.cpython-313.pyc
+│   │   │   │   ├── HOTSPOT_ANALYSIS_README.md
+│   │   │   │   ├── hotspots_dbscan.py
+│   │   │   │   ├── hotspots_grid.py
+│   │   │   │   ├── hotspots_kde_admin.py
+│   │   │   │   └── spatial_utils.py
+│   │   │   └── section_3_1_integrated.py
+│   │   ├── 04_pricing
+│   │   │   ├── section_5_1_lead_time.py
+│   │   │   ├── section_5_2_occupancy_pricing.py
+│   │   │   ├── section_6_1_room_features.py
+│   │   │   ├── section_7_1_occupancy_capacity.py
+│   │   │   └── section_7_2_revpar.py
+│   │   ├── 05_elasticity
+│   │   │   ├── feature_importance_validation.py
+│   │   │   ├── matched_pairs_geographic.py
+│   │   │   ├── matched_pairs_longitudinal.py
+│   │   │   ├── matched_pairs_validated.py
+│   │   │   ├── matched_pairs_with_replacement.py
+│   │   │   ├── over_under_pricing.py
+│   │   │   └── README.md
+│   │   ├── eda_clustering.ipynb
+│   │   ├── eda_updated.py
+│   │   ├── geo_data
+│   │   │   ├── GeoSpain
+│   │   │   │   ├── geospain
+│   │   │   │   │   ├── __init__.py
+│   │   │   │   │   ├── __pycache__
+│   │   │   │   │   │   └── __init__.cpython-313.pyc
+│   │   │   │   │   ├── geo.py
+│   │   │   │   │   └── recursos
+│   │   │   │   │       ├── gadm41_ESP_0.cpg
+│   │   │   │   │       ├── gadm41_ESP_0.dbf
+│   │   │   │   │       ├── gadm41_ESP_0.prj
+│   │   │   │   │       ├── gadm41_ESP_0.shp
+│   │   │   │   │       ├── gadm41_ESP_0.shx
+│   │   │   │   │       ├── gadm41_ESP_4.cpg
+│   │   │   │   │       ├── gadm41_ESP_4.dbf
+│   │   │   │   │       ├── gadm41_ESP_4.prj
+│   │   │   │   │       ├── gadm41_ESP_4.shp
+│   │   │   │   │       └── gadm41_ESP_4.shx
+│   │   │   │   ├── LICENSE
+│   │   │   │   ├── README.md
+│   │   │   │   └── setup.py
+│   │   │   └── shapefiles
+│   │   │       ├── es_municipal_limits.shp
+│   │   │       ├── es_municipal_limits.shx
+│   │   │       └── es_national_limits.shp
+│   │   ├── outputs
+│   │   │   ├── city_consolidation
+│   │   │   │   └── spain_bookings_heatmap.html
+│   │   │   └── figures
+│   │   │       └── distance_features_vs_price.png
+│   │   ├── README.md
+│   │   ├── REORGANIZATION_SUMMARY.md
+│   │   └── summaries
+│   │       ├── ACTUAL_FINDINGS_SUMMARY.md
+│   │       ├── COMPREHENSIVE_ANALYSIS_SUMMARY.md
+│   │       ├── CRITIQUE_RESPONSE.md
+│   │       ├── EXECUTIVE_SUMMARY_FINAL.md
+│   │       ├── README.md
+│   │       ├── sections_1_2_1_3_summary.md
+│   │       ├── sections_3_4_summary.md
+│   │       ├── sections_5_6_summary.md
+│   │       └── STRATEGIC_PRESENTATION_FRAMEWORK.md
+│   └── interactive_heatmap_demo.ipynb
+├── nov24_summary.md
+├── outputs
+│   ├── city_consolidation
+│   │   ├── city_mapping_v2.csv
+│   │   ├── heatmap_consolidated_temporal.html
+│   │   ├── heatmap_difference.html
+│   │   ├── heatmap_original_temporal.html
+│   │   └── hexagon_comparison_report.json
+│   ├── eda
+│   │   ├── descriptive_analysis
+│   │   │   └── figures
+│   │   │       ├── section_4_1_month_dow_heatmap.png
+│   │   │       ├── section_4_1_seasonality.png
+│   │   │       ├── section_4_2_popular_expensive.png
+│   │   │       ├── section_4_3_bookings_daily.png
+│   │   │       ├── section_4_3_bookings_monthly.png
+│   │   │       └── section_4_3_bookings_weekly.png
+│   │   ├── elasticity
+│   │   │   ├── CRITIQUE_RESPONSE.md
+│   │   │   ├── data
+│   │   │   │   ├── bootstrap_results_with_replacement.json
+│   │   │   │   ├── feature_importance_results.csv
+│   │   │   │   ├── longitudinal_pricing_results.csv
+│   │   │   │   ├── matched_pairs_geographic.csv
+│   │   │   │   ├── matched_pairs_validated.csv
+│   │   │   │   └── matched_pairs_with_replacement.csv
+│   │   │   ├── FEATURE_IMPORTANCE_FINAL.md
+│   │   │   ├── FEATURE_IMPORTANCE_SUMMARY.md
+│   │   │   ├── figures
+│   │   │   │   ├── 1_confidence_distribution.png
+│   │   │   │   ├── 1_model_comparison.png
+│   │   │   │   ├── 2_actual_vs_predicted.png
+│   │   │   │   ├── 2_segment_elasticity_boxplot.png
+│   │   │   │   ├── 3_opportunity_impact.png
+│   │   │   │   ├── 3_residual_distribution.png
+│   │   │   │   ├── 4_risk_sensitivity.png
+│   │   │   │   ├── 4_shap_beeswarm.png
+│   │   │   │   ├── 5_shap_dependence_top3.png
+│   │   │   │   ├── 6_feature_importance_comparison.png
+│   │   │   │   ├── longitudinal_pricing_analysis.png
+│   │   │   │   ├── matched_pairs_geographic_executive.png
+│   │   │   │   ├── matching_diagnostics_final.png
+│   │   │   │   └── matching_methodology_evolution.png
+│   │   │   ├── MATCHED_PAIRS_VALIDATED_SUMMARY.md
+│   │   │   ├── MATCHING_WITH_REPLACEMENT_FINAL.md
+│   │   │   ├── MATCHING_WITH_REPLACEMENT_SUMMARY.md
+│   │   │   ├── PRICING_ANALYSIS_INSIGHTS.md
+│   │   │   └── README.md
+│   │   ├── pricing
+│   │   │   └── figures
+│   │   │       ├── section_5_1_lead_time.png
+│   │   │       ├── section_5_2_occupancy_pricing.png
+│   │   │       ├── section_6_1_room_features.png
+│   │   │       ├── section_7_1_occupancy_capacity.png
+│   │   │       ├── section_7_1_simpsons_paradox.png
+│   │   │       └── section_7_2_revpar.png
+│   │   └── spatial
+│   │       ├── data
+│   │       │   ├── hotel_distance_features.csv
+│   │       │   └── hotspots
+│   │       │       ├── city_consolidation_comparison.csv
+│   │       │       ├── city_name_mapping.csv
+│   │       │       ├── dbscan_cluster_summary.csv
+│   │       │       ├── dbscan_labeled_bookings.csv
+│   │       │       ├── grid_hotspots_top50.csv
+│   │       │       ├── grid_hotspots.csv
+│   │       │       ├── kde_hotspot_scores.csv
+│   │       │       └── kde_hotspots.geojson
+│   │       └── figures
+│   │           ├── dbscan_hotspots.png
+│   │           ├── distance_features_vs_price.png
+│   │           ├── grid_hotspots.png
+│   │           ├── kde_hotspots.png
+│   │           └── section_3_1_integrated.png
+│   ├── figures
+│   │   ├── dbscan_hotspots.png
+│   │   ├── distance_features_vs_price.png
+│   │   ├── elasticity_estimation
+│   │   │   ├── 1_confidence_distribution.png
+│   │   │   ├── 2_segment_elasticity_boxplot.png
+│   │   │   ├── 3_opportunity_impact.png
+│   │   │   └── 4_risk_sensitivity.png
+│   │   ├── grid_hotspots.png
+│   │   ├── kde_hotspots.png
+│   │   ├── matched_pairs_geographic_executive.png
+│   │   ├── revpar_optimization_curve.png
+│   │   ├── section_3_1_integrated.png
+│   │   ├── section_4_1_month_dow_heatmap.png
+│   │   ├── section_4_1_seasonality.png
+│   │   ├── section_4_2_popular_expensive.png
+│   │   ├── section_4_3_bookings_daily.png
+│   │   ├── section_4_3_bookings_monthly.png
+│   │   ├── section_4_3_bookings_weekly.png
+│   │   ├── section_5_1_lead_time.png
+│   │   ├── section_5_2_occupancy_pricing.png
+│   │   ├── section_6_1_room_features.png
+│   │   ├── section_7_1_occupancy_capacity.png
+│   │   ├── section_7_1_simpsons_paradox.png
+│   │   └── section_7_2_revpar.png
+│   ├── hotel_distance_features.csv
+│   ├── hotspots
+│   │   ├── city_consolidation_comparison.csv
+│   │   ├── city_name_mapping.csv
+│   │   ├── dbscan_cluster_summary.csv
+│   │   ├── dbscan_labeled_bookings.csv
+│   │   ├── grid_hotspots_top50.csv
+│   │   ├── grid_hotspots.csv
+│   │   ├── kde_hotspot_scores.csv
+│   │   └── kde_hotspots.geojson
+│   ├── matched_pairs_geographic.csv
+│   ├── test_heatmap_fixed.html
+│   ├── test_heatmap_new_layout.html
+│   └── test_heatmap.html
+├── poetry.lock
+├── pyproject.toml
+├── pyproject.toml.backup
+├── pytest.ini
+├── README.md
+├── REFACTORING_SUMMARY.md
+├── RESTRUCTURE_SUMMARY.md
+├── STRUCTURE.md
+├── TESTING_SUMMARY.md
+├── tests
+│   ├── __init__.py
+│   ├── __pycache__
+│   │   ├── __init__.cpython-313.pyc
+│   │   ├── conftest.cpython-313-pytest-7.4.4.pyc
+│   │   ├── test_cleaning_rules.cpython-313-pytest-7.4.4.pyc
+│   │   ├── test_data_validator.cpython-313-pytest-7.4.4.pyc
+│   │   ├── test_db.cpython-313-pytest-7.4.4.pyc
+│   │   ├── test_integration.cpython-313-pytest-7.4.4.pyc
+│   │   └── test_pipeline.cpython-313-pytest-7.4.4.pyc
+│   ├── conftest.py
+│   ├── fixtures
+│   ├── README.md
+│   ├── test_cleaning_rules.py
+│   ├── test_data_validator.py
+│   ├── test_db.py
+│   ├── test_integration.py
+│   └── test_pipeline.py
+├── tree.txt
+└── visualization
+    ├── __init__.py
+    └── plots.py
+
+63 directories, 648 files

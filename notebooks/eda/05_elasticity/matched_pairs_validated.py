@@ -254,14 +254,9 @@ def create_match_blocks(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame]:
 
 def find_matched_pairs(df_blocked: pd.DataFrame, max_block_size: int = 100) -> pd.DataFrame:
     """
-    Finds matched pairs within blocks using GREEDY 1:1 MATCHING on VALIDATED features.
+    Finds matched pairs within blocks using KNN on VALIDATED continuous features.
     
-    CRITICAL FIX: Implements 1:1 matching to avoid "many-to-many explosion"
-    - Each hotel can only be matched ONCE
-    - Pairs are selected greedily by best match quality (lowest distance)
-    - This prevents over-counting and ensures independent treatment effects
-    
-    Matching features (from validated model R²=0.71):
+    Matching features (from validated model):
     - dist_center_km
     - dist_coast_log  
     - log_room_size
@@ -283,10 +278,9 @@ def find_matched_pairs(df_blocked: pd.DataFrame, max_block_size: int = 100) -> p
         'weekend_ratio'
     ]
     
-    all_candidate_pairs = []
+    matched_pairs = []
     blocks_processed = 0
     
-    # Step 1: Generate ALL valid candidate pairs
     for block_vars, block in df_blocked.groupby([
         'is_coastal', 'room_type', 'room_view', 'month', 
         'children_allowed', 'revenue_quartile', 'city_standardized'
@@ -316,21 +310,16 @@ def find_matched_pairs(df_blocked: pd.DataFrame, max_block_size: int = 100) -> p
         dist_matrix = cdist(features_norm, features_norm, metric='euclidean')
         price_matrix = np.abs(prices[:, None] - prices[None, :]) / np.minimum(prices[:, None], prices[None, :])
         
-        # Generate all valid candidate pairs
+        # Match threshold
         for i in range(n):
             for j in range(i+1, n):
-                # Filter criteria
-                if ids[i] == ids[j]:  # Same hotel
-                    continue
-                if price_matrix[i, j] < 0.10:  # Price difference too small
-                    continue
-                if dist_matrix[i, j] > 3.0:  # Feature distance too large
+                if ids[i] == ids[j] or price_matrix[i, j] < 0.10 or dist_matrix[i, j] > 3.0:
                     continue
                 
                 high_idx = i if prices[i] > prices[j] else j
                 low_idx = j if prices[i] > prices[j] else i
                 
-                all_candidate_pairs.append({
+                matched_pairs.append({
                     'is_coastal': block.iloc[i]['is_coastal'],
                     'city_standardized': block.iloc[i]['city_standardized'],
                     'room_type': block.iloc[i]['room_type'],
@@ -350,41 +339,9 @@ def find_matched_pairs(df_blocked: pd.DataFrame, max_block_size: int = 100) -> p
                 })
         
         if blocks_processed % 100 == 0:
-            print(f"  Processed {blocks_processed} blocks, found {len(all_candidate_pairs)} candidate pairs...")
+            print(f"  Processed {blocks_processed} blocks, found {len(matched_pairs)} pairs...")
     
-    if not all_candidate_pairs:
-        return pd.DataFrame()
-    
-    # Step 2: Convert to DataFrame and sort by match quality (best matches first)
-    candidates_df = pd.DataFrame(all_candidate_pairs)
-    candidates_df = candidates_df.sort_values('match_distance')
-    
-    print(f"\n  Total candidate pairs before 1:1 matching: {len(candidates_df):,}")
-    
-    # Step 3: Greedy 1:1 Matching
-    # Track which hotels have been used
-    used_hotels = set()
-    final_pairs = []
-    
-    for _, pair in candidates_df.iterrows():
-        high_hotel = pair['high_price_hotel']
-        low_hotel = pair['low_price_hotel']
-        
-        # Check if either hotel has already been matched
-        if high_hotel in used_hotels or low_hotel in used_hotels:
-            continue  # Skip this pair
-        
-        # Accept this pair
-        final_pairs.append(pair.to_dict())
-        
-        # Mark both hotels as used
-        used_hotels.add(high_hotel)
-        used_hotels.add(low_hotel)
-    
-    print(f"  Final pairs after 1:1 matching: {len(final_pairs):,}")
-    print(f"  Reduction factor: {len(candidates_df) / max(len(final_pairs), 1):.1f}x")
-    
-    return pd.DataFrame(final_pairs)
+    return pd.DataFrame(matched_pairs)
 
 
 def calculate_elasticity_and_opportunity(pairs_df: pd.DataFrame) -> pd.DataFrame:
@@ -398,15 +355,13 @@ def calculate_elasticity_and_opportunity(pairs_df: pd.DataFrame) -> pd.DataFrame
     df['occ_pct_change'] = (df['high_occupancy'] - df['low_occupancy']) / df['occ_avg']
     df['arc_elasticity'] = df['occ_pct_change'] / df['price_pct_change']
     
-    # Filter valid pairs (relaxed - keep ALL pairs with valid elasticity)
+    # Filter valid pairs
     df_valid = df[
-        (df['arc_elasticity'] < 0) &  # Negative elasticity (downward sloping demand)
-        (df['arc_elasticity'] > -10) &  # Not absurdly elastic (was -5, now -10)
-        (df['occ_avg'] > 0.01) &  # Minimum occupancy
-        (df['match_distance'] < 3.0)  # Good match quality
+        (df['arc_elasticity'] < 0) &
+        (df['arc_elasticity'] > -5) &
+        (df['occ_avg'] > 0.01) &
+        (df['match_distance'] < 3.0)
     ]
-    
-    print(f"  Pairs after elasticity filtering: {len(df_valid):,}")
     
     # Counterfactual opportunity
     df_valid['current_revenue'] = (
@@ -422,22 +377,18 @@ def calculate_elasticity_and_opportunity(pairs_df: pd.DataFrame) -> pd.DataFrame
     )
     df_valid['opportunity'] = df_valid['counterfactual_revenue'] - df_valid['current_revenue']
     
-    # Return ALL valid pairs (not just positive opportunity)
-    # This is important for 1:1 matching where sample size is smaller
-    return df_valid
+    return df_valid[df_valid['opportunity'] > 0]
 
 
 def print_results(opp_positive: pd.DataFrame) -> None:
     """Prints comprehensive results summary."""
     print("\n" + "=" * 80)
-    print("VALIDATED MATCHED PAIRS RESULTS (1:1 MATCHING)")
+    print("VALIDATED MATCHED PAIRS RESULTS")
     print("=" * 80)
     
     print(f"\n1. SAMPLE SIZE:")
-    print(f"   Total valid pairs: {len(opp_positive):,}")
-    print(f"   Pairs with positive opportunity: {(opp_positive['opportunity'] > 0).sum():,}")
+    print(f"   Pairs with positive opportunity: {len(opp_positive):,}")
     print(f"   Unique low-price hotels: {opp_positive['low_price_hotel'].nunique():,}")
-    print(f"   Unique high-price hotels: {opp_positive['high_price_hotel'].nunique():,}")
     
     print(f"\n2. ELASTICITY ESTIMATE:")
     print(f"   Median: {opp_positive['arc_elasticity'].median():.4f}")

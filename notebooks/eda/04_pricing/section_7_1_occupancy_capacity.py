@@ -46,65 +46,55 @@ print("=" * 80)
 
 # %%
 # Get total capacity per hotel
-# Note: We get hotel_id from bookings since rooms table doesn't have it
-print("\nCalculating hotel capacities...")
+# CORRECTED: Sum number_of_rooms for DISTINCT room types per hotel
+print("\nCalculating hotel capacities (CORRECTED method)...")
 hotel_capacity = con.execute("""
+    WITH hotel_room_types AS (
+        SELECT DISTINCT
+            b.hotel_id,
+            r.id as room_type_id,
+            r.number_of_rooms
+        FROM bookings b
+        JOIN booked_rooms br ON b.id = CAST(br.booking_id AS BIGINT)
+        JOIN rooms r ON br.room_id = r.id
+        WHERE b.status IN ('confirmed', 'Booked')
+    )
     SELECT 
-        b.hotel_id,
-        SUM(r.number_of_rooms) as total_capacity
-    FROM (
-        SELECT DISTINCT hotel_id, room_id
-        FROM booked_rooms br
-        JOIN bookings b ON CAST(br.booking_id AS BIGINT) = b.id
-    ) b
-    JOIN rooms r ON b.room_id = r.id
-    GROUP BY b.hotel_id
+        hotel_id,
+        SUM(number_of_rooms) as total_capacity
+    FROM hotel_room_types
+    GROUP BY hotel_id
 """).fetchdf()
 
 print(f"Analyzed {len(hotel_capacity)} hotels")
 print(f"Total capacity across all hotels: {hotel_capacity['total_capacity'].sum():,} rooms")
 
 # %%
-# Expand bookings to per-night occupancy
-print("\nExpanding bookings to per-night occupancy...")
-print("(This calculates which rooms were occupied on each night)")
+# Expand bookings to per-night occupancy using generate_series
+# CORRECTED: Explode each booking to daily granularity
+print("\nExpanding bookings to per-night occupancy (CORRECTED method)...")
+print("(Using generate_series to explode bookings to daily granularity)")
 
-# This is memory-intensive, so we'll do it in SQL
 occupancy_by_date = con.execute("""
-    WITH RECURSIVE date_series AS (
-        -- Generate all dates in the booking range
-        SELECT MIN(CAST(arrival_date AS DATE)) as stay_date,
-               MAX(CAST(departure_date AS DATE)) as max_date
-        FROM bookings
-        WHERE status IN ('confirmed', 'Booked')
-        
-        UNION ALL
-        
-        SELECT stay_date + INTERVAL 1 DAY, max_date
-        FROM date_series
-        WHERE stay_date < max_date
-    ),
-    occupied_rooms AS (
-        -- Count occupied rooms per hotel per night
+    WITH daily_bookings AS (
+        -- Explode each booking to one row per night of stay
         SELECT 
             b.hotel_id,
-            ds.stay_date,
-            COUNT(*) as occupied_rooms,
-            AVG(br.total_price / (CAST(b.departure_date AS DATE) - CAST(b.arrival_date AS DATE))) as avg_daily_price
-        FROM date_series ds
-        CROSS JOIN bookings b
+            CAST(b.arrival_date + (n * INTERVAL '1 day') AS DATE) as stay_date,
+            br.total_price / (b.departure_date - b.arrival_date) as nightly_rate
+        FROM bookings b
         JOIN booked_rooms br ON b.id = CAST(br.booking_id AS BIGINT)
-        WHERE ds.stay_date >= CAST(b.arrival_date AS DATE)
-          AND ds.stay_date < CAST(b.departure_date AS DATE)
-          AND b.status IN ('confirmed', 'Booked')
-        GROUP BY b.hotel_id, ds.stay_date
+        CROSS JOIN generate_series(0, (b.departure_date - b.arrival_date) - 1) as t(n)
+        WHERE b.status IN ('confirmed', 'Booked')
+          AND (b.departure_date - b.arrival_date) > 0
     )
     SELECT 
         hotel_id,
         stay_date,
-        occupied_rooms,
-        avg_daily_price
-    FROM occupied_rooms
+        COUNT(*) as occupied_rooms,  -- Now correctly counts room-nights
+        AVG(nightly_rate) as avg_daily_price
+    FROM daily_bookings
+    GROUP BY hotel_id, stay_date
     ORDER BY hotel_id, stay_date
 """).fetchdf()
 

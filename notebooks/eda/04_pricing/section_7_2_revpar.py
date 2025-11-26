@@ -42,61 +42,54 @@ print("SECTION 7.2: RevPAR ANALYSIS")
 print("=" * 80)
 
 # %%
-# Get hotel capacities (reuse from 7.1)
-print("\nCalculating hotel capacities...")
+# Get hotel capacities (CORRECTED: distinct room types per hotel)
+print("\nCalculating hotel capacities (CORRECTED method)...")
 hotel_capacity = con.execute("""
+    WITH hotel_room_types AS (
+        SELECT DISTINCT
+            b.hotel_id,
+            r.id as room_type_id,
+            r.number_of_rooms
+        FROM bookings b
+        JOIN booked_rooms br ON b.id = CAST(br.booking_id AS BIGINT)
+        JOIN rooms r ON br.room_id = r.id
+        WHERE b.status IN ('confirmed', 'Booked')
+    )
     SELECT 
-        b.hotel_id,
-        SUM(r.number_of_rooms) as total_capacity
-    FROM (
-        SELECT DISTINCT hotel_id, room_id
-        FROM booked_rooms br
-        JOIN bookings b ON CAST(br.booking_id AS BIGINT) = b.id
-    ) b
-    JOIN rooms r ON b.room_id = r.id
-    GROUP BY b.hotel_id
+        hotel_id,
+        SUM(number_of_rooms) as total_capacity
+    FROM hotel_room_types
+    GROUP BY hotel_id
 """).fetchdf()
 
 print(f"Analyzed {len(hotel_capacity)} hotels")
 
 # %%
 # Calculate revenue and occupancy per hotel-date
-print("\nCalculating RevPAR by hotel and date...")
+# CORRECTED: Explode bookings to daily granularity using generate_series
+print("\nCalculating RevPAR by hotel and date (CORRECTED method)...")
 revpar_data = con.execute("""
-    WITH RECURSIVE date_series AS (
-        SELECT MIN(CAST(arrival_date AS DATE)) as stay_date,
-               MAX(CAST(departure_date AS DATE)) as max_date
-        FROM bookings
-        WHERE status IN ('confirmed', 'Booked')
-        
-        UNION ALL
-        
-        SELECT stay_date + INTERVAL 1 DAY, max_date
-        FROM date_series
-        WHERE stay_date < max_date
-    ),
-    daily_revenue AS (
+    WITH daily_bookings AS (
+        -- Explode each booking to one row per night of stay
         SELECT 
             b.hotel_id,
-            ds.stay_date,
-            COUNT(*) as occupied_rooms,
-            SUM(br.total_price / (CAST(b.departure_date AS DATE) - CAST(b.arrival_date AS DATE))) as total_revenue,
-            AVG(br.total_price / (CAST(b.departure_date AS DATE) - CAST(b.arrival_date AS DATE))) as avg_daily_price
-        FROM date_series ds
-        CROSS JOIN bookings b
+            CAST(b.arrival_date + (n * INTERVAL '1 day') AS DATE) as stay_date,
+            br.total_price / (b.departure_date - b.arrival_date) as nightly_rate
+        FROM bookings b
         JOIN booked_rooms br ON b.id = CAST(br.booking_id AS BIGINT)
-        WHERE ds.stay_date >= CAST(b.arrival_date AS DATE)
-          AND ds.stay_date < CAST(b.departure_date AS DATE)
-          AND b.status IN ('confirmed', 'Booked')
-        GROUP BY b.hotel_id, ds.stay_date
+        CROSS JOIN generate_series(0, (b.departure_date - b.arrival_date) - 1) as t(n)
+        WHERE b.status IN ('confirmed', 'Booked')
+          AND (b.departure_date - b.arrival_date) > 0
     )
     SELECT 
         hotel_id,
         stay_date,
-        occupied_rooms,
-        total_revenue,
-        avg_daily_price
-    FROM daily_revenue
+        COUNT(*) as occupied_rooms,  -- Now correctly counts room-nights
+        SUM(nightly_rate) as total_revenue,
+        AVG(nightly_rate) as avg_daily_price
+    FROM daily_bookings
+    GROUP BY hotel_id, stay_date
+    ORDER BY hotel_id, stay_date
 """).fetchdf()
 
 print(f"Calculated revenue for {len(revpar_data):,} hotel-date combinations")
