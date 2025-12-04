@@ -14,6 +14,7 @@ Key Concepts:
 import sys
 sys.path.insert(0, '../../../..')
 from lib.db import init_db
+from lib.sql_loader import load_sql_file
 from lib.data_validator import CleaningConfig, DataCleaner
 import pandas as pd
 import numpy as np
@@ -24,85 +25,34 @@ import seaborn as sns
 # Initialize database with FULL cleaning configuration
 print("Initializing database with full data cleaning...")
 
-# Create configuration with ALL rules enabled
+# Initialize database
+con = init_db()
+
+# Clean data
 config = CleaningConfig(
-    # Enable ALL cleaning rules
-    remove_negative_prices=True,
-    remove_zero_prices=True,
-    remove_low_prices=True,
-    remove_null_prices=True,
-    remove_extreme_prices=True,
-    remove_null_dates=True,
-    remove_null_created_at=True,
-    remove_negative_stay=True,
-    remove_negative_lead_time=True,
-    remove_null_occupancy=True,
-    remove_overcrowded_rooms=True,
-    remove_null_room_id=True,
-    remove_null_booking_id=True,
-    remove_null_hotel_id=True,
-    remove_orphan_bookings=True,
-    remove_null_status=True,
-    remove_cancelled_but_active=True,
-    remove_bookings_before_2023=True,
-    remove_bookings_after_2024=True,
     exclude_reception_halls=True,
     exclude_missing_location=True,
-    fix_empty_strings=True,
-    impute_children_allowed=True,
-    impute_events_allowed=True,
     verbose=True
 )
-
-# Apply cleaning
 cleaner = DataCleaner(config)
-con = cleaner.clean(init_db())
+con = cleaner.clean(con)
 
 # %%
+# Load SQL queries from files
+query_hotel_config = load_sql_file('QUERY_HOTEL_CONFIG_DISTRIBUTION.sql', __file__)
+query_room_type = load_sql_file('QUERY_ROOM_TYPE_SUMMARY.sql', __file__)
+query_bookings_per_room = load_sql_file('QUERY_BOOKINGS_PER_ROOM.sql', __file__)
+
+# Execute queries
 # Get data - HOTEL-LEVEL ANALYSIS
 # Distribution of configurations per hotel
-hotel_config_distribution = con.execute("""
-    SELECT 
-        b.hotel_id,
-        COUNT(DISTINCT br.room_id) as num_configurations,
-        SUM(r.number_of_rooms) as total_units,
-        COUNT(DISTINCT br.room_type) as num_categories,
-        STRING_AGG(DISTINCT br.room_type, ', ') as categories
-    FROM bookings b
-    JOIN booked_rooms br ON br.booking_id = b.id
-    JOIN rooms r ON r.id = br.room_id
-    WHERE b.hotel_id IS NOT NULL AND br.room_type IS NOT NULL
-    GROUP BY b.hotel_id
-""").fetchdf()
+hotel_config_distribution = con.execute(query_hotel_config).fetchdf()
 
 # Summary stats by room type (for category understanding)
-room_type_summary = con.execute("""
-    SELECT 
-        br.room_type,
-        COUNT(DISTINCT r.id) as num_configurations,
-        SUM(r.number_of_rooms) as total_units,
-        AVG(r.number_of_rooms) as avg_units_per_config,
-        MEDIAN(r.number_of_rooms) as median_units_per_config
-    FROM rooms r
-    JOIN booked_rooms br ON br.room_id = r.id
-    WHERE br.room_type IS NOT NULL
-    GROUP BY br.room_type
-    ORDER BY total_units DESC
-""").fetchdf()
+room_type_summary = con.execute(query_room_type).fetchdf()
 
 # Bookings per room (for utilization analysis)
-bookings_per_room = con.execute("""
-    SELECT 
-        br.room_id,
-        ANY_VALUE(br.room_type) as room_type,
-        r.number_of_rooms,
-        COUNT(*) as total_bookings,
-        COUNT(*) * 1.0 / NULLIF(r.number_of_rooms, 0) as bookings_per_individual_room
-    FROM booked_rooms br
-    JOIN rooms r ON br.room_id = r.id
-    GROUP BY br.room_id, r.number_of_rooms
-    ORDER BY total_bookings DESC
-""").fetchdf()
+bookings_per_room = con.execute(query_bookings_per_room).fetchdf()
 
 # Visualizations
 fig, axes = plt.subplots(2, 2, figsize=(18, 14))

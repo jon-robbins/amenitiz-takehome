@@ -15,6 +15,7 @@ Approach:
 import sys
 sys.path.insert(0, '../../../..')
 from lib.db import init_db
+from lib.sql_loader import load_sql_file
 from lib.data_validator import CleaningConfig, DataCleaner
 from lib.eda_utils import (
     analyze_price_vs_room_features,
@@ -28,37 +29,17 @@ from pathlib import Path
 # Initialize database with FULL cleaning configuration
 print("Initializing database with full data cleaning...")
 
+# Initialize database
+con = init_db()
+
+# Clean data
 config = CleaningConfig(
-    # Enable ALL cleaning rules
-    remove_negative_prices=True,
-    remove_zero_prices=True,
-    remove_low_prices=True,
-    remove_null_prices=True,
-    remove_extreme_prices=True,
-    remove_null_dates=True,
-    remove_null_created_at=True,
-    remove_negative_stay=True,
-    remove_negative_lead_time=True,
-    remove_null_occupancy=True,
-    remove_overcrowded_rooms=True,
-    remove_null_room_id=True,
-    remove_null_booking_id=True,
-    remove_null_hotel_id=True,
-    remove_orphan_bookings=True,
-    remove_null_status=True,
-    remove_cancelled_but_active=True,
-    remove_bookings_before_2023=True,
-    remove_bookings_after_2024=True,
     exclude_reception_halls=True,
     exclude_missing_location=True,
-    fix_empty_strings=True,
-    impute_children_allowed=True,
-    impute_events_allowed=True,
     verbose=True
 )
-
 cleaner = DataCleaner(config)
-con = cleaner.clean(init_db())
+con = cleaner.clean(con)
 
 # %%
 print("=" * 80)
@@ -66,40 +47,12 @@ print("SECTION 6.1: PRICE VS ROOM FEATURES")
 print("=" * 80)
 
 # %%
-# Build modeling view with all room features
+# Load SQL query from file
+query = load_sql_file('QUERY_LOAD_BOOKINGS_WITH_ROOM_FEATURES.sql', __file__)
+
+# Execute query
 print("\nBuilding modeling view...")
-modeling_df = con.execute("""
-    SELECT 
-        b.id as booking_id,
-        b.hotel_id,
-        b.arrival_date,
-        b.departure_date,
-        CAST(b.departure_date AS DATE) - CAST(b.arrival_date AS DATE) as nights,
-        br.total_price as room_price,
-        br.total_price / (CAST(b.departure_date AS DATE) - CAST(b.arrival_date AS DATE)) as daily_price,
-        br.room_id,
-        br.room_type,
-        br.room_size,
-        br.room_view,
-        br.total_adult,
-        br.total_children,
-        r.max_occupancy,
-        r.max_adults,
-        r.pricing_per_person_activated as pricing_per_person,
-        r.events_allowed,
-        r.pets_allowed,
-        r.smoking_allowed,
-        r.children_allowed,
-        hl.city,
-        hl.country
-    FROM bookings b
-    JOIN booked_rooms br ON b.id = CAST(br.booking_id AS BIGINT)
-    JOIN rooms r ON br.room_id = r.id
-    JOIN hotel_location hl ON b.hotel_id = hl.hotel_id
-    WHERE b.status IN ('confirmed', 'Booked')
-      AND (CAST(b.departure_date AS DATE) - CAST(b.arrival_date AS DATE)) > 0
-      AND br.total_price > 0
-""").fetchdf()
+modeling_df = con.execute(query).fetchdf()
 
 print(f"Loaded {len(modeling_df):,} bookings with room features")
 print(f"Features available: {list(modeling_df.columns)}")

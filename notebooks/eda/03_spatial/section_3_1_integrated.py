@@ -25,12 +25,18 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from lib.db import init_db  # noqa: E402
 from lib.data_validator import CleaningConfig, DataCleaner  # noqa: E402
-from notebooks.eda.hotspots.spatial_utils import (  # noqa: E402
-    ensure_output_dir,
-    load_clean_booking_locations,
-)
-from notebooks.eda.hotspots.hotspots_grid import assign_grid_bins  # noqa: E402
-from notebooks.eda.hotspots.hotspots_dbscan import run_dbscan, summarize_clusters  # noqa: E402
+from lib.sql_loader import load_sql_file  # noqa: E402
+# Import hotspots modules - add hotspots directory to path
+HOTSPOTS_DIR = Path(__file__).resolve().parent / "hotspots"
+if str(HOTSPOTS_DIR) not in sys.path:
+    sys.path.insert(0, str(HOTSPOTS_DIR))
+
+import spatial_utils  # noqa: E402
+from hotspots_grid import assign_grid_bins  # noqa: E402
+from hotspots_dbscan import run_dbscan, summarize_clusters  # noqa: E402
+
+ensure_output_dir = spatial_utils.ensure_output_dir
+load_clean_booking_locations = spatial_utils.load_clean_booking_locations
 from notebooks.data_prep.city_consolidation import (  # noqa: E402
     create_city_mapping,
     apply_city_mapping,
@@ -66,24 +72,12 @@ def load_city_analysis(con, use_canonical: bool = True) -> tuple[pd.DataFrame, d
     Returns:
         (city_df, city_mapping) where city_mapping is None if use_canonical=False
     """
+    # Load SQL query from file
+    query = load_sql_file('QUERY_LOAD_CITY_BOOKING_DATA.sql', __file__)
+    
+    # Execute query
     # Load raw city data
-    df = con.execute(
-        """
-        SELECT 
-            hl.city,
-            b.id as booking_id,
-            hl.hotel_id,
-            br.room_id,
-            br.total_price,
-            (CAST(b.departure_date AS DATE) - CAST(b.arrival_date AS DATE)) as nights
-        FROM bookings b
-        JOIN booked_rooms br ON b.id = CAST(br.booking_id AS BIGINT)
-        JOIN hotel_location hl ON b.hotel_id = hl.hotel_id
-        WHERE b.status IN ('confirmed', 'Booked')
-          AND (CAST(b.departure_date AS DATE) - CAST(b.arrival_date AS DATE)) > 0
-          AND hl.city IS NOT NULL
-    """
-    ).fetchdf()
+    df = con.execute(query).fetchdf()
     
     city_mapping = None
     if use_canonical:
@@ -470,37 +464,16 @@ def main() -> None:
     # Load cleaned data with FULL cleaning configuration
     print("\nLoading cleaned booking data with full validation...")
     
-    config = CleaningConfig(
-        # Enable ALL cleaning rules
-        remove_negative_prices=True,
-        remove_zero_prices=True,
-        remove_low_prices=True,
-        remove_null_prices=True,
-        remove_extreme_prices=True,
-        remove_null_dates=True,
-        remove_null_created_at=True,
-        remove_negative_stay=True,
-        remove_negative_lead_time=True,
-        remove_null_occupancy=True,
-        remove_overcrowded_rooms=True,
-        remove_null_room_id=True,
-        remove_null_booking_id=True,
-        remove_null_hotel_id=True,
-        remove_orphan_bookings=True,
-        remove_null_status=True,
-        remove_cancelled_but_active=True,
-        remove_bookings_before_2023=True,
-        remove_bookings_after_2024=True,
-        exclude_reception_halls=True,
-        exclude_missing_location=True,
-        fix_empty_strings=True,
-        impute_children_allowed=True,
-        impute_events_allowed=True,
-        verbose=False
-    )
+    # Initialize database
+    con = init_db()
     
+    # Clean data
+    config = CleaningConfig(
+        exclude_reception_halls=True,
+        exclude_missing_location=True
+    )
     cleaner = DataCleaner(config)
-    con = cleaner.clean(init_db())
+    con = cleaner.clean(con)
     geo_df = load_clean_booking_locations()
     print(f"Loaded {len(geo_df):,} bookings with location data.")
 

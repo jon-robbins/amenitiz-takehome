@@ -16,6 +16,7 @@ This normalizes prices across different stay durations to enable:
 import sys
 sys.path.insert(0, '../../../..')
 from lib.db import init_db
+from lib.sql_loader import load_sql_file
 from lib.data_validator import CleaningConfig, DataCleaner
 import pandas as pd
 import numpy as np
@@ -26,65 +27,26 @@ import seaborn as sns
 # Initialize database with FULL cleaning configuration
 print("Initializing database with full data cleaning...")
 
-# Create configuration with ALL rules enabled
+# Initialize database
+con = init_db()
+
+# Clean data
 config = CleaningConfig(
-    # Enable ALL cleaning rules
-    remove_negative_prices=True,
-    remove_zero_prices=True,
-    remove_low_prices=True,
-    remove_null_prices=True,
-    remove_extreme_prices=True,
-    remove_null_dates=True,
-    remove_null_created_at=True,
-    remove_negative_stay=True,
-    remove_negative_lead_time=True,
-    remove_null_occupancy=True,
-    remove_overcrowded_rooms=True,
-    remove_null_room_id=True,
-    remove_null_booking_id=True,
-    remove_null_hotel_id=True,
-    remove_orphan_bookings=True,
-    remove_null_status=True,
-    remove_cancelled_but_active=True,
-    remove_bookings_before_2023=True,
-    remove_bookings_after_2024=True,
     exclude_reception_halls=True,
     exclude_missing_location=True,
-    fix_empty_strings=True,
-    impute_children_allowed=True,
-    impute_events_allowed=True,
     verbose=True
 )
-
-# Apply cleaning
 cleaner = DataCleaner(config)
-con = cleaner.clean(init_db())
+con = cleaner.clean(con)
 
 # %%
 
+# Load SQL query from file
+query = load_sql_file('QUERY_LOAD_DAILY_PRICE_DATA.sql', __file__)
+
+# Execute query
 # Get daily price data
-daily_price_data = con.execute("""
-    SELECT 
-        br.id as booked_room_id,
-        br.booking_id,
-        br.room_id,
-        br.room_type,
-        br.room_size,
-        br.total_price,
-        b.arrival_date,
-        b.departure_date,
-        DATE_DIFF('day', b.arrival_date, b.departure_date) as stay_length_days,
-        br.total_price / NULLIF(DATE_DIFF('day', b.arrival_date, b.departure_date), 0) as daily_price,
-        br.total_adult + br.total_children as total_guests,
-        b.hotel_id
-    FROM booked_rooms br
-    JOIN bookings b ON b.id = br.booking_id
-    WHERE b.arrival_date IS NOT NULL 
-      AND b.departure_date IS NOT NULL
-      AND DATE_DIFF('day', b.arrival_date, b.departure_date) > 0
-      AND br.total_price > 0
-      AND br.room_type IS NOT NULL
-""").fetchdf()
+daily_price_data = con.execute(query).fetchdf()
 
 print(f"Total booked rooms with valid pricing: {len(daily_price_data):,}")
 

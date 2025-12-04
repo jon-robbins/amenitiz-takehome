@@ -32,10 +32,14 @@ try:
 except ImportError:
     GADM = None  # type: ignore
 
-from notebooks.eda.hotspots.spatial_utils import (  # noqa: E402
-    ensure_output_dir,
-    load_clean_booking_locations,
-)
+# Import using absolute path - add the hotspots directory to path
+HOTSPOTS_DIR = Path(__file__).resolve().parent
+if str(HOTSPOTS_DIR) not in sys.path:
+    sys.path.insert(0, str(HOTSPOTS_DIR))
+
+import spatial_utils  # noqa: E402
+ensure_output_dir = spatial_utils.ensure_output_dir
+load_clean_booking_locations = spatial_utils.load_clean_booking_locations
 
 try:
     import geopandas as gpd

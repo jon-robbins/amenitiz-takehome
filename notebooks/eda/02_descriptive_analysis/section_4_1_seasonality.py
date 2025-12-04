@@ -15,6 +15,7 @@ import sys
 sys.path.insert(0, '../../../..')
 from lib.db import init_db
 from lib.data_validator import CleaningConfig, DataCleaner
+from lib.sql_loader import load_sql_file
 from lib.eda_utils import (
     plot_seasonality_analysis,
     calculate_seasonality_stats,
@@ -30,37 +31,18 @@ from pathlib import Path
 # Initialize database with FULL cleaning configuration
 print("Initializing database with full data cleaning...")
 
+# Initialize database
+con = init_db()
+
+# Clean data
 config = CleaningConfig(
-    # Enable ALL cleaning rules
-    remove_negative_prices=True,
-    remove_zero_prices=True,
-    remove_low_prices=True,
-    remove_null_prices=True,
-    remove_extreme_prices=True,
-    remove_null_dates=True,
-    remove_null_created_at=True,
-    remove_negative_stay=True,
-    remove_negative_lead_time=True,
-    remove_null_occupancy=True,
-    remove_overcrowded_rooms=True,
-    remove_null_room_id=True,
-    remove_null_booking_id=True,
-    remove_null_hotel_id=True,
-    remove_orphan_bookings=True,
-    remove_null_status=True,
-    remove_cancelled_but_active=True,
-    remove_bookings_before_2023=True,
-    remove_bookings_after_2024=True,
     exclude_reception_halls=True,
     exclude_missing_location=True,
-    fix_empty_strings=True,
-    impute_children_allowed=True,
-    impute_events_allowed=True,
     verbose=True
 )
 
 cleaner = DataCleaner(config)
-con = cleaner.clean(init_db())
+con = cleaner.clean(con)
 
 # %%
 print("=" * 80)
@@ -68,36 +50,12 @@ print("SECTION 4.1: SEASONALITY IN PRICE")
 print("=" * 80)
 
 # %%
-# Query to get per-night pricing with temporal features
+# Load SQL query from file
+query = load_sql_file('QUERY_LOAD_BOOKINGS_WITH_TEMPORAL_FEATURES.sql', __file__)
+
+# Execute query
 print("\nLoading booking data with temporal features...")
-seasonality_data = con.execute("""
-    SELECT 
-        b.id as booking_id,
-        b.hotel_id,
-        b.arrival_date,
-        b.departure_date,
-        CAST(b.departure_date AS DATE) - CAST(b.arrival_date AS DATE) as nights,
-        br.total_price as room_price,
-        br.total_price / (CAST(b.departure_date AS DATE) - CAST(b.arrival_date AS DATE)) as daily_price,
-        br.room_type,
-        hl.city,
-        hl.country,
-        -- Extract temporal features from arrival date
-        EXTRACT(MONTH FROM CAST(b.arrival_date AS DATE)) as arrival_month,
-        EXTRACT(DOW FROM CAST(b.arrival_date AS DATE)) as arrival_dow,
-        EXTRACT(YEAR FROM CAST(b.arrival_date AS DATE)) as arrival_year,
-        -- Extract from departure date
-        EXTRACT(MONTH FROM CAST(b.departure_date AS DATE)) as departure_month,
-        EXTRACT(DOW FROM CAST(b.departure_date AS DATE)) as departure_dow
-    FROM bookings b
-    JOIN booked_rooms br ON b.id = CAST(br.booking_id AS BIGINT)
-    JOIN hotel_location hl ON b.hotel_id = hl.hotel_id
-    WHERE b.status IN ('confirmed', 'Booked')
-      AND (CAST(b.departure_date AS DATE) - CAST(b.arrival_date AS DATE)) > 0
-      AND br.total_price > 0
-      AND b.arrival_date IS NOT NULL
-      AND b.departure_date IS NOT NULL
-""").fetchdf()
+seasonality_data = con.execute(query).fetchdf()
 
 print(f"Loaded {len(seasonality_data):,} bookings")
 print(f"Date range: {seasonality_data['arrival_date'].min()} to {seasonality_data['arrival_date'].max()}")

@@ -12,7 +12,8 @@ import numpy as np
 import pandas as pd
 
 from lib.db import init_db
-from lib.data_validator import validate_and_clean
+from lib.data_validator import CleaningConfig, DataCleaner
+from lib.sql_loader import load_sql_file
 
 
 def load_clean_booking_locations(
@@ -23,31 +24,36 @@ def load_clean_booking_locations(
     Load booking-level latitude/longitude points from a freshly
     initialized DuckDB connection that has been cleaned by the
     data validator.
+    
+    SQL Query: QUERY_LOAD_BOOKING_LOCATIONS (defined below)
+    
+    Parameters
+    ----------
+    rooms_to_exclude : Iterable[str] | None
+        Room types to exclude from analysis.
+    exclude_missing_location_bookings : bool
+        If True, exclude bookings without location data.
+    
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame with booking_id, coordinates, and booking details.
     """
-    con: duckdb.DuckDBPyConnection = validate_and_clean(
-        init_db(),
-        verbose=False,
-        rooms_to_exclude=list(rooms_to_exclude) if rooms_to_exclude else None,
-        exclude_missing_location_bookings=exclude_missing_location_bookings,
+    # Initialize database
+    con: duckdb.DuckDBPyConnection = init_db()
+    
+    # Clean data
+    config = CleaningConfig(
+        exclude_reception_halls=(rooms_to_exclude is not None),
+        exclude_missing_location=exclude_missing_location_bookings
     )
-
-    query = """
-        SELECT
-            b.id AS booking_id,
-            b.total_price,
-            CAST(b.arrival_date AS DATE) AS arrival_date,
-            CAST(b.departure_date AS DATE) AS departure_date,
-            hl.city,
-            hl.country,
-            hl.latitude,
-            hl.longitude
-        FROM bookings b
-        JOIN hotel_location hl
-          ON b.hotel_id = hl.hotel_id
-        WHERE b.status IN ('confirmed', 'Booked')
-          AND hl.latitude IS NOT NULL
-          AND hl.longitude IS NOT NULL
-    """
+    cleaner = DataCleaner(config)
+    con = cleaner.clean(con)
+    
+    # Load SQL query from file
+    query = load_sql_file('QUERY_LOAD_BOOKING_LOCATIONS.sql', __file__)
+    
+    # Execute query
     df = con.execute(query).fetchdf()
     df["latitude"] = df["latitude"].astype(float)
     df["longitude"] = df["longitude"].astype(float)

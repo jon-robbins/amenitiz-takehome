@@ -20,8 +20,10 @@ from shapely.geometry import Point
 from shapely.ops import nearest_points
 
 from lib.db import init_db
-from lib.data_validator import validate_and_clean
+from lib.data_validator import CleaningConfig, DataCleaner
 from lib.eda_utils import load_coastline_shapefile
+from lib.cache_utils import cache_to_csv
+from lib.sql_loader import load_sql_file
 
 # %%
 def get_madrid_coords() -> tuple[float, float]:
@@ -36,12 +38,13 @@ def get_madrid_coords() -> tuple[float, float]:
     import json
     from pathlib import Path
 
-    cities_fp = Path(__file__).parent.parent.parent / "data" / "cities500.json"
+    # cities500.json is in the project root data/ directory
+    cities_fp = Path(__file__).parent.parent.parent.parent / "data" / "cities500.json"
     with open(cities_fp, "r", encoding="utf-8") as f:
         cities_data = json.load(f)
     for city in cities_data:
         if city.get("name", "").lower() == "madrid" or city.get("asciiName", "").lower() == "madrid":
-            return float(city["lat"]), float(city["lng"])
+            return float(city["lat"]), float(city["lon"])
     raise ValueError("Madrid not found in cities500.json")
 
 MADRID_LAT, MADRID_LON = get_madrid_coords()
@@ -133,31 +136,43 @@ def calculate_distance_from_coast(
     return df
 
 
+@cache_to_csv(
+    csv_path="outputs/eda/spatial/data/hotel_locations.csv",
+    save_after_compute=True
+)
 def load_hotel_locations() -> pd.DataFrame:
     """
     Load unique hotel locations from the database.
+    
     Returns DataFrame with hotel_id, latitude, longitude, city, country.
     Filters out any NaN or invalid coordinates.
+    
+    SQL Query: QUERY_LOAD_HOTEL_LOCATIONS (defined below)
+    CSV Cache: outputs/eda/spatial/data/hotel_locations.csv
+    
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame with hotel_id, latitude, longitude, city, country.
     """
-    con = validate_and_clean(
-        init_db(),
-        verbose=False,
-        rooms_to_exclude=["reception_hall"],
-        exclude_missing_location_bookings=True,
+    # Initialize database
+    con = init_db()
+    
+    # Clean data
+    config = CleaningConfig(
+        exclude_reception_halls=True,
+        exclude_missing_location=True
     )
-
-    query = """
-        SELECT DISTINCT
-            hotel_id,
-            latitude,
-            longitude,
-            city,
-            country
-        FROM hotel_location
-        WHERE latitude IS NOT NULL
-          AND longitude IS NOT NULL
-    """
+    cleaner = DataCleaner(config)
+    con = cleaner.clean(con)
+    
+    # Load SQL query from file
+    query = load_sql_file('QUERY_LOAD_HOTEL_LOCATIONS.sql', __file__)
+    
+    # Execute query
     df = con.execute(query).fetchdf()
+    
+    # Type conversions and validation
     df["latitude"] = pd.to_numeric(df["latitude"], errors="coerce")
     df["longitude"] = pd.to_numeric(df["longitude"], errors="coerce")
     
@@ -170,15 +185,38 @@ def load_hotel_locations() -> pd.DataFrame:
     return df
 
 
-def main() -> None:
-    """Calculate and save distance features."""
+def main(load_from_csv: bool = False) -> None:
+    """
+    Calculate and save distance features.
+    
+    Parameters
+    ----------
+    load_from_csv : bool, default=False
+        If True, load hotel locations from CSV cache instead of querying database.
+        Can also be set via environment variable: LOAD_FROM_CSV=1 or 
+        LOAD_HOTEL_LOCATIONS_FROM_CSV=1
+    """
     print("=" * 80)
     print("CALCULATING DISTANCE FEATURES")
     print("=" * 80)
 
     # Load hotel locations (unique hotels only)
+    # Decorator handles CSV caching automatically
     print("\nLoading unique hotel locations...")
-    hotels_df = load_hotel_locations()
+    
+    # Check for cached CSV if requested
+    if load_from_csv:
+        from lib.cache_utils import load_cached_csv
+        cached_df = load_cached_csv("outputs/eda/spatial/data/hotel_locations.csv")
+        if cached_df is not None:
+            hotels_df = cached_df
+            print("Loaded from CSV cache")
+        else:
+            print("CSV cache not found, querying database...")
+            hotels_df = load_hotel_locations()
+    else:
+        hotels_df = load_hotel_locations()
+    
     print(f"Loaded {len(hotels_df):,} unique hotel locations.")
 
     # Calculate distance from Madrid
@@ -206,8 +244,8 @@ def main() -> None:
         f"Distance from coast - Median: {hotels_df['distance_from_coast'].median():.2f} km"
     )
 
-    # Save hotel-level results
-    output_path = Path("../../../outputs/eda/spatial/data/hotel_distance_features.csv")
+    # Save hotel-level results with distance features
+    output_path = Path(__file__).parent.parent.parent.parent / "outputs" / "eda" / "spatial" / "data" / "hotel_distance_features.csv"
     output_path.parent.mkdir(parents=True, exist_ok=True)
     hotels_df.to_csv(output_path, index=False)
     print(f"\nSaved hotel-level distance features to {output_path}")

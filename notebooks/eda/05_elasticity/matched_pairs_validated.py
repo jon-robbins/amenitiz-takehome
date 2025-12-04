@@ -30,37 +30,6 @@ from matplotlib.ticker import FuncFormatter
 import re
 
 # %%
-def get_cleaning_config() -> CleaningConfig:
-    """Returns standard cleaning configuration for matched pairs analysis."""
-    return CleaningConfig(
-        remove_negative_prices=True,
-        remove_zero_prices=True,
-        remove_low_prices=True,
-        remove_null_prices=True,
-        remove_extreme_prices=True,
-        remove_null_dates=True,
-        remove_null_created_at=True,
-        remove_negative_stay=True,
-        remove_negative_lead_time=True,
-        remove_null_occupancy=True,
-        remove_overcrowded_rooms=True,
-        remove_null_room_id=True,
-        remove_null_booking_id=True,
-        remove_null_hotel_id=True,
-        remove_orphan_bookings=True,
-        remove_null_status=True,
-        remove_cancelled_but_active=True,
-        remove_bookings_before_2023=True,
-        remove_bookings_after_2024=True,
-        exclude_reception_halls=True,
-        exclude_missing_location=True,
-        fix_empty_strings=True,
-        impute_children_allowed=True,
-        impute_events_allowed=True,
-        match_city_names_with_tfidf=True,
-        set_empty_room_view_to_no_view_str=True,
-        verbose=False
-    )
 
 
 def load_hotel_month_data(con) -> pd.DataFrame:
@@ -433,9 +402,17 @@ print("Using validated features from feature_importance_validation.py")
 print("=" * 80)
 
 print("\nLoading database...")
-config = get_cleaning_config()
+config = CleaningConfig(
+    exclude_reception_halls=True,
+    exclude_missing_location=True,
+    match_city_names_with_tfidf=True
+)
 cleaner = DataCleaner(config)
-con = cleaner.clean(init_db())
+# Initialize database
+con = init_db()
+
+# Clean data
+con = cleaner.clean(con)
 
 # %%
 print("\nLoading distance features...")

@@ -151,8 +151,10 @@ ax4.set_xticklabels([f'{x.mid:.2f}' for x in coast_binned.index], rotation=45)
 ax4.grid(True, alpha=0.3, axis='y')
 
 plt.tight_layout()
-Path('../../../outputs/eda/spatial/figures').mkdir(parents=True, exist_ok=True)
-plt.savefig('../../../outputs/eda/spatial/figures/distance_features_vs_price.png', dpi=300, bbox_inches='tight')
+# Use absolute path relative to project root
+output_dir = Path(__file__).parent.parent.parent.parent / 'outputs' / 'eda' / 'spatial' / 'figures'
+output_dir.mkdir(parents=True, exist_ok=True)
+plt.savefig(output_dir / 'distance_features_vs_price.png', dpi=300, bbox_inches='tight')
 plt.show()
 
 print("\nSaved visualization to outputs/figures/distance_features_vs_price.png")

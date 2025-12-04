@@ -31,6 +31,7 @@ import re
 # Database and cleaning
 from lib.db import init_db
 from lib.data_validator import CleaningConfig, DataCleaner
+from lib.holiday_features import get_hotel_holiday_features
 
 # Scikit-learn
 from sklearn.pipeline import Pipeline
@@ -70,40 +71,6 @@ try:
 except ImportError:
     SHAP_AVAILABLE = False
     print("Warning: SHAP not available. Install with: pip install shap")
-
-
-# %%
-def get_cleaning_config() -> CleaningConfig:
-    """Returns standard cleaning configuration."""
-    return CleaningConfig(
-        remove_negative_prices=True,
-        remove_zero_prices=True,
-        remove_low_prices=True,
-        remove_null_prices=True,
-        remove_extreme_prices=True,
-        remove_null_dates=True,
-        remove_null_created_at=True,
-        remove_negative_stay=True,
-        remove_negative_lead_time=True,
-        remove_null_occupancy=True,
-        remove_overcrowded_rooms=True,
-        remove_null_room_id=True,
-        remove_null_booking_id=True,
-        remove_null_hotel_id=True,
-        remove_orphan_bookings=True,
-        remove_null_status=True,
-        remove_cancelled_but_active=True,
-        remove_bookings_before_2023=True,
-        remove_bookings_after_2024=True,
-        exclude_reception_halls=True,
-        exclude_missing_location=True,
-        fix_empty_strings=True,
-        impute_children_allowed=True,
-        impute_events_allowed=True,
-        match_city_names_with_tfidf=True,
-        set_empty_room_view_to_no_view_str=True,
-        verbose=False
-    )
 
 
 # %%
@@ -248,14 +215,18 @@ def load_hotel_month_data(con) -> pd.DataFrame:
 
 
 # %%
-def engineer_features(df: pd.DataFrame, distance_features: pd.DataFrame) -> pd.DataFrame:
+def engineer_features(
+    df: pd.DataFrame, 
+    distance_features: pd.DataFrame,
+    cities500_path: Path | None = None
+) -> pd.DataFrame:
     """
     Engineers all features for modeling.
     
     Features:
     - Geographic: dist_center_km, is_coastal, dist_coast_log, dist_madrid_log, lat, lon
     - Product: log_room_size, view_quality_ordinal, room_capacity_pax, amenities_score, total_capacity_log
-    - Temporal: month_sin, month_cos, weekend_ratio, is_summer, is_winter
+    - Temporal: month_sin, month_cos, weekend_ratio, is_summer, is_winter, holiday_ratio
     - City indicators: Binary flags for top 10 cities (is_madrid, is_barcelona, etc.)
     """
     df = df.copy()
@@ -336,6 +307,20 @@ def engineer_features(df: pd.DataFrame, distance_features: pd.DataFrame) -> pd.D
     df['city_lon'] = df['city_lon'].fillna(df['longitude'])
     df['dist_center_km'] = df['dist_center_km'].fillna(0)
     
+    # Holiday features (Spanish regional holidays)
+    if cities500_path is not None:
+        df = get_hotel_holiday_features(
+            df,
+            cities500_path=cities500_path,
+            hotel_id_col='hotel_id',
+            lat_col='latitude',
+            lon_col='longitude',
+            month_col='month',
+            buffer_days=2
+        )
+        # Fill any remaining NaN in holiday_ratio with 0
+        df['holiday_ratio'] = df['holiday_ratio'].fillna(0)
+    
     return df
 
 
@@ -350,13 +335,14 @@ def prepare_features_and_target(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.Seri
     Returns:
         X, y, numeric_features, categorical_features, boolean_features
     """
-    # Define feature groups - FULL SET WITH OCCUPANCY
+    # Define feature groups - FULL SET WITH OCCUPANCY AND HOLIDAYS
     numeric_features = [
         'dist_center_km', 'dist_coast_log',
         'log_room_size', 'room_capacity_pax', 'amenities_score', 'total_capacity_log',
         'view_quality_ordinal',
         'weekend_ratio',
-        'occupancy_rate'  # Now properly calculated (NULL room_ids filtered)
+        'occupancy_rate',  # Now properly calculated (NULL room_ids filtered)
+        'holiday_ratio'    # Proportion of days near regional Spanish holidays
     ]
     
     # Categorical features (for CatBoost - no one-hot encoding needed)
@@ -504,13 +490,14 @@ def evaluate_models(
             from sklearn.preprocessing import StandardScaler
             from sklearn.compose import make_column_transformer
             
-            # Get feature lists from parent scope - FULL SET WITH OCCUPANCY
+            # Get feature lists from parent scope - FULL SET WITH OCCUPANCY AND HOLIDAYS
             numeric_features = [
                 'dist_center_km', 'dist_coast_log',
                 'log_room_size', 'room_capacity_pax', 'amenities_score', 'total_capacity_log',
                 'view_quality_ordinal',
                 'weekend_ratio',
-                'occupancy_rate'
+                'occupancy_rate',
+                'holiday_ratio'
             ]
             categorical_features = ['room_type', 'room_view', 'city_standardized']
             boolean_features = ['is_coastal', 'is_july_august', 'children_allowed']
@@ -979,9 +966,17 @@ def main():
     
     # Load and clean data
     print("\n1. Loading and cleaning data...")
-    config = get_cleaning_config()
+    # Initialize database
+    con = init_db()
+    
+    # Clean data
+    config = CleaningConfig(
+        exclude_reception_halls=True,
+        exclude_missing_location=True,
+        match_city_names_with_tfidf=True
+    )
     cleaner = DataCleaner(config)
-    con = cleaner.clean(init_db())
+    con = cleaner.clean(con)
     
     # Load hotel-month data
     print("\n2. Loading hotel-month aggregation...")
@@ -995,9 +990,12 @@ def main():
     distance_features = pd.read_csv(distance_features_path.resolve())
     print(f"   Loaded distance features for {len(distance_features):,} hotels")
     
+    # Path to cities500.json for holiday features
+    cities500_path = script_dir / '../../../data/cities500.json'
+    
     # Engineer features
-    print("\n4. Engineering features...")
-    df = engineer_features(df, distance_features)
+    print("\n4. Engineering features (including holiday proximity)...")
+    df = engineer_features(df, distance_features, cities500_path=cities500_path.resolve())
     df = df.dropna(subset=['log_avg_adr', 'distance_from_coast', 'distance_from_madrid'])
     print(f"   Final dataset: {len(df):,} records")
     

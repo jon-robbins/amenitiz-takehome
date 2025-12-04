@@ -19,6 +19,7 @@ sys.path.insert(0, '../../../..')
 
 from lib.db import init_db
 from lib.data_validator import CleaningConfig, DataCleaner
+from lib.sql_loader import load_sql_file
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -26,69 +27,30 @@ import seaborn as sns
 from matplotlib.ticker import FuncFormatter
 
 # %%
-def get_cleaning_config() -> CleaningConfig:
-    """Returns standard cleaning configuration for longitudinal analysis."""
-    return CleaningConfig(
-        remove_negative_prices=True,
-        remove_zero_prices=True,
-        remove_low_prices=True,
-        remove_null_prices=True,
-        remove_extreme_prices=True,
-        remove_null_dates=True,
-        remove_null_created_at=True,
-        remove_negative_stay=True,
-        remove_negative_lead_time=True,
-        remove_null_occupancy=True,
-        remove_overcrowded_rooms=True,
-        remove_null_room_id=True,
-        remove_null_booking_id=True,
-        remove_null_hotel_id=True,
-        remove_orphan_bookings=True,
-        remove_null_status=True,
-        remove_cancelled_but_active=True,
-        remove_bookings_before_2023=True,
-        remove_bookings_after_2024=True,
-        exclude_reception_halls=True,
-        fix_empty_strings=True,
-        impute_children_allowed=True,
-        impute_events_allowed=True,
-        set_empty_room_view_to_no_view_str=True,
-        verbose=False
-    )
 
 
 def load_hotel_month_product_data(con) -> pd.DataFrame:
     """
+    Load hotel-month-product aggregation for longitudinal analysis.
+    
+    SQL Query: QUERY_LOAD_HOTEL_MONTH_PRODUCT_DATA (defined below)
+    
+    Returns
+    -------
+    pd.DataFrame
+        Hotel-month-product aggregated statistics.
+    """
+    """
     Loads hotel-month-product aggregation for 2023 and 2024.
     
     Aggregates to Hotel-Month-Product level with ADR, revenue, and room nights.
+    
+    SQL Query: QUERY_LOAD_HOTEL_MONTH_PRODUCT_DATA (loaded from file)
     """
-    query = """
-    SELECT 
-        b.hotel_id,
-        EXTRACT(YEAR FROM CAST(b.arrival_date AS DATE)) AS year,
-        EXTRACT(MONTH FROM CAST(b.arrival_date AS DATE)) AS month,
-        br.room_type,
-        COALESCE(NULLIF(br.room_view, ''), 'no_view') AS room_view,
-        r.children_allowed,
-        AVG(br.total_price) AS avg_adr,
-        SUM(br.total_price) AS total_revenue,
-        COUNT(*) AS room_nights,
-        SUM(r.number_of_rooms) AS total_capacity
-    FROM bookings b
-    JOIN booked_rooms br ON b.id = CAST(br.booking_id AS BIGINT)
-    JOIN rooms r ON br.room_id = r.id
-    WHERE b.status IN ('confirmed', 'Booked')
-      AND EXTRACT(YEAR FROM CAST(b.arrival_date AS DATE)) IN (2023, 2024)
-    GROUP BY 
-        b.hotel_id, 
-        year, 
-        month, 
-        br.room_type, 
-        room_view, 
-        r.children_allowed
-    HAVING COUNT(*) >= 5  -- Minimum sample size per product-month
-    """
+    # Load SQL query from file
+    query = load_sql_file('QUERY_LOAD_HOTEL_MONTH_PRODUCT_DATA.sql', __file__)
+    
+    # Execute query
     return con.execute(query).fetchdf()
 
 
@@ -656,9 +618,15 @@ print("=" * 80)
 
 # %%
 print("\nLoading and cleaning data...")
-config = get_cleaning_config()
+# Initialize database
+con = init_db()
+
+# Clean data
+config = CleaningConfig(
+    exclude_reception_halls=True
+)
 cleaner = DataCleaner(config)
-con = cleaner.clean(init_db())
+con = cleaner.clean(con)
 
 # %%
 print("\nAggregating to Hotel-Month-Product level...")

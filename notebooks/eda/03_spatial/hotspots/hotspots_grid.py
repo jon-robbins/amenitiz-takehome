@@ -13,14 +13,18 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.append(str(PROJECT_ROOT))
 
-from notebooks.eda.hotspots.spatial_utils import (  # noqa: E402
-    ensure_output_dir,
-    load_clean_booking_locations,
-)
+# Import using absolute path - add the hotspots directory to path
+HOTSPOTS_DIR = Path(__file__).resolve().parent
+if str(HOTSPOTS_DIR) not in sys.path:
+    sys.path.insert(0, str(HOTSPOTS_DIR))
+
+import spatial_utils  # noqa: E402
+ensure_output_dir = spatial_utils.ensure_output_dir
+load_clean_booking_locations = spatial_utils.load_clean_booking_locations
 
 
 def assign_grid_bins(df: pd.DataFrame, resolution_deg: float = 0.1) -> pd.DataFrame:

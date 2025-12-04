@@ -1,0 +1,958 @@
+==========================================
+Running: notebooks/eda/00_schema_exploration/occupancy_calculation_debug.py
+==========================================
+================================================================================
+PART 1: SINGLE HOTEL DEEP DIVE
+================================================================================
+Loaded ds_booked_rooms.csv into table 'booked_rooms' with type casting
+Loaded ds_bookings.csv into table 'bookings' with type casting
+Loaded ds_hotel_location.csv into table 'hotel_location' with type casting
+Loaded ds_rooms.csv into table 'rooms' with type casting
+
+1.1 Finding a small hotel to analyze...
+   hotel_id  num_bookings  num_room_types first_booking last_booking
+0      7792            20               1    2023-01-27   2023-07-14
+1     15198            20               1    2023-07-02   2024-07-22
+2      8631            20               1    2023-12-23   2024-09-20
+3      6942            20               1    2023-02-24   2023-12-29
+4     24620            20               1    2024-04-05   2024-09-01
+
+>>> Selected hotel_id = 7792
+
+1.2 All bookings for this hotel...
+   booking_id arrival_date departure_date  nights     status  booking_total
+0     2584767   2023-01-27     2023-01-29       2  confirmed         289.89
+1     2495796   2023-02-03     2023-02-05       2  confirmed         330.00
+2     2617872   2023-02-10     2023-02-12       2  confirmed         348.00
+3     2609500   2023-02-17     2023-02-19       2  confirmed         368.00
+4     2828855   2023-02-24     2023-02-26       2  confirmed         351.00
+5     2499310   2023-03-03     2023-03-05       2  confirmed         328.00
+6     2915057   2023-03-18     2023-03-20       2  confirmed         280.50
+7     2566961   2023-03-24     2023-03-26       2  confirmed         320.00
+8     2651506   2023-04-05     2023-04-09       4  confirmed         764.50
+9     3121540   2023-04-14     2023-04-16       2  confirmed         340.00
+
+1.3 Room types used by this hotel (via booked_rooms)...
+   room_type_id  number_of_rooms  max_occupancy room_type      room_view
+0         24353                1              7   cottage  mountain_view
+
+>>> This hotel has 1 distinct room types
+>>> Total capacity: 1 rooms
+
+1.4 Sample booked_rooms entries for this hotel...
+   booked_room_id  booking_id  room_id room_type      room_view  total_adult  total_children  total_price arrival_date departure_date  nights  room_type_capacity
+TIMEOUT or ERROR
+
+==========================================
+Running: notebooks/eda/01_data_quality/analyze_distance_features.py
+==========================================
+/Users/jon/GitHub/amenitiz-takehome/notebooks/eda/01_data_quality/analyze_distance_features.py:34: DeprecationWarning: validate_and_clean() is deprecated. Use CleaningConfig and DataCleaner instead. See function docstring for migration instructions.
+  con = validate_and_clean(
+Loading distance features...
+Loaded distance features for 4,652 hotels
+
+Distance from Madrid - Min: 0.11 km
+Distance from Madrid - Max: 1926.59 km
+Distance from Madrid - Median: 446.48 km
+
+Distance from Coast - Min: 0.00 km
+Distance from Coast - Max: 851.15 km
+Distance from Coast - Median: 18.11 km
+
+Loading bookings data...
+Loaded ds_booked_rooms.csv into table 'booked_rooms' with type casting
+Loaded ds_bookings.csv into table 'bookings' with type casting
+Loaded ds_hotel_location.csv into table 'hotel_location' with type casting
+Loaded ds_rooms.csv into table 'rooms' with type casting
+Loaded 835,998 bookings
+
+Bookings with distance features: 835,998
+Missing distance_from_madrid: 3785
+Missing distance_from_coast: 3785
+Bookings for analysis (with distances): 832,213
+
+================================================================================
+CORRELATION ANALYSIS: DISTANCE FEATURES VS PRICE
+================================================================================
+
+Correlation between distance_from_madrid and daily_price: 0.0140
+Correlation between distance_from_coast and daily_price: -0.0154
+Traceback (most recent call last):
+  File "/Users/jon/.pyenv/versions/3.13.7/lib/python3.13/pathlib/_local.py", line 722, in mkdir
+    os.mkdir(self, mode)
+    ~~~~~~~~^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '../../../outputs/eda/spatial/figures'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+TIMEOUT or ERROR
+
+==========================================
+Running: notebooks/eda/01_data_quality/calculate_distance_features.py
+==========================================
+Traceback (most recent call last):
+  File "/Users/jon/GitHub/amenitiz-takehome/notebooks/eda/01_data_quality/calculate_distance_features.py", line 49, in <module>
+    MADRID_LAT, MADRID_LON = get_madrid_coords()
+                             ~~~~~~~~~~~~~~~~~^^
+  File "/Users/jon/GitHub/amenitiz-takehome/notebooks/eda/01_data_quality/calculate_distance_features.py", line 42, in get_madrid_coords
+    with open(cities_fp, "r", encoding="utf-8") as f:
+         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/Users/jon/GitHub/amenitiz-takehome/notebooks/data/cities500.json'
+TIMEOUT or ERROR
+
+==========================================
+Running: notebooks/eda/02_descriptive_analysis/section_1_2_hotel_supply.py
+==========================================
+Applying 31 data cleaning rules...
+  ✓ Negative Price: 3 rows
+  ✓ Zero Price: 12,464 rows
+  ✓ Low Price (<€5/night): 653 rows
+  ✓ NULL Price: 968 rows
+  ✓ Extreme Price (>5k/night): 31 rows
+  ✓ NULL Dates: 991 rows
+  - NULL Created At: 0 rows
+  - Negative Stay: 0 rows
+  ✓ Negative Lead Time: 10,404 rows
+  - NULL Occupancy: 0 rows
+  ✓ Overcrowded Room: 11,226 rows
+  ✓ NULL Room ID: 5,037 rows
+  - NULL Booking ID: 0 rows
+  - NULL Hotel ID: 0 rows
+  ✓ Orphan Bookings: 21,759 rows
+  - NULL Status: 0 rows
+  ✓ Cancelled but Active: 2 rows
+  - Bookings Before 2023: 0 rows
+  ✓ Bookings After 2024: 1,911 rows
+  ✓ Exclude Reception Halls: 2,213 rows
+  ✓ Orphan Bookings (after exclusions): 1,993 rows
+  ✓ Exclude Missing Location (Phase 1): 166 rows
+  ✓ Exclude Missing Location Bookings (Phase 1): 158 rows
+  ✓ Fix Empty city: 712 rows
+  - Fix Empty country: 0 rows
+  ✓ Fix Empty address: 979 rows
+  ✓ Exclude Missing Location (Phase 2): 325 rows
+  ✓ Exclude Missing Location Bookings (Phase 2): 318 rows
+  ✓ Impute children_allowed: 6,908 rows
+  - Impute events_allowed: 0 rows
+  ✓ Set Empty Room View to 'no_view': 430,237 rows
+
+Final: 989,959 bookings, 1,176,615 booked_rooms
+/Users/jon/GitHub/amenitiz-takehome/notebooks/eda/02_descriptive_analysis/section_1_2_hotel_supply.py:116: UserWarning: set_ticklabels() should only be used with a fixed number of ticks, i.e. after set_ticks() or using a FixedLocator.
+  ax3.set_xticklabels(ax3.get_xticklabels(), rotation=45, ha='right')
+Initializing database with full data cleaning...
+Loaded ds_booked_rooms.csv into table 'booked_rooms' with type casting
+Loaded ds_bookings.csv into table 'bookings' with type casting
+Loaded ds_hotel_location.csv into table 'hotel_location' with type casting
+
+==========================================
+Running: notebooks/eda/02_descriptive_analysis/section_1_3_daily_price.py
+==========================================
+Applying 31 data cleaning rules...
+  ✓ Negative Price: 3 rows
+  ✓ Zero Price: 12,464 rows
+  ✓ Low Price (<€5/night): 653 rows
+  ✓ NULL Price: 968 rows
+  ✓ Extreme Price (>5k/night): 31 rows
+  ✓ NULL Dates: 991 rows
+  - NULL Created At: 0 rows
+  - Negative Stay: 0 rows
+  ✓ Negative Lead Time: 10,404 rows
+  - NULL Occupancy: 0 rows
+  ✓ Overcrowded Room: 11,226 rows
+  ✓ NULL Room ID: 5,037 rows
+  - NULL Booking ID: 0 rows
+  - NULL Hotel ID: 0 rows
+  ✓ Orphan Bookings: 21,759 rows
+  - NULL Status: 0 rows
+  ✓ Cancelled but Active: 2 rows
+  - Bookings Before 2023: 0 rows
+  ✓ Bookings After 2024: 1,911 rows
+  ✓ Exclude Reception Halls: 2,213 rows
+  ✓ Orphan Bookings (after exclusions): 1,993 rows
+  ✓ Exclude Missing Location (Phase 1): 166 rows
+  ✓ Exclude Missing Location Bookings (Phase 1): 158 rows
+  ✓ Fix Empty city: 712 rows
+  - Fix Empty country: 0 rows
+  ✓ Fix Empty address: 979 rows
+  ✓ Exclude Missing Location (Phase 2): 325 rows
+  ✓ Exclude Missing Location Bookings (Phase 2): 318 rows
+  ✓ Impute children_allowed: 6,908 rows
+  - Impute events_allowed: 0 rows
+  ✓ Set Empty Room View to 'no_view': 430,237 rows
+
+Final: 989,959 bookings, 1,176,615 booked_rooms
+/Users/jon/GitHub/amenitiz-takehome/notebooks/eda/02_descriptive_analysis/section_1_3_daily_price.py:88: FutureWarning: The default of observed=False is deprecated and will be changed to True in a future version of pandas. Pass observed=False to retain current behavior or observed=True to adopt the future default and silence this warning.
+  price_by_stay = stay_length_groups.groupby('stay_group')['daily_price'].agg([
+/Users/jon/GitHub/amenitiz-takehome/notebooks/eda/02_descriptive_analysis/section_1_3_daily_price.py:120: UserWarning: set_ticklabels() should only be used with a fixed number of ticks, i.e. after set_ticks() or using a FixedLocator.
+  ax2.set_xticklabels(ax2.get_xticklabels(), rotation=45, ha='right')
+/Users/jon/GitHub/amenitiz-takehome/notebooks/eda/02_descriptive_analysis/section_1_3_daily_price.py:141: FutureWarning: The default of observed=False is deprecated and will be changed to True in a future version of pandas. Pass observed=False to retain current behavior or observed=True to adopt the future default and silence this warning.
+  price_by_stay_plot = stay_length_groups.groupby('stay_group')['daily_price'].median()
+TIMEOUT or ERROR
+
+==========================================
+Running: notebooks/eda/02_descriptive_analysis/section_2_1_room_features.py
+==========================================
+/Users/jon/GitHub/amenitiz-takehome/notebooks/eda/02_descriptive_analysis/section_2_1_room_features.py:14: DeprecationWarning: validate_and_clean() is deprecated. Use CleaningConfig and DataCleaner instead. See function docstring for migration instructions.
+  con = validate_and_clean(con_raw)
+/Users/jon/GitHub/amenitiz-takehome/notebooks/eda/02_descriptive_analysis/section_2_1_room_features.py:71: SettingWithCopyWarning: 
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  size_available['price_per_sqm'] = size_available['daily_price'] / size_available['room_size']
+/Users/jon/GitHub/amenitiz-takehome/notebooks/eda/02_descriptive_analysis/section_2_1_room_features.py:109: SettingWithCopyWarning: 
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  size_available['size_bin'] = pd.cut(
+/Users/jon/GitHub/amenitiz-takehome/notebooks/eda/02_descriptive_analysis/section_2_1_room_features.py:115: FutureWarning: The default of observed=False is deprecated and will be changed to True in a future version of pandas. Pass observed=False to retain current behavior or observed=True to adopt the future default and silence this warning.
+  price_by_size_category = size_available.groupby(['room_type', 'size_bin'])['daily_price'].agg([
+/Users/jon/GitHub/amenitiz-takehome/notebooks/eda/02_descriptive_analysis/section_2_1_room_features.py:134: UserWarning: set_ticklabels() should only be used with a fixed number of ticks, i.e. after set_ticks() or using a FixedLocator.
+  ax1.set_xticklabels(ax1.get_xticklabels(), rotation=45, ha='right')
+/Users/jon/GitHub/amenitiz-takehome/notebooks/eda/02_descriptive_analysis/section_2_1_room_features.py:162: UserWarning: set_ticklabels() should only be used with a fixed number of ticks, i.e. after set_ticks() or using a FixedLocator.
+  ax3.set_xticklabels(ax3.get_xticklabels(), rotation=45, ha='right')
+Loaded ds_booked_rooms.csv into table 'booked_rooms' with type casting
+Loaded ds_bookings.csv into table 'bookings' with type casting
+Loaded ds_hotel_location.csv into table 'hotel_location' with type casting
+Loaded ds_rooms.csv into table 'rooms' with type casting
+================================================================================
+SECTION 2.1: Room Features Analysis (Size, View)
+================================================================================
+
+Total bookings with feature data: 1,164,947
+
+================================================================================
+1. ROOM SIZE ANALYSIS
+================================================================================
+Bookings with room_size data: 776,708 (66.7%)
+
+Room size statistics:
+count    776708.000000
+mean         41.241877
+std         229.450609
+min           1.000000
+
+==========================================
+Running: notebooks/eda/02_descriptive_analysis/section_2_2_capacity_policies.py
+==========================================
+/Users/jon/GitHub/amenitiz-takehome/notebooks/eda/02_descriptive_analysis/section_2_2_capacity_policies.py:14: DeprecationWarning: validate_and_clean() is deprecated. Use CleaningConfig and DataCleaner instead. See function docstring for migration instructions.
+  con = validate_and_clean(con_raw)
+/Users/jon/GitHub/amenitiz-takehome/notebooks/eda/02_descriptive_analysis/section_2_2_capacity_policies.py:134: FutureWarning: The default of observed=False is deprecated and will be changed to True in a future version of pandas. Pass observed=False to retain current behavior or observed=True to adopt the future default and silence this warning.
+  price_by_occ_rate = capacity_data.groupby('occupancy_bin')['daily_price'].agg([
+/Users/jon/GitHub/amenitiz-takehome/notebooks/eda/02_descriptive_analysis/section_2_2_capacity_policies.py:149: UserWarning: set_ticklabels() should only be used with a fixed number of ticks, i.e. after set_ticks() or using a FixedLocator.
+  ax1.set_xticklabels(ax1.get_xticklabels(), rotation=45, ha='right')
+Loaded ds_booked_rooms.csv into table 'booked_rooms' with type casting
+Loaded ds_bookings.csv into table 'bookings' with type casting
+Loaded ds_hotel_location.csv into table 'hotel_location' with type casting
+Loaded ds_rooms.csv into table 'rooms' with type casting
+================================================================================
+SECTION 2.2: Capacity and Policy Flags Analysis
+================================================================================
+
+Total bookings with capacity/policy data: 1,164,947
+
+================================================================================
+1. CAPACITY ANALYSIS
+================================================================================
+
+--- Max Occupancy Distribution ---
+count    1.164947e+06
+mean     2.862620e+00
+std      2.047408e+00
+min      1.000000e+00
+25%      2.000000e+00
+50%      2.000000e+00
+75%      4.000000e+00
+max      2.000000e+02
+Name: max_occupancy, dtype: float64
+
+Max occupancy by category:
+                 count  mean  median  min  max
+room_type                                     
+apartment       267903  4.24     4.0    1  200
+cottage          10691  9.10     7.0    2   43
+reception_hall    2103  7.27     6.0    1  120
+room            859870  2.21     2.0    1   42
+villa            24380  7.73     6.0    1   50
+
+
+==========================================
+Running: notebooks/eda/02_descriptive_analysis/section_4_1_seasonality.py
+==========================================
+Applying 31 data cleaning rules...
+  ✓ Negative Price: 3 rows
+  ✓ Zero Price: 12,464 rows
+  ✓ Low Price (<€5/night): 653 rows
+  ✓ NULL Price: 968 rows
+  ✓ Extreme Price (>5k/night): 31 rows
+  ✓ NULL Dates: 991 rows
+  - NULL Created At: 0 rows
+  - Negative Stay: 0 rows
+  ✓ Negative Lead Time: 10,404 rows
+  - NULL Occupancy: 0 rows
+  ✓ Overcrowded Room: 11,226 rows
+  ✓ NULL Room ID: 5,037 rows
+  - NULL Booking ID: 0 rows
+  - NULL Hotel ID: 0 rows
+  ✓ Orphan Bookings: 21,759 rows
+  - NULL Status: 0 rows
+  ✓ Cancelled but Active: 2 rows
+  - Bookings Before 2023: 0 rows
+  ✓ Bookings After 2024: 1,911 rows
+  ✓ Exclude Reception Halls: 2,213 rows
+  ✓ Orphan Bookings (after exclusions): 1,993 rows
+  ✓ Exclude Missing Location (Phase 1): 166 rows
+  ✓ Exclude Missing Location Bookings (Phase 1): 158 rows
+  ✓ Fix Empty city: 712 rows
+  - Fix Empty country: 0 rows
+  ✓ Fix Empty address: 979 rows
+  ✓ Exclude Missing Location (Phase 2): 325 rows
+  ✓ Exclude Missing Location Bookings (Phase 2): 318 rows
+  ✓ Impute children_allowed: 6,908 rows
+  - Impute events_allowed: 0 rows
+  ✓ Set Empty Room View to 'no_view': 430,237 rows
+
+Final: 989,959 bookings, 1,176,615 booked_rooms
+Initializing database with full data cleaning...
+Loaded ds_booked_rooms.csv into table 'booked_rooms' with type casting
+Loaded ds_bookings.csv into table 'bookings' with type casting
+Loaded ds_hotel_location.csv into table 'hotel_location' with type casting
+Loaded ds_rooms.csv into table 'rooms' with type casting
+================================================================================
+TIMEOUT or ERROR
+
+==========================================
+Running: notebooks/eda/02_descriptive_analysis/section_4_2_popular_expensive.py
+==========================================
+Applying 31 data cleaning rules...
+  ✓ Negative Price: 3 rows
+  ✓ Zero Price: 12,464 rows
+  ✓ Low Price (<€5/night): 653 rows
+  ✓ NULL Price: 968 rows
+  ✓ Extreme Price (>5k/night): 31 rows
+  ✓ NULL Dates: 991 rows
+  - NULL Created At: 0 rows
+  - Negative Stay: 0 rows
+  ✓ Negative Lead Time: 10,404 rows
+  - NULL Occupancy: 0 rows
+  ✓ Overcrowded Room: 11,226 rows
+  ✓ NULL Room ID: 5,037 rows
+  - NULL Booking ID: 0 rows
+  - NULL Hotel ID: 0 rows
+  ✓ Orphan Bookings: 21,759 rows
+  - NULL Status: 0 rows
+  ✓ Cancelled but Active: 2 rows
+  - Bookings Before 2023: 0 rows
+  ✓ Bookings After 2024: 1,911 rows
+  ✓ Exclude Reception Halls: 2,213 rows
+  ✓ Orphan Bookings (after exclusions): 1,993 rows
+  ✓ Exclude Missing Location (Phase 1): 166 rows
+  ✓ Exclude Missing Location Bookings (Phase 1): 158 rows
+  ✓ Fix Empty city: 712 rows
+  - Fix Empty country: 0 rows
+  ✓ Fix Empty address: 979 rows
+  ✓ Exclude Missing Location (Phase 2): 325 rows
+  ✓ Exclude Missing Location Bookings (Phase 2): 318 rows
+  ✓ Impute children_allowed: 6,908 rows
+  - Impute events_allowed: 0 rows
+  ✓ Set Empty Room View to 'no_view': 430,237 rows
+
+Final: 989,959 bookings, 1,176,615 booked_rooms
+TIMEOUT or ERROR
+
+==========================================
+Running: notebooks/eda/02_descriptive_analysis/section_4_3_booking_counts.py
+==========================================
+Applying 31 data cleaning rules...
+  ✓ Negative Price: 3 rows
+  ✓ Zero Price: 12,464 rows
+  ✓ Low Price (<€5/night): 653 rows
+  ✓ NULL Price: 968 rows
+  ✓ Extreme Price (>5k/night): 31 rows
+  ✓ NULL Dates: 991 rows
+  - NULL Created At: 0 rows
+  - Negative Stay: 0 rows
+  ✓ Negative Lead Time: 10,404 rows
+  - NULL Occupancy: 0 rows
+  ✓ Overcrowded Room: 11,226 rows
+  ✓ NULL Room ID: 5,037 rows
+  - NULL Booking ID: 0 rows
+  - NULL Hotel ID: 0 rows
+  ✓ Orphan Bookings: 21,759 rows
+  - NULL Status: 0 rows
+  ✓ Cancelled but Active: 2 rows
+  - Bookings Before 2023: 0 rows
+  ✓ Bookings After 2024: 1,911 rows
+  ✓ Exclude Reception Halls: 2,213 rows
+  ✓ Orphan Bookings (after exclusions): 1,993 rows
+  ✓ Exclude Missing Location (Phase 1): 166 rows
+  ✓ Exclude Missing Location Bookings (Phase 1): 158 rows
+  ✓ Fix Empty city: 712 rows
+  - Fix Empty country: 0 rows
+  ✓ Fix Empty address: 979 rows
+  ✓ Exclude Missing Location (Phase 2): 325 rows
+  ✓ Exclude Missing Location Bookings (Phase 2): 318 rows
+  ✓ Impute children_allowed: 6,908 rows
+  - Impute events_allowed: 0 rows
+  ✓ Set Empty Room View to 'no_view': 430,237 rows
+
+Final: 989,959 bookings, 1,176,615 booked_rooms
+Initializing database with full data cleaning...
+Loaded ds_booked_rooms.csv into table 'booked_rooms' with type casting
+Loaded ds_bookings.csv into table 'bookings' with type casting
+Loaded ds_hotel_location.csv into table 'hotel_location' with type casting
+Loaded ds_rooms.csv into table 'rooms' with type casting
+================================================================================
+TIMEOUT or ERROR
+
+==========================================
+Running: notebooks/eda/03_spatial/hotspots/hotspots_dbscan.py
+==========================================
+Traceback (most recent call last):
+  File "/Users/jon/GitHub/amenitiz-takehome/notebooks/eda/03_spatial/hotspots/hotspots_dbscan.py", line 21, in <module>
+    from notebooks.eda.hotspots.spatial_utils import (  # noqa: E402
+    ...<2 lines>...
+    )
+ModuleNotFoundError: No module named 'notebooks.eda.hotspots'
+TIMEOUT or ERROR
+
+==========================================
+Running: notebooks/eda/03_spatial/hotspots/hotspots_grid.py
+==========================================
+Traceback (most recent call last):
+  File "/Users/jon/GitHub/amenitiz-takehome/notebooks/eda/03_spatial/hotspots/hotspots_grid.py", line 20, in <module>
+    from notebooks.eda.hotspots.spatial_utils import (  # noqa: E402
+    ...<2 lines>...
+    )
+ModuleNotFoundError: No module named 'notebooks.eda.hotspots'
+TIMEOUT or ERROR
+
+==========================================
+Running: notebooks/eda/03_spatial/hotspots/hotspots_kde_admin.py
+==========================================
+Traceback (most recent call last):
+  File "/Users/jon/GitHub/amenitiz-takehome/notebooks/eda/03_spatial/hotspots/hotspots_kde_admin.py", line 35, in <module>
+    from notebooks.eda.hotspots.spatial_utils import (  # noqa: E402
+    ...<2 lines>...
+    )
+ModuleNotFoundError: No module named 'notebooks.eda.hotspots'
+TIMEOUT or ERROR
+
+==========================================
+Running: notebooks/eda/03_spatial/hotspots/spatial_utils.py
+==========================================
+
+==========================================
+Running: notebooks/eda/03_spatial/section_3_1_integrated.py
+==========================================
+Traceback (most recent call last):
+  File "/Users/jon/GitHub/amenitiz-takehome/notebooks/eda/03_spatial/section_3_1_integrated.py", line 29, in <module>
+    from notebooks.eda.hotspots.spatial_utils import (  # noqa: E402
+    ...<2 lines>...
+    )
+ModuleNotFoundError: No module named 'notebooks.eda.hotspots'
+TIMEOUT or ERROR
+
+==========================================
+Running: notebooks/eda/04_pricing/section_5_1_lead_time.py
+==========================================
+Applying 31 data cleaning rules...
+  ✓ Negative Price: 3 rows
+  ✓ Zero Price: 12,464 rows
+  ✓ Low Price (<€5/night): 653 rows
+  ✓ NULL Price: 968 rows
+  ✓ Extreme Price (>5k/night): 31 rows
+  ✓ NULL Dates: 991 rows
+  - NULL Created At: 0 rows
+  - Negative Stay: 0 rows
+  ✓ Negative Lead Time: 10,404 rows
+  - NULL Occupancy: 0 rows
+  ✓ Overcrowded Room: 11,226 rows
+  ✓ NULL Room ID: 5,037 rows
+  - NULL Booking ID: 0 rows
+  - NULL Hotel ID: 0 rows
+  ✓ Orphan Bookings: 21,759 rows
+  - NULL Status: 0 rows
+  ✓ Cancelled but Active: 2 rows
+  - Bookings Before 2023: 0 rows
+  ✓ Bookings After 2024: 1,911 rows
+  ✓ Exclude Reception Halls: 2,213 rows
+  ✓ Orphan Bookings (after exclusions): 1,993 rows
+  ✓ Exclude Missing Location (Phase 1): 166 rows
+  ✓ Exclude Missing Location Bookings (Phase 1): 158 rows
+  ✓ Fix Empty city: 712 rows
+  - Fix Empty country: 0 rows
+  ✓ Fix Empty address: 979 rows
+  ✓ Exclude Missing Location (Phase 2): 325 rows
+  ✓ Exclude Missing Location Bookings (Phase 2): 318 rows
+  ✓ Impute children_allowed: 6,908 rows
+  - Impute events_allowed: 0 rows
+  ✓ Set Empty Room View to 'no_view': 430,237 rows
+
+Final: 989,959 bookings, 1,176,615 booked_rooms
+Initializing database with full data cleaning...
+Loaded ds_booked_rooms.csv into table 'booked_rooms' with type casting
+Loaded ds_bookings.csv into table 'bookings' with type casting
+Loaded ds_hotel_location.csv into table 'hotel_location' with type casting
+Loaded ds_rooms.csv into table 'rooms' with type casting
+================================================================================
+
+==========================================
+Running: notebooks/eda/04_pricing/section_5_2_occupancy_pricing.py
+==========================================
+Applying 31 data cleaning rules...
+  ✓ Negative Price: 3 rows
+  ✓ Zero Price: 12,464 rows
+  ✓ Low Price (<€5/night): 653 rows
+  ✓ NULL Price: 968 rows
+  ✓ Extreme Price (>5k/night): 31 rows
+  ✓ NULL Dates: 991 rows
+  - NULL Created At: 0 rows
+  - Negative Stay: 0 rows
+  ✓ Negative Lead Time: 10,404 rows
+  - NULL Occupancy: 0 rows
+  ✓ Overcrowded Room: 11,226 rows
+  ✓ NULL Room ID: 5,037 rows
+  - NULL Booking ID: 0 rows
+  - NULL Hotel ID: 0 rows
+  ✓ Orphan Bookings: 21,759 rows
+  - NULL Status: 0 rows
+  ✓ Cancelled but Active: 2 rows
+  - Bookings Before 2023: 0 rows
+  ✓ Bookings After 2024: 1,911 rows
+  ✓ Exclude Reception Halls: 2,213 rows
+  ✓ Orphan Bookings (after exclusions): 1,993 rows
+  ✓ Exclude Missing Location (Phase 1): 166 rows
+  ✓ Exclude Missing Location Bookings (Phase 1): 158 rows
+  ✓ Fix Empty city: 712 rows
+  - Fix Empty country: 0 rows
+  ✓ Fix Empty address: 979 rows
+  ✓ Exclude Missing Location (Phase 2): 325 rows
+  ✓ Exclude Missing Location Bookings (Phase 2): 318 rows
+  ✓ Impute children_allowed: 6,908 rows
+  - Impute events_allowed: 0 rows
+  ✓ Set Empty Room View to 'no_view': 430,237 rows
+
+Final: 989,959 bookings, 1,176,615 booked_rooms
+Initializing database with full data cleaning...
+Loaded ds_booked_rooms.csv into table 'booked_rooms' with type casting
+Loaded ds_bookings.csv into table 'bookings' with type casting
+Loaded ds_hotel_location.csv into table 'hotel_location' with type casting
+Loaded ds_rooms.csv into table 'rooms' with type casting
+================================================================================
+
+==========================================
+Running: notebooks/eda/04_pricing/section_6_1_room_features.py
+==========================================
+Applying 31 data cleaning rules...
+  ✓ Negative Price: 3 rows
+  ✓ Zero Price: 12,464 rows
+  ✓ Low Price (<€5/night): 653 rows
+  ✓ NULL Price: 968 rows
+  ✓ Extreme Price (>5k/night): 31 rows
+  ✓ NULL Dates: 991 rows
+  - NULL Created At: 0 rows
+  - Negative Stay: 0 rows
+  ✓ Negative Lead Time: 10,404 rows
+  - NULL Occupancy: 0 rows
+  ✓ Overcrowded Room: 11,226 rows
+  ✓ NULL Room ID: 5,037 rows
+  - NULL Booking ID: 0 rows
+  - NULL Hotel ID: 0 rows
+  ✓ Orphan Bookings: 21,759 rows
+  - NULL Status: 0 rows
+  ✓ Cancelled but Active: 2 rows
+  - Bookings Before 2023: 0 rows
+  ✓ Bookings After 2024: 1,911 rows
+  ✓ Exclude Reception Halls: 2,213 rows
+  ✓ Orphan Bookings (after exclusions): 1,993 rows
+  ✓ Exclude Missing Location (Phase 1): 166 rows
+  ✓ Exclude Missing Location Bookings (Phase 1): 158 rows
+  ✓ Fix Empty city: 712 rows
+  - Fix Empty country: 0 rows
+  ✓ Fix Empty address: 979 rows
+  ✓ Exclude Missing Location (Phase 2): 325 rows
+  ✓ Exclude Missing Location Bookings (Phase 2): 318 rows
+  ✓ Impute children_allowed: 6,908 rows
+  - Impute events_allowed: 0 rows
+  ✓ Set Empty Room View to 'no_view': 430,237 rows
+
+Final: 989,959 bookings, 1,176,615 booked_rooms
+Initializing database with full data cleaning...
+Loaded ds_booked_rooms.csv into table 'booked_rooms' with type casting
+Loaded ds_bookings.csv into table 'bookings' with type casting
+Loaded ds_hotel_location.csv into table 'hotel_location' with type casting
+Loaded ds_rooms.csv into table 'rooms' with type casting
+================================================================================
+
+==========================================
+Running: notebooks/eda/04_pricing/section_7_1_occupancy_capacity.py
+==========================================
+/Users/jon/GitHub/amenitiz-takehome/notebooks/eda/04_pricing/section_7_1_occupancy_capacity.py:35: DeprecationWarning: validate_and_clean() is deprecated. Use CleaningConfig and DataCleaner instead. See function docstring for migration instructions.
+  con = validate_and_clean(
+Initializing database...
+Loaded ds_booked_rooms.csv into table 'booked_rooms' with type casting
+Loaded ds_bookings.csv into table 'bookings' with type casting
+Loaded ds_hotel_location.csv into table 'hotel_location' with type casting
+Loaded ds_rooms.csv into table 'rooms' with type casting
+================================================================================
+SECTION 7.1: OCCUPANCY VS CAPACITY ANALYSIS
+================================================================================
+
+Calculating hotel capacities (CORRECTED method)...
+Analyzed 2246 hotels
+Total capacity across all hotels: 17,070.0 rooms
+
+Expanding bookings to per-night occupancy (CORRECTED method)...
+(Using generate_series to explode bookings to daily granularity)
+Calculated occupancy for 456,606 hotel-date combinations
+
+Calculating occupancy rates...
+Total hotel-nights analyzed: 456,606
+
+================================================================================
+OCCUPANCY STATISTICS
+================================================================================
+
+1. OVERALL OCCUPANCY DISTRIBUTION:
+   Mean occupancy: 51.1%
+   Median occupancy: 50.0%
+   Std dev: 31.2%
+   25th percentile: 25.0%
+   75th percentile: 77.8%
+   95th percentile: 100.0%
+
+2. HIGH OCCUPANCY FREQUENCY:
+   ≥95% occupancy: 76,466 nights (16.7%)
+   ≥90% occupancy: 83,548 nights (18.3%)
+   ≥80% occupancy: 111,290 nights (24.4%)
+
+3. PRICING BY OCCUPANCY LEVEL:
+
+==========================================
+Running: notebooks/eda/04_pricing/section_7_2_revpar.py
+==========================================
+/Users/jon/GitHub/amenitiz-takehome/notebooks/eda/04_pricing/section_7_2_revpar.py:31: DeprecationWarning: validate_and_clean() is deprecated. Use CleaningConfig and DataCleaner instead. See function docstring for migration instructions.
+  con = validate_and_clean(
+Initializing database...
+Loaded ds_booked_rooms.csv into table 'booked_rooms' with type casting
+Loaded ds_bookings.csv into table 'bookings' with type casting
+Loaded ds_hotel_location.csv into table 'hotel_location' with type casting
+Loaded ds_rooms.csv into table 'rooms' with type casting
+================================================================================
+SECTION 7.2: RevPAR ANALYSIS
+================================================================================
+
+Calculating hotel capacities (CORRECTED method)...
+Analyzed 2216 hotels
+
+Calculating RevPAR by hotel and date (CORRECTED method)...
+Calculated revenue for 455,589 hotel-date combinations
+
+RevPAR calculated for 455,589 hotel-nights
+
+================================================================================
+RevPAR STATISTICS
+================================================================================
+
+1. OVERALL RevPAR DISTRIBUTION:
+   Mean RevPAR: €65.46
+   Median RevPAR: €40.99
+   Std dev: €86.86
+   25th percentile: €18.26
+   75th percentile: €80.19
+
+2. RevPAR BY OCCUPANCY LEVEL:
+                count  mean_revpar  median_revpar  mean_occupancy  mean_price
+occupancy_bin                                                                
+<50%           263671        31.05          21.87           27.81      109.40
+50-70%          57375        65.96          56.59           62.50      105.18
+70-85%          41997        84.61          73.50           77.68      109.03
+85-95%          16667        90.70          78.00           89.08      101.97
+≥95%            75879       168.52         121.37           99.97      167.99
+
+3. RevPAR EFFICIENCY ANALYSIS:
+
+==========================================
+Running: notebooks/eda/05_elasticity/feature_importance_validation.py
+==========================================
+================================================================================
+FEATURE IMPORTANCE & SUFFICIENCY TEST
+================================================================================
+
+1. Loading and cleaning data...
+Loaded ds_booked_rooms.csv into table 'booked_rooms' with type casting
+Loaded ds_bookings.csv into table 'bookings' with type casting
+Loaded ds_hotel_location.csv into table 'hotel_location' with type casting
+Loaded ds_rooms.csv into table 'rooms' with type casting
+
+2. Loading hotel-month aggregation...
+   Loaded 26,047 hotel-month-roomtype records
+
+3. Loading distance features...
+   Loaded distance features for 4,652 hotels
+
+4. Engineering features...
+   Final dataset: 25,945 records
+
+5. Preparing features and target...
+   Features: 15 total
+     - Numeric: 9
+     - Categorical: 3
+     - Boolean: 3
+
+6. Creating preprocessing pipeline...
+
+7. Building models...
+   Models to evaluate: ['Ridge', 'RandomForest', 'XGBoost', 'LightGBM', 'CatBoost']
+
+8. Evaluating models...
+
+================================================================================
+MODEL EVALUATION
+================================================================================
+
+Ridge:
+----------------------------------------
+/Users/jon/GitHub/amenitiz-takehome/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2749: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+TIMEOUT or ERROR
+
+==========================================
+Running: notebooks/eda/05_elasticity/gps_continuous_treatment.py
+==========================================
+/Users/jon/GitHub/amenitiz-takehome/.venv/lib/python3.13/site-packages/numpy/lib/_function_base_impl.py:3065: RuntimeWarning: invalid value encountered in divide
+  c /= stddev[:, None]
+/Users/jon/GitHub/amenitiz-takehome/.venv/lib/python3.13/site-packages/numpy/lib/_function_base_impl.py:3066: RuntimeWarning: invalid value encountered in divide
+  c /= stddev[None, :]
+/Users/jon/GitHub/amenitiz-takehome/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2749: UserWarning: X does not have valid feature names, but PolynomialFeatures was fitted with feature names
+  warnings.warn(
+/Users/jon/GitHub/amenitiz-takehome/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2749: UserWarning: X does not have valid feature names, but PolynomialFeatures was fitted with feature names
+  warnings.warn(
+/Users/jon/GitHub/amenitiz-takehome/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2749: UserWarning: X does not have valid feature names, but PolynomialFeatures was fitted with feature names
+  warnings.warn(
+/Users/jon/GitHub/amenitiz-takehome/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2749: UserWarning: X does not have valid feature names, but PolynomialFeatures was fitted with feature names
+  warnings.warn(
+/Users/jon/GitHub/amenitiz-takehome/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2749: UserWarning: X does not have valid feature names, but PolynomialFeatures was fitted with feature names
+  warnings.warn(
+/Users/jon/GitHub/amenitiz-takehome/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2749: UserWarning: X does not have valid feature names, but PolynomialFeatures was fitted with feature names
+  warnings.warn(
+/Users/jon/GitHub/amenitiz-takehome/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2749: UserWarning: X does not have valid feature names, but PolynomialFeatures was fitted with feature names
+  warnings.warn(
+/Users/jon/GitHub/amenitiz-takehome/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2749: UserWarning: X does not have valid feature names, but PolynomialFeatures was fitted with feature names
+  warnings.warn(
+/Users/jon/GitHub/amenitiz-takehome/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2749: UserWarning: X does not have valid feature names, but PolynomialFeatures was fitted with feature names
+  warnings.warn(
+/Users/jon/GitHub/amenitiz-takehome/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2749: UserWarning: X does not have valid feature names, but PolynomialFeatures was fitted with feature names
+  warnings.warn(
+/Users/jon/GitHub/amenitiz-takehome/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2749: UserWarning: X does not have valid feature names, but PolynomialFeatures was fitted with feature names
+  warnings.warn(
+/Users/jon/GitHub/amenitiz-takehome/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2749: UserWarning: X does not have valid feature names, but PolynomialFeatures was fitted with feature names
+  warnings.warn(
+/Users/jon/GitHub/amenitiz-takehome/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2749: UserWarning: X does not have valid feature names, but PolynomialFeatures was fitted with feature names
+  warnings.warn(
+/Users/jon/GitHub/amenitiz-takehome/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2749: UserWarning: X does not have valid feature names, but PolynomialFeatures was fitted with feature names
+  warnings.warn(
+/Users/jon/GitHub/amenitiz-takehome/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2749: UserWarning: X does not have valid feature names, but PolynomialFeatures was fitted with feature names
+  warnings.warn(
+/Users/jon/GitHub/amenitiz-takehome/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2749: UserWarning: X does not have valid feature names, but PolynomialFeatures was fitted with feature names
+  warnings.warn(
+/Users/jon/GitHub/amenitiz-takehome/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2749: UserWarning: X does not have valid feature names, but PolynomialFeatures was fitted with feature names
+  warnings.warn(
+/Users/jon/GitHub/amenitiz-takehome/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2749: UserWarning: X does not have valid feature names, but PolynomialFeatures was fitted with feature names
+  warnings.warn(
+TIMEOUT or ERROR
+
+==========================================
+Running: notebooks/eda/05_elasticity/matched_pairs_geographic.py
+==========================================
+/Users/jon/GitHub/amenitiz-takehome/notebooks/eda/05_elasticity/matched_pairs_geographic.py:143: FutureWarning: The default of observed=False is deprecated and will be changed to True in a future version of pandas. Pass observed=False to retain current behavior or observed=True to adopt the future default and silence this warning.
+  for block_vars, block in df_blocked.groupby(['market_segment', 'room_type', 'month', 'children_allowed', 'revenue_quartile']):
+TIMEOUT or ERROR
+
+==========================================
+Running: notebooks/eda/05_elasticity/matched_pairs_longitudinal.py
+==========================================
+================================================================================
+LONGITUDINAL PRICE SENSITIVITY ANALYSIS
+Comparing Same Hotel Performance: 2023 vs 2024
+================================================================================
+
+Loading and cleaning data...
+Loaded ds_booked_rooms.csv into table 'booked_rooms' with type casting
+Loaded ds_bookings.csv into table 'bookings' with type casting
+Loaded ds_hotel_location.csv into table 'hotel_location' with type casting
+Loaded ds_rooms.csv into table 'rooms' with type casting
+
+Aggregating to Hotel-Month-Product level...
+  Raw records: 28,377
+  Unique hotels: 1,684
+  Year distribution:
+year
+2023    14387
+2024    13990
+
+Pivoting to wide format (2023 vs 2024)...
+  Products with data in BOTH years: 6,226
+  Unique hotels with YoY comparison: 733
+
+Calculating YoY changes...
+  After outlier removal: 5,602 products
+
+Assigning pricing strategy bins...
+
+Strategy distribution:
+strategy_bin
+Slashers\n (Prices decrease by >10%)           1201
+Flatliners\n (Prices change by -10% to +5%)    1140
+Nudgers\n (Prices increase by >5% to +15%)      767
+Hikers\n (Prices increase by >15% to +30%)      891
+Moonshots\n (Prices increase by >30%)          1603
+Name: count, dtype: int64
+
+Analyzing strategy performance...
+
+================================================================================
+
+==========================================
+Running: notebooks/eda/05_elasticity/matched_pairs_validated_features.py
+==========================================
+/Users/jon/GitHub/amenitiz-takehome/notebooks/eda/05_elasticity/matched_pairs_validated_features.py:143: FutureWarning: The default of observed=False is deprecated and will be changed to True in a future version of pandas. Pass observed=False to retain current behavior or observed=True to adopt the future default and silence this warning.
+  for block_vars, block in df_blocked.groupby(['market_segment', 'room_type', 'month', 'children_allowed', 'revenue_quartile']):
+TIMEOUT or ERROR
+
+==========================================
+Running: notebooks/eda/05_elasticity/matched_pairs_validated.py
+==========================================
+/Users/jon/GitHub/amenitiz-takehome/notebooks/eda/05_elasticity/matched_pairs_validated.py:253: FutureWarning: The default of observed=False is deprecated and will be changed to True in a future version of pandas. Pass observed=False to retain current behavior or observed=True to adopt the future default and silence this warning.
+  for block_vars, block in df_blocked.groupby([
+TIMEOUT or ERROR
+
+==========================================
+Running: notebooks/eda/05_elasticity/matched_pairs_with_replacement.py
+==========================================
+/Users/jon/GitHub/amenitiz-takehome/notebooks/eda/05_elasticity/matched_pairs_with_replacement.py:238: FutureWarning: The default of observed=False is deprecated and will be changed to True in a future version of pandas. Pass observed=False to retain current behavior or observed=True to adopt the future default and silence this warning.
+  for block_vars, block in df_blocked.groupby([
+/Users/jon/GitHub/amenitiz-takehome/notebooks/eda/05_elasticity/matched_pairs_with_replacement.py:450: SettingWithCopyWarning: 
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  df_valid['current_revenue'] = (
+/Users/jon/GitHub/amenitiz-takehome/notebooks/eda/05_elasticity/matched_pairs_with_replacement.py:454: SettingWithCopyWarning: 
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  df_valid['counterfactual_occ'] = (
+/Users/jon/GitHub/amenitiz-takehome/notebooks/eda/05_elasticity/matched_pairs_with_replacement.py:457: SettingWithCopyWarning: 
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  df_valid['counterfactual_revenue'] = (
+/Users/jon/GitHub/amenitiz-takehome/notebooks/eda/05_elasticity/matched_pairs_with_replacement.py:461: SettingWithCopyWarning: 
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  df_valid['opportunity'] = df_valid['counterfactual_revenue'] - df_valid['current_revenue']
+/Users/jon/GitHub/amenitiz-takehome/notebooks/eda/05_elasticity/matched_pairs_with_replacement.py:878: MatplotlibDeprecationWarning: The 'labels' parameter of boxplot() has been renamed 'tick_labels' since Matplotlib 3.9; support for the old name will be dropped in 3.11.
+  bp = ax2.boxplot(segment_data_list, labels=segment_labels, patch_artist=True,
+================================================================================
+1:1 MATCHING WITH REPLACEMENT - VALIDATED FEATURES
+================================================================================
+
+1. Loading and cleaning data...
+Loaded ds_booked_rooms.csv into table 'booked_rooms' with type casting
+Loaded ds_bookings.csv into table 'bookings' with type casting
+Loaded ds_hotel_location.csv into table 'hotel_location' with type casting
+Loaded ds_rooms.csv into table 'rooms' with type casting
+
+2. Loading hotel-month aggregation...
+   Loaded 26,047 hotel-month-roomtype records
+
+==========================================
+Running: notebooks/eda/05_elasticity/over_under_pricing.py
+==========================================
+/Users/jon/GitHub/amenitiz-takehome/notebooks/eda/05_elasticity/over_under_pricing.py:104: FutureWarning: The default of observed=False is deprecated and will be changed to True in a future version of pandas. Pass observed=False to retain current behavior or observed=True to adopt the future default and silence this warning.
+  summary = results.groupby('premium_bin')['is_winner'].mean()
+/Users/jon/GitHub/amenitiz-takehome/notebooks/eda/05_elasticity/over_under_pricing.py:123: FutureWarning: The default of observed=False is deprecated and will be changed to True in a future version of pandas. Pass observed=False to retain current behavior or observed=True to adopt the future default and silence this warning.
+  median_lift = results.groupby('premium_bin')['revpar_lift_pct'].median()
+Loading database...
+Loaded ds_booked_rooms.csv into table 'booked_rooms' with type casting
+Loaded ds_bookings.csv into table 'bookings' with type casting
+Loaded ds_hotel_location.csv into table 'hotel_location' with type casting
+Loaded ds_rooms.csv into table 'rooms' with type casting
+Creating aggregation...
+Matching pairs to identify Overpricing...
+
+============================================================
+THE REVPAR OPTIMIZATION CURVE
+============================================================
+
+Probability of RevPAR Gain by Price Hike:
+premium_bin
+10-20%    0.920413
+20-30%    0.925065
+30-40%    0.927085
+40-50%    0.937408
+50%+      0.941259
+Name: is_winner, dtype: float64
+
+Interpretation:
+- If 'is_winner' drops below 0.5, it means raising prices hurts RevPAR more often than it helps.
+- This threshold is our 'Safety Cap' for the algorithm.
+Saved plot to outputs/figures/revpar_tipping_point.png
+
+==========================================
+Running: notebooks/eda/eda_updated.py
+==========================================
+Applying 25 data cleaning rules...
+  ✓ Negative Price: 3 rows
+  ✓ Zero Price: 12,464 rows
+  ✓ Low Price (<€5/night): 653 rows
+  ✓ NULL Price: 968 rows
+  ✓ Extreme Price (>5k/night): 31 rows
+  ✓ NULL Dates: 991 rows
+  - NULL Created At: 0 rows
+  - Negative Stay: 0 rows
+  ✓ Negative Lead Time: 10,404 rows
+  - NULL Occupancy: 0 rows
+  ✓ Overcrowded Room: 11,226 rows
+  ✓ NULL Room ID: 5,037 rows
+  - NULL Booking ID: 0 rows
+  - NULL Hotel ID: 0 rows
+  ✓ Orphan Bookings: 21,759 rows
+  - NULL Status: 0 rows
+  ✓ Cancelled but Active: 2 rows
+  - Bookings Before 2023: 0 rows
+  ✓ Bookings After 2024: 1,911 rows
+  ✓ Fix Empty city: 712 rows
+  - Fix Empty country: 0 rows
+  ✓ Fix Empty address: 979 rows
+  ✓ Impute children_allowed: 6,935 rows
+  ✓ Impute events_allowed: 28 rows
+  ✓ Set Empty Room View to 'no_view': 430,680 rows
+
+Final: 992,428 bookings, 1,179,319 booked_rooms
+/Users/jon/GitHub/amenitiz-takehome/notebooks/eda/eda_updated.py:255: UserWarning: set_ticklabels() should only be used with a fixed number of ticks, i.e. after set_ticks() or using a FixedLocator.
+  ax3.set_xticklabels(ax3.get_xticklabels(), rotation=45, ha='right')
+/Users/jon/GitHub/amenitiz-takehome/notebooks/eda/eda_updated.py:1104: FutureWarning: The default of observed=False is deprecated and will be changed to True in a future version of pandas. Pass observed=False to retain current behavior or observed=True to adopt the future default and silence this warning.
+  price_by_occ_rate = capacity_data.groupby('occupancy_bin')['daily_price'].agg([
+/Users/jon/GitHub/amenitiz-takehome/notebooks/eda/eda_updated.py:1119: UserWarning: set_ticklabels() should only be used with a fixed number of ticks, i.e. after set_ticks() or using a FixedLocator.
+  ax1.set_xticklabels(ax1.get_xticklabels(), rotation=45, ha='right')
+Loaded ds_booked_rooms.csv into table 'booked_rooms' with type casting
+Loaded ds_bookings.csv into table 'bookings' with type casting
+Loaded ds_hotel_location.csv into table 'hotel_location' with type casting
+Loaded ds_rooms.csv into table 'rooms' with type casting
+Loaded ds_booked_rooms.csv into table 'booked_rooms' with type casting
+Loaded ds_bookings.csv into table 'bookings' with type casting
+TIMEOUT or ERROR
+
+==========================================
+Running: notebooks/eda/geo_data/GeoSpain/geospain/geo.py
+==========================================
+

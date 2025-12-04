@@ -8,14 +8,14 @@ The Goldilocks Solution:
 - Just Right (1:1 with Replacement): N=~3-5k pairs (one match per treatment)
 
 Methodology:
-1. Identify Treatment (High Price) and Control (Low Price) hotels within each block
+1. Identify Treatment (Premium Pricing) and Control (Discount Pricing) hotels within each block
 2. For EACH Treatment hotel, find its SINGLE BEST Control match
 3. DO NOT remove the Control from the pool (allow reuse)
-4. This estimates ATT (Average Treatment Effect on the Treated)
+4. This estimates ATT (Average Treatment Effect on the Treated) - the "Premium Advantage"
 
 Features validated by XGBoost (R² = 0.71):
 - Geographic: dist_center_km, dist_coast_log
-- Product: log_room_size, room_capacity_pax, amenities_score, total_capacity_log, view_quality_ordinal
+- Product: log_room_size, room_capacity_pax, amenities_score, total_capacity_log, view_quality_ordinal, total_capacity
 - Temporal: month_sin, month_cos, weekend_ratio
 - Categorical: room_type, room_view, city (top 5)
 - Boolean: is_coastal, is_summer, is_winter, children_allowed
@@ -27,6 +27,7 @@ sys.path.insert(0, '../../../..')
 
 from lib.db import init_db
 from lib.data_validator import CleaningConfig, DataCleaner
+from lib.sql_loader import load_sql_file
 import pandas as pd
 import numpy as np
 import re
@@ -37,43 +38,12 @@ from typing import Tuple, List
 from sklearn.preprocessing import StandardScaler
 from matplotlib.ticker import FuncFormatter
 
-# %%
-def get_cleaning_config() -> CleaningConfig:
-    """Returns standard cleaning configuration."""
-    return CleaningConfig(
-        remove_negative_prices=True,
-        remove_zero_prices=True,
-        remove_low_prices=True,
-        remove_null_prices=True,
-        remove_extreme_prices=True,
-        remove_null_dates=True,
-        remove_null_created_at=True,
-        remove_negative_stay=True,
-        remove_negative_lead_time=True,
-        remove_null_occupancy=True,
-        remove_overcrowded_rooms=True,
-        remove_null_room_id=True,
-        remove_null_booking_id=True,
-        remove_null_hotel_id=True,
-        remove_orphan_bookings=True,
-        remove_null_status=True,
-        remove_cancelled_but_active=True,
-        remove_bookings_before_2023=True,
-        remove_bookings_after_2024=True,
-        exclude_reception_halls=True,
-        exclude_missing_location=True,
-        fix_empty_strings=True,
-        impute_children_allowed=True,
-        impute_events_allowed=True,
-        match_city_names_with_tfidf=True,
-        set_empty_room_view_to_no_view_str=True,
-        verbose=False
-    )
 
 
 # %%
 def load_hotel_month_data(con) -> pd.DataFrame:
-    """Loads hotel-month aggregation with all validated features.
+    """
+    Loads hotel-month aggregation with all validated features.
     
     CORRECTED CALCULATIONS (based on schema exploration):
     1. Explode each booking to daily granularity (each night is a row)
@@ -82,129 +52,19 @@ def load_hotel_month_data(con) -> pd.DataFrame:
     4. Aggregate to HOTEL-MONTH level first to get total room-nights sold
     5. Occupancy = total_room_nights_sold / (hotel_capacity × days_in_month)
     6. Then join back room-type features for matching
+    
+    SQL Query: QUERY_LOAD_HOTEL_MONTH_DATA (defined below)
+    
+    Returns
+    -------
+    pd.DataFrame
+        Hotel-month aggregated statistics with all validated features.
     """
-    query = """
-    -- Step 1: Get TRUE hotel capacity (sum of distinct room types per hotel)
-    WITH hotel_capacity AS (
-        SELECT DISTINCT
-            b.hotel_id,
-            r.id as room_type_id,
-            r.number_of_rooms
-        FROM bookings b
-        JOIN booked_rooms br ON b.id = CAST(br.booking_id AS BIGINT)
-        JOIN rooms r ON br.room_id = r.id
-        WHERE b.status IN ('confirmed', 'Booked')
-    ),
-    hotel_total_capacity AS (
-        SELECT hotel_id, SUM(number_of_rooms) as hotel_rooms
-        FROM hotel_capacity
-        GROUP BY hotel_id
-    ),
+    # Define SQL query for traceability
+    # Load SQL query from file
+    query = load_sql_file('QUERY_LOAD_HOTEL_MONTH_DATA.sql', __file__)
     
-    -- Step 2: Explode bookings to daily granularity
-    daily_bookings AS (
-        SELECT 
-            b.hotel_id,
-            CAST(b.arrival_date + (n * INTERVAL '1 day') AS DATE) as stay_date,
-            br.room_type,
-            COALESCE(NULLIF(br.room_view, ''), 'no_view') AS room_view,
-            r.children_allowed,
-            hl.city,
-            hl.latitude,
-            hl.longitude,
-            br.total_price / (b.departure_date - b.arrival_date) as nightly_rate,
-            br.room_size,
-            r.max_occupancy as room_capacity_pax,
-            r.events_allowed,
-            r.pets_allowed,
-            r.smoking_allowed
-        FROM bookings b
-        JOIN booked_rooms br ON b.id = CAST(br.booking_id AS BIGINT)
-        JOIN hotel_location hl ON b.hotel_id = hl.hotel_id
-        JOIN rooms r ON br.room_id = r.id
-        CROSS JOIN generate_series(0, (b.departure_date - b.arrival_date) - 1) as t(n)
-        WHERE b.status IN ('confirmed', 'Booked')
-          AND CAST(b.arrival_date AS DATE) BETWEEN '2023-01-01' AND '2024-12-31'
-          AND hl.city IS NOT NULL
-          AND (b.departure_date - b.arrival_date) > 0
-    ),
-    
-    -- Step 3: FIRST aggregate to HOTEL-MONTH level to get correct total occupancy
-    hotel_month_totals AS (
-        SELECT 
-            db.hotel_id,
-            DATE_TRUNC('month', db.stay_date) AS month,
-            MAX(db.city) as city,
-            MAX(db.latitude) as latitude,
-            MAX(db.longitude) as longitude,
-            
-            -- TOTAL revenue and room-nights for the ENTIRE hotel
-            SUM(db.nightly_rate) AS total_revenue,
-            COUNT(*) AS total_room_nights_sold,
-            AVG(db.nightly_rate) AS avg_adr,
-            
-            -- Temporal
-            EXTRACT(MONTH FROM MAX(db.stay_date)) AS month_number,
-            EXTRACT(DAY FROM LAST_DAY(MAX(db.stay_date))) AS days_in_month,
-            SUM(CASE WHEN EXTRACT(ISODOW FROM db.stay_date) >= 6 THEN 1 ELSE 0 END)::FLOAT / 
-                NULLIF(COUNT(*), 0) AS weekend_ratio
-        FROM daily_bookings db
-        GROUP BY db.hotel_id, month
-    ),
-    
-    -- Step 4: Get room-type features (most common per hotel-month)
-    hotel_month_room_features AS (
-        SELECT 
-            db.hotel_id,
-            DATE_TRUNC('month', db.stay_date) AS month,
-            -- Use the most common room type/view for this hotel-month
-            MODE() WITHIN GROUP (ORDER BY db.room_type) as room_type,
-            MODE() WITHIN GROUP (ORDER BY db.room_view) as room_view,
-            MAX(db.children_allowed) as children_allowed,
-            AVG(db.room_size) AS avg_room_size,
-            MAX(db.room_capacity_pax) AS room_capacity_pax,
-            (CAST(MAX(db.events_allowed) AS INT) + 
-             CAST(MAX(db.pets_allowed) AS INT) + 
-             CAST(MAX(db.smoking_allowed) AS INT) + 
-             CAST(MAX(db.children_allowed) AS INT)) AS amenities_score
-        FROM daily_bookings db
-        GROUP BY db.hotel_id, month
-    )
-    
-    -- Step 5: Join everything and calculate CORRECT occupancy
-    SELECT 
-        hmt.hotel_id,
-        hmt.month,
-        hmrf.room_type,
-        hmrf.room_view,
-        hmrf.children_allowed,
-        hmt.city,
-        hmt.latitude,
-        hmt.longitude,
-        hmt.total_revenue,
-        hmt.total_room_nights_sold as room_nights_sold,
-        hmt.avg_adr,
-        hmrf.avg_room_size,
-        hmrf.room_capacity_pax,
-        hmt.month_number,
-        hmt.days_in_month,
-        hmt.weekend_ratio,
-        hmrf.amenities_score,
-        -- View quality (ordinal 0-3)
-        CASE 
-            WHEN hmrf.room_view IN ('ocean_view', 'sea_view') THEN 3
-            WHEN hmrf.room_view IN ('lake_view', 'mountain_view') THEN 2
-            WHEN hmrf.room_view IN ('pool_view', 'garden_view') THEN 1
-            ELSE 0
-        END AS view_quality_ordinal,
-        htc.hotel_rooms AS total_capacity,
-        -- CORRECT occupancy: TOTAL room_nights / (hotel_capacity × days)
-        (hmt.total_room_nights_sold::FLOAT / NULLIF(htc.hotel_rooms * hmt.days_in_month, 0)) AS occupancy_rate
-    FROM hotel_month_totals hmt
-    JOIN hotel_total_capacity htc ON hmt.hotel_id = htc.hotel_id
-    JOIN hotel_month_room_features hmrf ON hmt.hotel_id = hmrf.hotel_id AND hmt.month = hmrf.month
-    WHERE htc.hotel_rooms > 0 AND hmt.total_room_nights_sold > 0 AND hmt.avg_adr > 0
-    """
+    # Execute query
     return con.execute(query).fetchdf()
 
 
@@ -280,6 +140,7 @@ def engineer_validated_features(df: pd.DataFrame, distance_features: pd.DataFram
     # Product features
     df['log_room_size'] = np.log1p(df['avg_room_size'])
     df['total_capacity_log'] = np.log1p(df['total_capacity'])
+    df['log_partner_size'] = np.log1p(df['partner_size'])
     
     # Temporal features (cyclical encoding)
     df['month_sin'] = np.sin(2 * np.pi * df['month_number'] / 12)
@@ -296,17 +157,24 @@ def engineer_validated_features(df: pd.DataFrame, distance_features: pd.DataFram
 
 
 # %%
-def add_revenue_quartiles(df: pd.DataFrame) -> pd.DataFrame:
-    """Adds annual revenue quartile bins."""
-    hotel_annual_revenue = df.groupby('hotel_id')['total_revenue'].sum().reset_index()
-    hotel_annual_revenue.columns = ['hotel_id', 'annual_revenue']
-    hotel_annual_revenue['revenue_quartile'] = pd.qcut(
-        hotel_annual_revenue['annual_revenue'],
+def add_capacity_quartiles(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Adds capacity quartile bins based on total_capacity (number of rooms).
+    
+    This replaces revenue_quartile because:
+    1. New hotels have no revenue history
+    2. Capacity is available at listing time
+    3. Capacity is a strong proxy for business scale
+    """
+    hotel_capacity = df.groupby('hotel_id')['total_capacity'].first().reset_index()
+    hotel_capacity.columns = ['hotel_id', 'hotel_capacity']
+    hotel_capacity['capacity_quartile'] = pd.qcut(
+        hotel_capacity['hotel_capacity'],
         q=4,
         labels=['Q1', 'Q2', 'Q3', 'Q4'],
         duplicates='drop'
     )
-    return df.merge(hotel_annual_revenue[['hotel_id', 'revenue_quartile']], on='hotel_id', how='left')
+    return df.merge(hotel_capacity[['hotel_id', 'capacity_quartile']], on='hotel_id', how='left')
 
 
 # %%
@@ -321,7 +189,7 @@ def create_match_blocks(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame]:
     - city_standardized (top 5 + other)
     - month (temporal)
     - children_allowed (binary)
-    - revenue_quartile (Q1-Q4)
+    - capacity_quartile (Q1-Q4) - uses room count instead of revenue for new hotel support
     """
     df = df.copy()
     df['block_id'] = df.groupby([
@@ -331,7 +199,7 @@ def create_match_blocks(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame]:
         'city_standardized',
         'month',
         'children_allowed',
-        'revenue_quartile'
+        'capacity_quartile'
     ], observed=True).ngroup()
     
     block_hotel_counts = df.groupby('block_id', observed=True)['hotel_id'].nunique()
@@ -346,8 +214,8 @@ def find_matched_pairs_with_replacement(df_blocked: pd.DataFrame, max_block_size
     """
     1:1 Matching WITH REPLACEMENT
     
-    For each High-Price hotel (Treatment):
-    1. Find its single best Low-Price match (Control) in the same block
+    For each Premium Pricing hotel (Treatment):
+    1. Find its single best Discount Pricing match (Control) in the same block
     2. DO NOT remove the Control from the pool
     3. Multiple Treatments can match to the same Control
     
@@ -359,10 +227,11 @@ def find_matched_pairs_with_replacement(df_blocked: pd.DataFrame, max_block_size
     - view_quality_ordinal, weekend_ratio
     """
     # Validated matching features (continuous only)
+    # Added 'total_capacity' (number of rooms) as a direct matching factor per user request
     match_features = [
         'dist_center_km', 'dist_coast_log',
         'log_room_size', 'room_capacity_pax', 'amenities_score', 'total_capacity_log',
-        'view_quality_ordinal', 'weekend_ratio'
+        'view_quality_ordinal', 'weekend_ratio', 'total_capacity'
     ]
     
     matched_pairs = []
@@ -375,7 +244,7 @@ def find_matched_pairs_with_replacement(df_blocked: pd.DataFrame, max_block_size
     
     for block_vars, block in df_blocked.groupby([
         'is_coastal', 'room_type', 'room_view', 'city_standardized',
-        'month', 'children_allowed', 'revenue_quartile'
+        'month', 'children_allowed', 'capacity_quartile'
     ]):
         if len(block) < 2 or len(block) > max_block_size:
             continue
@@ -386,7 +255,7 @@ def find_matched_pairs_with_replacement(df_blocked: pd.DataFrame, max_block_size
         if not all(f in block.columns for f in match_features):
             continue
         
-        # Split into Treatment (High Price) and Control (Low Price)
+        # Split into Treatment (Premium Pricing) and Control (Discount Pricing)
         # Use median price within block as threshold
         median_price = block['avg_adr'].median()
         treatment = block[block['avg_adr'] > median_price].copy()
@@ -435,14 +304,14 @@ def find_matched_pairs_with_replacement(df_blocked: pd.DataFrame, max_block_size
                 'room_view': t_row.room_view,
                 'city': t_row.city_standardized,
                 'month': str(t_row.month),
-                'revenue_quartile': t_row.revenue_quartile,
+                'capacity_quartile': t_row.capacity_quartile,
                 
-                # Treatment (High Price)
+                # Treatment (Premium Pricing)
                 'treatment_hotel': t_row.hotel_id,
                 'treatment_price': t_row.avg_adr,
                 'treatment_occupancy': t_row.occupancy_rate,
                 
-                # Control (Low Price)
+                # Control (Discount Pricing)
                 'control_hotel': c_row['hotel_id'],
                 'control_price': c_row['avg_adr'],
                 'control_occupancy': c_row['occupancy_rate'],
@@ -560,7 +429,7 @@ def block_bootstrap_ci(pairs_df: pd.DataFrame, n_bootstrap: int = 1000, confiden
 
 
 def calculate_elasticity_and_opportunity(pairs_df: pd.DataFrame) -> pd.DataFrame:
-    """Calculates arc elasticity and counterfactual revenue opportunity."""
+    """Calculates arc elasticity and counterfactual revenue opportunity (ATT)."""
     df = pairs_df.copy()
     
     # Arc elasticity (midpoint method)
@@ -618,6 +487,16 @@ def calculate_revpar_metrics(opp_positive: pd.DataFrame, con=None) -> dict:
     avg_price_diff_pct = opp_positive['price_diff_pct'].mean()
     n_hotels = opp_positive['treatment_hotel'].nunique()
     
+    # Calculate robust relative lift metrics
+    opp_positive['revpar_treatment'] = opp_positive['treatment_price'] * opp_positive['treatment_occupancy']
+    opp_positive['revpar_control'] = opp_positive['control_price'] * opp_positive['control_occupancy']
+    opp_positive['lift_abs'] = opp_positive['revpar_treatment'] - opp_positive['revpar_control']
+    opp_positive['lift_pct'] = (opp_positive['lift_abs'] / opp_positive['revpar_control']) * 100
+    
+    # Use median lift for conservative estimate (mean is skewed by outliers)
+    median_lift_pct = opp_positive['lift_pct'].median()
+    mean_lift_pct = opp_positive['lift_pct'].mean()
+    
     # === ACTUAL DATA FROM CONTROL (underpriced) HOTELS ===
     avg_adr = opp_positive['control_price'].mean()
     avg_occupancy = opp_positive['control_occupancy'].mean()
@@ -660,9 +539,11 @@ def calculate_revpar_metrics(opp_positive: pd.DataFrame, con=None) -> dict:
         }
     
     return {
-        # Elasticity
+        # Elasticity & Lift
         'elasticity_median': elasticity,
         'avg_price_diff_pct': avg_price_diff_pct,
+        'observed_lift_pct_median': median_lift_pct,
+        'observed_lift_pct_mean': mean_lift_pct,
         
         # Actual baseline (from corrected data)
         'avg_adr': avg_adr,
@@ -1465,6 +1346,156 @@ def create_underpricing_figure(pairs_df: pd.DataFrame, analysis: dict, output_pa
 
 
 # %%
+def create_optimization_curve_figure(pairs_df: pd.DataFrame, output_path: Path) -> None:
+    """
+    Create revenue optimization curve from matched pairs data.
+    
+    This is the empirical version - using actual elasticity measured from matched pairs
+    to project RevPAR at different price points.
+    """
+    import numpy as np
+    
+    # Get empirical elasticity from matched pairs
+    elasticity_median = pairs_df['arc_elasticity'].median()
+    elasticity_25 = pairs_df['arc_elasticity'].quantile(0.25)
+    elasticity_75 = pairs_df['arc_elasticity'].quantile(0.75)
+    
+    # Get baseline metrics from control (underpriced) hotels
+    base_adr = pairs_df['control_price'].mean()
+    base_occ = pairs_df['control_occupancy'].mean()
+    base_revpar = base_adr * base_occ
+    
+    # Price deviation range
+    price_range = np.linspace(-30, 120, 100)
+    
+    # Variable elasticity model: elasticity becomes more negative at higher prices
+    # This captures competitive dynamics and customer price sensitivity
+    sensitivity_factor = 0.015  # Elasticity increases 1.5% per 1% price deviation
+    
+    def compute_revpar_curve(base_elasticity, price_devs):
+        """Compute RevPAR curve with variable elasticity."""
+        prices = base_adr * (1 + price_devs / 100)
+        
+        # Variable elasticity
+        elasticities = base_elasticity * (1 + sensitivity_factor * np.abs(price_devs))
+        
+        # Compute occupancy with cumulative elasticity effect
+        occupancies = np.zeros_like(price_devs)
+        # Find index closest to 0 as baseline
+        zero_idx = np.argmin(np.abs(price_devs))
+        occupancies[zero_idx] = base_occ
+        
+        # Forward from zero
+        for i in range(zero_idx + 1, len(price_devs)):
+            delta_p = (price_devs[i] - price_devs[i-1]) / 100
+            avg_e = (elasticities[i] + elasticities[i-1]) / 2
+            occupancies[i] = occupancies[i-1] * (1 + avg_e * delta_p)
+        
+        # Backward from zero
+        for i in range(zero_idx - 1, -1, -1):
+            delta_p = (price_devs[i] - price_devs[i+1]) / 100
+            avg_e = (elasticities[i] + elasticities[i+1]) / 2
+            occupancies[i] = occupancies[i+1] * (1 + avg_e * delta_p)
+        
+        occupancies = np.clip(occupancies, 0.01, 0.95)
+        return prices * occupancies
+    
+    # Compute curves for median and IQR
+    revpar_median = compute_revpar_curve(elasticity_median, price_range)
+    revpar_25 = compute_revpar_curve(elasticity_25, price_range)
+    revpar_75 = compute_revpar_curve(elasticity_75, price_range)
+    
+    # Find optimal for median curve
+    opt_idx = np.argmax(revpar_median)
+    opt_dev = price_range[opt_idx]
+    opt_rev = revpar_median[opt_idx]
+    
+    # Create figure
+    fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+    
+    # --- Left Panel: Empirical Elasticity Distribution ---
+    ax1 = axes[0]
+    
+    # Plot elasticity distribution
+    import seaborn as sns
+    sns.histplot(pairs_df['arc_elasticity'], bins=40, kde=True, ax=ax1, 
+                 color='#2E86AB', alpha=0.6, edgecolor='black', linewidth=0.5)
+    ax1.axvline(elasticity_median, color='#E74C3C', linestyle='--', linewidth=2.5,
+                label=f'Median: ε={elasticity_median:.2f}')
+    ax1.axvline(elasticity_25, color='orange', linestyle=':', linewidth=2,
+                label=f'Q1: ε={elasticity_25:.2f}')
+    ax1.axvline(elasticity_75, color='orange', linestyle=':', linewidth=2,
+                label=f'Q3: ε={elasticity_75:.2f}')
+    
+    ax1.set_xlabel('Price Elasticity of Demand (ε)', fontsize=12, fontweight='bold')
+    ax1.set_ylabel('Frequency', fontsize=12, fontweight='bold')
+    ax1.set_title('Empirical Elasticity Distribution\n(From Matched Pairs)', fontsize=14, fontweight='bold')
+    ax1.legend(fontsize=10)
+    ax1.set_xlim(-1.5, 0)
+    ax1.grid(True, alpha=0.3)
+    
+    # Add interpretation
+    ax1.text(0.02, 0.98, f'n = {len(pairs_df):,} pairs\nAll ε < 0 (inelastic)',
+             transform=ax1.transAxes, fontsize=10, va='top',
+             bbox=dict(boxstyle='round', facecolor='lightyellow', alpha=0.8))
+    
+    # --- Right Panel: Revenue Optimization Curve ---
+    ax2 = axes[1]
+    
+    # Plot confidence band (IQR)
+    ax2.fill_between(price_range, revpar_25, revpar_75, alpha=0.2, color='#2E86AB',
+                     label='IQR Range')
+    
+    # Plot median curve
+    ax2.plot(price_range, revpar_median, lw=3, color='#2E86AB',
+             label=f'RevPAR Curve (ε={elasticity_median:.2f})')
+    
+    # Mark optimal point
+    ax2.axvline(opt_dev, color='#27AE60', linestyle='--', lw=2, 
+                label=f'Optimal: +{opt_dev:.0f}%')
+    ax2.scatter(opt_dev, opt_rev, color='#27AE60', s=150, zorder=5, 
+                edgecolors='black', linewidth=2)
+    
+    # Shade zones
+    ax2.axvspan(15, 40, alpha=0.15, color='green', label='Safe Zone (15-40%)')
+    ax2.axvspan(opt_dev, 120, alpha=0.15, color='red', label=f'Overpricing (>{opt_dev:.0f}%)')
+    
+    # Mark peer average and current position
+    ax2.axvline(0, color='black', linestyle=':', alpha=0.5, label='Peer Average')
+    
+    # Calculate lift at optimal
+    zero_idx = np.argmin(np.abs(price_range))
+    base_rev = revpar_median[zero_idx]
+    lift_pct = ((opt_rev - base_rev) / base_rev) * 100
+    
+    ax2.set_xlabel('Price Deviation from Peer Group (%)', fontsize=12, fontweight='bold')
+    ax2.set_ylabel(f'Expected RevPAR (€)', fontsize=12, fontweight='bold')
+    ax2.set_title('Revenue Optimization Curve\n(Matched Pairs Empirical Model)', fontsize=14, fontweight='bold')
+    ax2.legend(fontsize=8, loc='upper right')
+    ax2.grid(True, alpha=0.3)
+    ax2.set_xlim(-30, 120)
+    
+    # Add metrics box
+    metrics_text = f"""At Optimal (+{opt_dev:.0f}%):
+RevPAR: €{opt_rev:.2f}
+Lift: +{lift_pct:.1f}%
+Base: €{base_rev:.2f}"""
+    ax2.text(0.02, 0.02, metrics_text, transform=ax2.transAxes, fontsize=9,
+             va='bottom', family='monospace',
+             bbox=dict(boxstyle='round', facecolor='lightyellow', alpha=0.8))
+    
+    plt.tight_layout()
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    plt.savefig(output_path, dpi=300, bbox_inches='tight', facecolor='white')
+    plt.close()
+    
+    print(f"   ✓ Optimization curve saved to: {output_path}")
+    print(f"      Empirical elasticity: ε = {elasticity_median:.2f}")
+    print(f"      Optimal price deviation: +{opt_dev:.0f}%")
+    print(f"      Expected RevPAR lift: +{lift_pct:.1f}%")
+
+
+# %%
 def print_results(opp_positive: pd.DataFrame) -> None:
     """Prints comprehensive results summary."""
     print("\n" + "=" * 80)
@@ -1490,8 +1521,8 @@ def print_results(opp_positive: pd.DataFrame) -> None:
     print(f"   Median price difference: {opp_positive['price_diff_pct'].median():.1f}%")
     print(f"   Price diff range: [{opp_positive['price_diff_pct'].min():.1f}%, {opp_positive['price_diff_pct'].max():.1f}%]")
     
-    print(f"\n4. OPPORTUNITY SIZING:")
-    print(f"   Total opportunity: €{opp_positive['opportunity'].sum():,.0f}")
+    print(f"\n4. OPPORTUNITY SIZING (ATT ESTIMATION):")
+    print(f"   Total opportunity (RevPAR Lift): €{opp_positive['opportunity'].sum():,.0f}")
     print(f"   Average per treatment: €{opp_positive['opportunity'].mean():,.0f}")
 
 
@@ -1504,9 +1535,17 @@ def main():
     
     # Load and clean data
     print("\n1. Loading and cleaning data...")
-    config = get_cleaning_config()
+    # Initialize database
+    con = init_db()
+    
+    # Clean data
+    config = CleaningConfig(
+        exclude_reception_halls=True,
+        exclude_missing_location=True,
+        match_city_names_with_tfidf=True
+    )
     cleaner = DataCleaner(config)
-    con = cleaner.clean(init_db())
+    con = cleaner.clean(con)
     
     # Load hotel-month data
     print("\n2. Loading hotel-month aggregation...")
@@ -1542,9 +1581,9 @@ def main():
     print(f"   Market segments:")
     print(df['market_segment'].value_counts())
     
-    # Add revenue quartiles
-    print("\n6. Calculating revenue quartiles...")
-    df = add_revenue_quartiles(df)
+    # Add capacity quartiles (replaces revenue_quartile for new hotel support)
+    print("\n6. Calculating capacity quartiles...")
+    df = add_capacity_quartiles(df)
     
     # Create blocks
     print("\n6. Creating exact match blocks...")
@@ -1573,23 +1612,29 @@ def main():
     underpricing_fig_path = script_dir / '../../../outputs/eda/elasticity/figures/underpricing_analysis.png'
     create_underpricing_figure(opp_positive, underpricing_analysis, underpricing_fig_path)
     
+    # Create optimization curve figure (matched pairs version)
+    print("\n10. Creating optimization curve figure...")
+    opt_curve_path = script_dir / '../../../outputs/eda/elasticity/figures/matched_pairs_optimization_curve.png'
+    create_optimization_curve_figure(opp_positive, opt_curve_path)
+    
     # Calculate bootstrap confidence intervals (clustered by treatment hotel)
-    print("\n10. Calculating bootstrap confidence intervals...")
+    print("\n11. Calculating bootstrap confidence intervals...")
     bootstrap_results = block_bootstrap_ci(opp_positive, n_bootstrap=1000, confidence=0.95)
     
     # Save results
-    print("\n11. Saving results...")
+    print("\n12. Saving results...")
     output_path = script_dir / '../../../outputs/eda/elasticity/data/matched_pairs_with_replacement.csv'
     output_path.parent.mkdir(parents=True, exist_ok=True)
     opp_positive.to_csv(output_path, index=False)
     print(f"   ✓ Saved pairs to: {output_path}")
     
     # Calculate RevPAR metrics
-    print("\n12. Calculating RevPAR metrics...")
+    print("\n13. Calculating RevPAR metrics...")
     revpar_metrics = calculate_revpar_metrics(opp_positive)
     
     print(f"\n   ELASTICITY & BASELINE:")
     print(f"   Elasticity (median): ε = {revpar_metrics['elasticity_median']:.3f}")
+    print(f"   Observed RevPAR Lift (ATT): +{revpar_metrics['observed_lift_pct_median']:.1f}% (median)")
     print(f"   Avg ADR (control hotels): €{revpar_metrics['avg_adr']:.2f}")
     print(f"   Avg price gap between twins: {revpar_metrics['avg_price_diff_pct']:.1f}%")
     
@@ -1640,7 +1685,7 @@ def main():
     print(f"✓ Saved bootstrap CI to: {bootstrap_path}")
     
     # Create executive summary figure
-    print("\n13. Creating executive summary figure (geographic style)...")
+    print("\n14. Creating executive summary figure (geographic style)...")
     exec_fig_path = script_dir / '../../../outputs/eda/elasticity/figures/matched_pairs_executive_summary.png'
     exec_fig_path.parent.mkdir(parents=True, exist_ok=True)
     create_geographic_style_figure(opp_positive, bootstrap_results, exec_fig_path)
