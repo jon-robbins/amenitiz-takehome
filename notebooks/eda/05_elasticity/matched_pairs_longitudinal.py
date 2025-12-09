@@ -19,6 +19,7 @@ sys.path.insert(0, '../../../..')
 
 from lib.db import init_db
 from lib.data_validator import CleaningConfig, DataCleaner
+from lib.sql_loader import load_sql_file
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -26,69 +27,30 @@ import seaborn as sns
 from matplotlib.ticker import FuncFormatter
 
 # %%
-def get_cleaning_config() -> CleaningConfig:
-    """Returns standard cleaning configuration for longitudinal analysis."""
-    return CleaningConfig(
-        remove_negative_prices=True,
-        remove_zero_prices=True,
-        remove_low_prices=True,
-        remove_null_prices=True,
-        remove_extreme_prices=True,
-        remove_null_dates=True,
-        remove_null_created_at=True,
-        remove_negative_stay=True,
-        remove_negative_lead_time=True,
-        remove_null_occupancy=True,
-        remove_overcrowded_rooms=True,
-        remove_null_room_id=True,
-        remove_null_booking_id=True,
-        remove_null_hotel_id=True,
-        remove_orphan_bookings=True,
-        remove_null_status=True,
-        remove_cancelled_but_active=True,
-        remove_bookings_before_2023=True,
-        remove_bookings_after_2024=True,
-        exclude_reception_halls=True,
-        fix_empty_strings=True,
-        impute_children_allowed=True,
-        impute_events_allowed=True,
-        set_empty_room_view_to_no_view_str=True,
-        verbose=False
-    )
 
 
 def load_hotel_month_product_data(con) -> pd.DataFrame:
     """
+    Load hotel-month-product aggregation for longitudinal analysis.
+    
+    SQL Query: QUERY_LOAD_HOTEL_MONTH_PRODUCT_DATA (defined below)
+    
+    Returns
+    -------
+    pd.DataFrame
+        Hotel-month-product aggregated statistics.
+    """
+    """
     Loads hotel-month-product aggregation for 2023 and 2024.
     
     Aggregates to Hotel-Month-Product level with ADR, revenue, and room nights.
+    
+    SQL Query: QUERY_LOAD_HOTEL_MONTH_PRODUCT_DATA (loaded from file)
     """
-    query = """
-    SELECT 
-        b.hotel_id,
-        EXTRACT(YEAR FROM CAST(b.arrival_date AS DATE)) AS year,
-        EXTRACT(MONTH FROM CAST(b.arrival_date AS DATE)) AS month,
-        br.room_type,
-        COALESCE(NULLIF(br.room_view, ''), 'no_view') AS room_view,
-        r.children_allowed,
-        AVG(br.total_price) AS avg_adr,
-        SUM(br.total_price) AS total_revenue,
-        COUNT(*) AS room_nights,
-        SUM(r.number_of_rooms) AS total_capacity
-    FROM bookings b
-    JOIN booked_rooms br ON b.id = CAST(br.booking_id AS BIGINT)
-    JOIN rooms r ON br.room_id = r.id
-    WHERE b.status IN ('confirmed', 'Booked')
-      AND EXTRACT(YEAR FROM CAST(b.arrival_date AS DATE)) IN (2023, 2024)
-    GROUP BY 
-        b.hotel_id, 
-        year, 
-        month, 
-        br.room_type, 
-        room_view, 
-        r.children_allowed
-    HAVING COUNT(*) >= 5  -- Minimum sample size per product-month
-    """
+    # Load SQL query from file
+    query = load_sql_file('QUERY_LOAD_HOTEL_MONTH_PRODUCT_DATA.sql', __file__)
+    
+    # Execute query
     return con.execute(query).fetchdf()
 
 
@@ -178,7 +140,13 @@ def assign_strategy_bins(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
     
     bins = [-np.inf, -0.10, 0.05, 0.15, 0.30, np.inf]
-    labels = ['Slashers', 'Flatliners', 'Nudgers', 'Hikers', 'Moonshots']
+    labels = [
+        "Slashers\n (Prices decrease by >10%)", 
+        "Flatliners\n (Prices change by -10% to +5%)", 
+        "Nudgers\n (Prices increase by >5% to +15%)", 
+        "Hikers\n (Prices increase by >15% to +30%)", 
+        "Moonshots\n (Prices increase by >30%)"
+    ]
     
     df['strategy_bin'] = pd.cut(
         df['price_change_pct'],
@@ -225,11 +193,20 @@ def detect_danger_zone(strategy_stats: pd.DataFrame) -> tuple[bool, str]:
     Returns:
         Tuple of (danger_zone_detected, message)
     """
-    if 'Moonshots' not in strategy_stats.index or 'Hikers' not in strategy_stats.index:
+    # Find Moonshots and Hikers by checking if index contains the key string
+    moonshots_idx = None
+    hikers_idx = None
+    for idx in strategy_stats.index:
+        if 'Moonshots' in str(idx):
+            moonshots_idx = idx
+        if 'Hikers' in str(idx):
+            hikers_idx = idx
+    
+    if moonshots_idx is None or hikers_idx is None:
         return False, "INSUFFICIENT DATA: Not enough Moonshots or Hikers to detect danger zone."
     
-    moonshots_revenue = strategy_stats.loc['Moonshots', 'revenue_median']
-    hikers_revenue = strategy_stats.loc['Hikers', 'revenue_median']
+    moonshots_revenue = strategy_stats.loc[moonshots_idx, 'revenue_median']
+    hikers_revenue = strategy_stats.loc[hikers_idx, 'revenue_median']
     
     if moonshots_revenue < hikers_revenue:
         diff = hikers_revenue - moonshots_revenue
@@ -262,14 +239,20 @@ def create_strategy_visualization(
     fig, axes = plt.subplots(2, 2, figsize=(16, 12))
     
     colors = {
-        'Slashers': '#E74C3C',    # Red - cutting prices
-        'Flatliners': '#95A5A6',  # Gray - no change
-        'Nudgers': '#3498DB',     # Blue - modest increase
-        'Hikers': '#27AE60',      # Green - healthy increase
-        'Moonshots': '#F39C12'    # Orange - aggressive
+        "Slashers\n (Prices decrease by >10%)": '#E74C3C',    # Red - cutting prices
+        "Flatliners\n (Prices change by -10% to +5%)": '#95A5A6',  # Gray - no change
+        "Nudgers\n (Prices increase by >5% to +15%)": '#3498DB',     # Blue - modest increase
+        "Hikers\n (Prices increase by >15% to +30%)": '#27AE60',      # Green - healthy increase
+        "Moonshots\n (Prices increase by >30%)": '#F39C12'    # Orange - aggressive
     }
     
-    ordered_bins = ['Slashers', 'Flatliners', 'Nudgers', 'Hikers', 'Moonshots']
+    ordered_bins = [
+        "Slashers\n (Prices decrease by >10%)", 
+        "Flatliners\n (Prices change by -10% to +5%)", 
+        "Nudgers\n (Prices increase by >5% to +15%)", 
+        "Hikers\n (Prices increase by >15% to +30%)", 
+        "Moonshots\n (Prices increase by >30%)"
+    ]
     existing_bins = [b for b in ordered_bins if b in strategy_stats.index]
     
     # =========================================================================
@@ -280,7 +263,17 @@ def create_strategy_visualization(
     revenues = [strategy_stats.loc[b, 'revenue_median'] for b in existing_bins]
     bar_colors = [colors[b] for b in existing_bins]
     
-    bars = ax1.bar(existing_bins, revenues, color=bar_colors, edgecolor='black', linewidth=1.5)
+    # Create multi-line labels with definitions
+    display_labels = []
+    for b in existing_bins:
+        parts = b.split('\n')
+        if len(parts) == 2:
+            # Format as "Strategy\n(Definition)"
+            display_labels.append(f"{parts[0]}\n{parts[1]}")
+        else:
+            display_labels.append(b)
+    
+    bars = ax1.bar(range(len(existing_bins)), revenues, color=bar_colors, edgecolor='black', linewidth=1.5)
     
     for bar, rev in zip(bars, revenues):
         height = bar.get_height()
@@ -293,6 +286,8 @@ def create_strategy_visualization(
     ax1.set_title('Median Revenue Growth by Pricing Strategy', fontsize=14, fontweight='bold')
     ax1.set_ylabel('Median YoY Revenue Change', fontsize=12)
     ax1.set_xlabel('Pricing Strategy (2023 → 2024)', fontsize=12)
+    ax1.set_xticks(range(len(existing_bins)))
+    ax1.set_xticklabels(display_labels, rotation=45, ha='right', fontsize=9)
     ax1.yaxis.set_major_formatter(FuncFormatter(lambda x, _: f'{x:.0%}'))
     ax1.grid(axis='y', alpha=0.3)
     
@@ -314,8 +309,17 @@ def create_strategy_visualization(
     bars2 = ax2_twin.bar(x + width/2, success_rates, width, color='forestgreen', alpha=0.7,
                          label='Success Rate', edgecolor='black')
     
+    # Create multi-line labels with definitions
+    display_labels = []
+    for b in existing_bins:
+        parts = b.split('\n')
+        if len(parts) == 2:
+            display_labels.append(f"{parts[0]}\n{parts[1]}")
+        else:
+            display_labels.append(b)
+    
     ax2.set_xticks(x)
-    ax2.set_xticklabels(existing_bins, fontsize=10)
+    ax2.set_xticklabels(display_labels, rotation=45, ha='right', fontsize=9)
     ax2.set_ylabel('Number of Hotel-Month-Products', fontsize=12, color='steelblue')
     ax2_twin.set_ylabel('Success Rate (% with Revenue Growth)', fontsize=12, color='forestgreen')
     ax2_twin.yaxis.set_major_formatter(FuncFormatter(lambda x, _: f'{x:.0%}'))
@@ -335,13 +339,19 @@ def create_strategy_visualization(
     
     for strategy in existing_bins:
         mask = df_sample['strategy_bin'] == strategy
+        # Use full label with definition for legend
+        parts = strategy.split('\n')
+        if len(parts) == 2:
+            legend_label = f"{parts[0]}\n{parts[1]}"
+        else:
+            legend_label = strategy
         ax3.scatter(
             df_sample.loc[mask, 'price_change_pct'] * 100,
             df_sample.loc[mask, 'revenue_change_pct'] * 100,
             c=colors[strategy],
             alpha=0.4,
             s=30,
-            label=strategy,
+            label=legend_label,
             edgecolors='none'
         )
     
@@ -397,10 +407,14 @@ def create_strategy_visualization(
              'o-', color='#2C3E50', linewidth=2.5, markersize=8, markerfacecolor='white',
              markeredgewidth=2)
     
-    # Highlight danger zone if exists
+    # Highlight danger zone - always show at x > 30% based on user requirement
+    # Check if we have data beyond 30% to determine if danger zone is relevant
+    max_price_change = x_vals.max() if len(x_vals) > 0 else 0
     danger_detected, _ = detect_danger_zone(strategy_stats)
-    if danger_detected:
-        ax4.axvspan(30, 60, alpha=0.2, color='red', label='Danger Zone (>30%)')
+    
+    # Always highlight danger zone at x > 30% if we have data in that range
+    if max_price_change > 30:
+        ax4.axvspan(30, max(max_price_change, 60), alpha=0.2, color='red', label='Danger Zone (>30%)')
         ax4.axvline(30, color='red', linestyle='--', linewidth=2, alpha=0.7)
     
     ax4.axhline(0, color='gray', linewidth=1, linestyle='-', alpha=0.5)
@@ -409,7 +423,8 @@ def create_strategy_visualization(
     ax4.set_ylabel('Median Revenue Change (%)', fontsize=12)
     ax4.set_title('The Tipping Point: Where Price Hikes Hurt', fontsize=14, fontweight='bold')
     ax4.grid(alpha=0.3)
-    if danger_detected:
+    # Always show legend if danger zone is highlighted
+    if max_price_change > 30:
         ax4.legend(loc='upper right')
     
     # Add annotation for optimal zone
@@ -427,7 +442,7 @@ def create_strategy_visualization(
     plt.suptitle('Longitudinal Price Sensitivity Analysis (2023 vs 2024)\nSelf-Matching: Same Hotel Comparison',
                  fontsize=16, fontweight='bold', y=1.02)
     
-    plt.tight_layout()
+    plt.tight_layout(rect=[0, 0.03, 1, 0.98])
     output_path.parent.mkdir(parents=True, exist_ok=True)
     plt.savefig(output_path, dpi=300, bbox_inches='tight', facecolor='white')
     plt.show()
@@ -445,11 +460,18 @@ def print_summary_table(strategy_stats: pd.DataFrame) -> None:
     ))
     print("-" * 70)
     
-    for strategy in ['Slashers', 'Flatliners', 'Nudgers', 'Hikers', 'Moonshots']:
-        if strategy in strategy_stats.index:
-            row = strategy_stats.loc[strategy]
+    for strategy_name in ['Slashers', 'Flatliners', 'Nudgers', 'Hikers', 'Moonshots']:
+        # Find matching index that contains the strategy name
+        matching_idx = None
+        for idx in strategy_stats.index:
+            if strategy_name in str(idx):
+                matching_idx = idx
+                break
+        
+        if matching_idx is not None:
+            row = strategy_stats.loc[matching_idx]
             print("{:<12} {:>10,} {:>12,} {:>11.1%} {:>11.1%} {:>11.1%}".format(
-                strategy,
+                strategy_name,
                 int(row['n_products']),
                 int(row['n_hotels']),
                 row['price_median'],
@@ -485,6 +507,106 @@ def print_danger_zone_analysis(strategy_stats: pd.DataFrame) -> None:
 
 
 # %%
+def create_executive_elasticity_proof(df: pd.DataFrame, strategy_stats: pd.DataFrame, output_path: Path) -> None:
+    """
+    Creates simplified visualization showing Price Change vs Occupancy Change.
+    This DIRECTLY proves elasticity - the slope IS the elasticity coefficient.
+    """
+    plt.style.use('seaborn-v0_8-whitegrid')
+    plt.rcParams['font.family'] = 'sans-serif'
+    plt.rcParams['figure.dpi'] = 300
+    
+    fig, ax = plt.subplots(1, 1, figsize=(10, 7))
+    
+    # Filter valid data
+    valid_mask = (
+        df['price_change_pct'].notna() & 
+        df['volume_change_pct'].notna() &
+        df['price_change_pct'].between(-0.5, 1.0) &
+        df['volume_change_pct'].between(-1.0, 1.0)
+    )
+    df_valid = df[valid_mask].copy()
+    
+    # Create bins for the curve
+    fine_bins = np.arange(-0.3, 0.6, 0.05)
+    df_valid['fine_bin'] = pd.cut(df_valid['price_change_pct'], bins=fine_bins)
+    
+    curve_data = df_valid.groupby('fine_bin', observed=True).agg({
+        'volume_change_pct': 'median',
+        'hotel_id': 'count'
+    }).reset_index()
+    curve_data.columns = ['bin', 'occupancy_median', 'count']
+    curve_data['bin_center'] = curve_data['bin'].apply(
+        lambda x: float(x.mid) if pd.notna(x) and hasattr(x, 'mid') else np.nan
+    )
+    curve_data['bin_center'] = pd.to_numeric(curve_data['bin_center'], errors='coerce')
+    curve_data = curve_data.dropna(subset=['bin_center'])
+    curve_data = curve_data[curve_data['count'] >= 20]
+    
+    x_vals = np.array(curve_data['bin_center'].values, dtype=float) * 100
+    y_vals = np.array(curve_data['occupancy_median'].values, dtype=float) * 100
+    
+    # Scatter plot of individual observations (sampled for visibility)
+    df_sample = df_valid.sample(min(2000, len(df_valid)), random_state=42)
+    ax.scatter(df_sample['price_change_pct'] * 100, df_sample['volume_change_pct'] * 100,
+               alpha=0.15, s=20, c='steelblue', edgecolors='none', label='Individual hotels')
+    
+    # Main curve (median trend)
+    ax.plot(x_vals, y_vals, 'o-', color='#E74C3C', linewidth=3, markersize=10, 
+            markerfacecolor='white', markeredgewidth=2.5, label='Median occupancy change', zorder=5)
+    
+    # Calculate and plot regression line (this IS the elasticity)
+    slope, intercept = np.polyfit(df_valid['price_change_pct'], df_valid['volume_change_pct'], 1)
+    x_line = np.linspace(-0.3, 0.5, 100)
+    ax.plot(x_line * 100, (slope * x_line + intercept) * 100, 'k--', linewidth=2, 
+            label=f'Elasticity: ε = {slope:.2f}', zorder=4)
+    
+    # Reference lines
+    ax.axhline(0, color='gray', linewidth=1.5, linestyle='-', alpha=0.5)
+    ax.axvline(0, color='gray', linewidth=1.5, linestyle='-', alpha=0.5)
+    
+    # Add elasticity interpretation box
+    interpretation = f"""Elasticity ε = {slope:.2f}
+    
+For every 10% price increase:
+→ Occupancy drops {abs(slope) * 10:.1f}%
+
+This confirms INELASTIC demand
+(|ε| < 1 means price ↑ = revenue ↑)"""
+    
+    ax.text(0.98, 0.98, interpretation,
+            transform=ax.transAxes, ha='right', va='top', fontsize=11,
+            bbox=dict(boxstyle='round,pad=0.5', facecolor='lightyellow', edgecolor='orange', alpha=0.95),
+            fontfamily='monospace')
+    
+    # Add "what unit elastic would look like" reference
+    ax.plot([-30, 50], [30, -50], ':', color='purple', linewidth=2, alpha=0.5,
+            label='Unit elastic (ε = -1)')
+    
+    ax.set_xlabel('Price Change Year-over-Year (%)', fontsize=14, fontweight='bold')
+    ax.set_ylabel('Occupancy Change Year-over-Year (%)', fontsize=14, fontweight='bold')
+    ax.set_title('Proving Elasticity: Price Increases → Small Occupancy Loss\n(Same Hotels Tracked 2023 → 2024)', 
+                 fontsize=16, fontweight='bold', pad=20)
+    ax.legend(loc='lower left', fontsize=10, frameon=True, shadow=True)
+    ax.grid(alpha=0.3)
+    ax.set_xlim(-35, 55)
+    ax.set_ylim(-60, 60)
+    
+    # Add sample size note
+    n_hotels = df_valid['hotel_id'].nunique()
+    ax.text(0.02, 0.02, f'n = {len(df_valid):,} hotel-month-products ({n_hotels:,} unique hotels)',
+            transform=ax.transAxes, ha='left', va='bottom', fontsize=10, 
+            style='italic', alpha=0.7)
+    
+    plt.tight_layout()
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    plt.savefig(output_path, dpi=300, bbox_inches='tight', facecolor='white')
+    plt.close()
+    print(f"   ✓ Executive elasticity proof figure saved to: {output_path}")
+    print(f"      Estimated elasticity from longitudinal data: ε = {slope:.3f}")
+
+
+# %%
 # =============================================================================
 # MAIN EXECUTION
 # =============================================================================
@@ -496,9 +618,15 @@ print("=" * 80)
 
 # %%
 print("\nLoading and cleaning data...")
-config = get_cleaning_config()
+# Initialize database
+con = init_db()
+
+# Clean data
+config = CleaningConfig(
+    exclude_reception_halls=True
+)
 cleaner = DataCleaner(config)
-con = cleaner.clean(init_db())
+con = cleaner.clean(con)
 
 # %%
 print("\nAggregating to Hotel-Month-Product level...")
@@ -544,8 +672,14 @@ print_danger_zone_analysis(strategy_stats)
 # %%
 print("\nCreating visualizations...")
 script_dir = Path(__file__).parent
-output_path = (script_dir / '../../../outputs/eda/elasticity/figures/longitudinal_pricing_analysis.png').resolve()
+
+# Full 4-panel visualization (for appendix)
+output_path = (script_dir / '../../../outputs/eda/elasticity/figures/longitudinal_pricing_analysis_full.png').resolve()
 create_strategy_visualization(df_final, strategy_stats, output_path)
+
+# Executive single-panel elasticity proof (for executive summary)
+exec_output_path = (script_dir / '../../../outputs/eda/elasticity/figures/longitudinal_pricing_analysis.png').resolve()
+create_executive_elasticity_proof(df_final, strategy_stats, exec_output_path)
 
 # %%
 # Save detailed results

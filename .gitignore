@@ -25,7 +25,7 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+# Note: lib/ is NOT ignored - it contains our utilities
 lib64/
 parts/
 sdist/
@@ -39,8 +39,8 @@ wheels/
 *.csv.gz
 *.npz
 
-# Images
-*.png
+# Images (allow .png for figures)
+# *.png
 *.jpg
 *.jpeg
 

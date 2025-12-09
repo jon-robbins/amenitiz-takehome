@@ -1,0 +1,34 @@
+# Price Recommender Configuration
+# ================================
+
+# Validated market elasticity from matched pairs analysis
+# 735 pairs, bootstrap CI: [-0.41, -0.37]
+elasticity:
+  market: -0.39
+  coastal: -0.45
+  madrid_metro: -0.50
+  provincial: -0.48
+
+# Diagnosis thresholds
+thresholds:
+  premium_threshold: 0.10      # 10% above/below peers triggers action
+  residual_threshold: 0.05    # 5pp occupancy difference triggers action
+
+# Price adjustment limits
+adjustments:
+  max_increase_pct: 30.0
+  max_decrease_pct: 30.0
+
+# Model parameters
+model:
+  n_estimators: 100
+  max_depth: 15
+  min_samples_leaf: 50
+  random_state: 42
+
+# Data parameters
+data:
+  min_price: 5.0
+  max_price: 1000.0
+  start_date: "2023-01-01"
+

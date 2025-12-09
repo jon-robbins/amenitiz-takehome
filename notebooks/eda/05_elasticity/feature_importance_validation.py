@@ -31,6 +31,7 @@ import re
 # Database and cleaning
 from lib.db import init_db
 from lib.data_validator import CleaningConfig, DataCleaner
+from lib.holiday_features import get_hotel_holiday_features
 
 # Scikit-learn
 from sklearn.pipeline import Pipeline
@@ -73,117 +74,159 @@ except ImportError:
 
 
 # %%
-def get_cleaning_config() -> CleaningConfig:
-    """Returns standard cleaning configuration."""
-    return CleaningConfig(
-        remove_negative_prices=True,
-        remove_zero_prices=True,
-        remove_low_prices=True,
-        remove_null_prices=True,
-        remove_extreme_prices=True,
-        remove_null_dates=True,
-        remove_null_created_at=True,
-        remove_negative_stay=True,
-        remove_negative_lead_time=True,
-        remove_null_occupancy=True,
-        remove_overcrowded_rooms=True,
-        remove_null_room_id=True,
-        remove_null_booking_id=True,
-        remove_null_hotel_id=True,
-        remove_orphan_bookings=True,
-        remove_null_status=True,
-        remove_cancelled_but_active=True,
-        remove_bookings_before_2023=True,
-        remove_bookings_after_2024=True,
-        exclude_reception_halls=True,
-        exclude_missing_location=True,
-        fix_empty_strings=True,
-        impute_children_allowed=True,
-        impute_events_allowed=True,
-        match_city_names_with_tfidf=True,
-        set_empty_room_view_to_no_view_str=True,
-        verbose=False
-    )
-
-
-# %%
 def load_hotel_month_data(con) -> pd.DataFrame:
     """
-    Loads hotel-month-roomtype aggregation with all features.
+    Loads hotel-month aggregation with all features.
+    
+    CORRECTED CALCULATIONS (based on schema exploration):
+    1. Explode each booking to daily granularity (each night is a row)
+    2. ADR = total_price / nights_stayed
+    3. Hotel capacity = SUM(number_of_rooms) for all distinct room types
+    4. Aggregate to HOTEL-MONTH level first to get total room-nights sold
+    5. Occupancy = total_room_nights_sold / (hotel_capacity × days_in_month)
+    6. Then join back room-type features for modeling
     
     Returns:
-        DataFrame with hotel_id, month, room_type as grain
+        DataFrame with hotel_id, month as grain
     """
     query = """
-    WITH hotel_month_room AS (
+    -- Step 1: Get TRUE hotel capacity (sum of distinct room types per hotel)
+    WITH hotel_capacity AS (
+        SELECT DISTINCT
+            b.hotel_id,
+            r.id as room_type_id,
+            r.number_of_rooms
+        FROM bookings b
+        JOIN booked_rooms br ON b.id = CAST(br.booking_id AS BIGINT)
+        JOIN rooms r ON br.room_id = r.id
+        WHERE b.status IN ('confirmed', 'Booked')
+    ),
+    hotel_total_capacity AS (
+        SELECT hotel_id, SUM(number_of_rooms) as hotel_rooms
+        FROM hotel_capacity
+        GROUP BY hotel_id
+    ),
+    
+    -- Step 2: Explode bookings to daily granularity
+    daily_bookings AS (
         SELECT 
             b.hotel_id,
-            DATE_TRUNC('month', CAST(b.arrival_date AS DATE)) AS month,
+            CAST(b.arrival_date + (n * INTERVAL '1 day') AS DATE) as stay_date,
             br.room_type,
             COALESCE(NULLIF(br.room_view, ''), 'no_view') AS room_view,
             r.children_allowed,
             hl.city,
             hl.latitude,
             hl.longitude,
-            
-            -- Revenue metrics
-            SUM(br.total_price) AS total_revenue,
-            COUNT(*) AS room_nights_sold,
-            SUM(br.total_price) / NULLIF(COUNT(*), 0) AS avg_adr,
-            
-            -- Room features
-            AVG(br.room_size) AS avg_room_size,
-            SUM(r.number_of_rooms) AS total_capacity,
-            MAX(r.max_occupancy) AS room_capacity_pax,
-            
-            -- Temporal features
-            EXTRACT(MONTH FROM MAX(CAST(b.arrival_date AS DATE))) AS month_number,
-            EXTRACT(DAY FROM LAST_DAY(MAX(CAST(b.arrival_date AS DATE)))) AS days_in_month,
-            SUM(CASE WHEN EXTRACT(ISODOW FROM CAST(b.arrival_date AS DATE)) >= 6 THEN 1 ELSE 0 END)::FLOAT / 
-                NULLIF(COUNT(*), 0) AS weekend_ratio,
-            
-            -- Amenities score (0-4)
-            (CAST(MAX(r.events_allowed) AS INT) + 
-             CAST(MAX(r.pets_allowed) AS INT) + 
-             CAST(MAX(r.smoking_allowed) AS INT) + 
-             CAST(MAX(r.children_allowed) AS INT)) AS amenities_score,
-            
-            -- View quality (ordinal 0-3)
-            CASE 
-                WHEN COALESCE(NULLIF(br.room_view, ''), 'no_view') IN ('ocean_view', 'sea_view') THEN 3
-                WHEN COALESCE(NULLIF(br.room_view, ''), 'no_view') IN ('lake_view', 'mountain_view') THEN 2
-                WHEN COALESCE(NULLIF(br.room_view, ''), 'no_view') IN ('pool_view', 'garden_view') THEN 1
-                ELSE 0
-            END AS view_quality_ordinal
-            
+            br.total_price / (b.departure_date - b.arrival_date) as nightly_rate,
+            br.room_size,
+            r.max_occupancy as room_capacity_pax,
+            r.events_allowed,
+            r.pets_allowed,
+            r.smoking_allowed
         FROM bookings b
         JOIN booked_rooms br ON b.id = CAST(br.booking_id AS BIGINT)
         JOIN hotel_location hl ON b.hotel_id = hl.hotel_id
         JOIN rooms r ON br.room_id = r.id
+        CROSS JOIN generate_series(0, (b.departure_date - b.arrival_date) - 1) as t(n)
         WHERE b.status IN ('confirmed', 'Booked')
           AND CAST(b.arrival_date AS DATE) BETWEEN '2023-01-01' AND '2024-12-31'
           AND hl.city IS NOT NULL
-        GROUP BY b.hotel_id, month, br.room_type, room_view, 
-                 r.children_allowed, hl.city, hl.latitude, hl.longitude
+          AND (b.departure_date - b.arrival_date) > 0
+    ),
+    
+    -- Step 3: FIRST aggregate to HOTEL-MONTH level to get correct total occupancy
+    hotel_month_totals AS (
+        SELECT 
+            db.hotel_id,
+            DATE_TRUNC('month', db.stay_date) AS month,
+            MAX(db.city) as city,
+            MAX(db.latitude) as latitude,
+            MAX(db.longitude) as longitude,
+            
+            -- TOTAL revenue and room-nights for the ENTIRE hotel
+            SUM(db.nightly_rate) AS total_revenue,
+            COUNT(*) AS total_room_nights_sold,
+            AVG(db.nightly_rate) AS avg_adr,
+            
+            -- Temporal
+            EXTRACT(MONTH FROM MAX(db.stay_date)) AS month_number,
+            EXTRACT(DAY FROM LAST_DAY(MAX(db.stay_date))) AS days_in_month,
+            SUM(CASE WHEN EXTRACT(ISODOW FROM db.stay_date) >= 6 THEN 1 ELSE 0 END)::FLOAT / 
+                NULLIF(COUNT(*), 0) AS weekend_ratio
+        FROM daily_bookings db
+        GROUP BY db.hotel_id, month
+    ),
+    
+    -- Step 4: Get room-type features (most common per hotel-month)
+    hotel_month_room_features AS (
+        SELECT 
+            db.hotel_id,
+            DATE_TRUNC('month', db.stay_date) AS month,
+            -- Use the most common room type/view for this hotel-month
+            MODE() WITHIN GROUP (ORDER BY db.room_type) as room_type,
+            MODE() WITHIN GROUP (ORDER BY db.room_view) as room_view,
+            MAX(db.children_allowed) as children_allowed,
+            AVG(db.room_size) AS avg_room_size,
+            MAX(db.room_capacity_pax) AS room_capacity_pax,
+            (CAST(MAX(db.events_allowed) AS INT) + 
+             CAST(MAX(db.pets_allowed) AS INT) + 
+             CAST(MAX(db.smoking_allowed) AS INT) + 
+             CAST(MAX(db.children_allowed) AS INT)) AS amenities_score
+        FROM daily_bookings db
+        GROUP BY db.hotel_id, month
     )
+    
+    -- Step 5: Join everything and calculate CORRECT occupancy
     SELECT 
-        *,
-        (room_nights_sold::FLOAT / NULLIF(total_capacity * days_in_month, 0)) AS occupancy_rate
-    FROM hotel_month_room
-    WHERE total_capacity > 0 AND room_nights_sold > 0 AND avg_adr > 0
+        hmt.hotel_id,
+        hmt.month,
+        hmrf.room_type,
+        hmrf.room_view,
+        hmrf.children_allowed,
+        hmt.city,
+        hmt.latitude,
+        hmt.longitude,
+        hmt.total_revenue,
+        hmt.total_room_nights_sold as room_nights_sold,
+        hmt.avg_adr,
+        hmrf.avg_room_size,
+        hmrf.room_capacity_pax,
+        hmt.month_number,
+        hmt.days_in_month,
+        hmt.weekend_ratio,
+        hmrf.amenities_score,
+        -- View quality (ordinal 0-3)
+        CASE 
+            WHEN hmrf.room_view IN ('ocean_view', 'sea_view') THEN 3
+            WHEN hmrf.room_view IN ('lake_view', 'mountain_view') THEN 2
+            WHEN hmrf.room_view IN ('pool_view', 'garden_view') THEN 1
+            ELSE 0
+        END AS view_quality_ordinal,
+        htc.hotel_rooms AS total_capacity,
+        -- CORRECT occupancy: TOTAL room_nights / (hotel_capacity × days)
+        (hmt.total_room_nights_sold::FLOAT / NULLIF(htc.hotel_rooms * hmt.days_in_month, 0)) AS occupancy_rate
+    FROM hotel_month_totals hmt
+    JOIN hotel_total_capacity htc ON hmt.hotel_id = htc.hotel_id
+    JOIN hotel_month_room_features hmrf ON hmt.hotel_id = hmrf.hotel_id AND hmt.month = hmrf.month
+    WHERE htc.hotel_rooms > 0 AND hmt.total_room_nights_sold > 0 AND hmt.avg_adr > 0
     """
     return con.execute(query).fetchdf()
 
 
 # %%
-def engineer_features(df: pd.DataFrame, distance_features: pd.DataFrame) -> pd.DataFrame:
+def engineer_features(
+    df: pd.DataFrame, 
+    distance_features: pd.DataFrame,
+    cities500_path: Path | None = None
+) -> pd.DataFrame:
     """
     Engineers all features for modeling.
     
     Features:
     - Geographic: dist_center_km, is_coastal, dist_coast_log, dist_madrid_log, lat, lon
     - Product: log_room_size, view_quality_ordinal, room_capacity_pax, amenities_score, total_capacity_log
-    - Temporal: month_sin, month_cos, weekend_ratio, is_summer, is_winter
+    - Temporal: month_sin, month_cos, weekend_ratio, is_summer, is_winter, holiday_ratio
     - City indicators: Binary flags for top 10 cities (is_madrid, is_barcelona, etc.)
     """
     df = df.copy()
@@ -253,11 +296,8 @@ def engineer_features(df: pd.DataFrame, distance_features: pd.DataFrame) -> pd.D
     df['log_room_size'] = np.log1p(df['avg_room_size'])
     df['total_capacity_log'] = np.log1p(df['total_capacity'])
     
-    # Temporal features (cyclical encoding)
-    df['month_sin'] = np.sin(2 * np.pi * df['month_number'] / 12)
-    df['month_cos'] = np.cos(2 * np.pi * df['month_number'] / 12)
-    df['is_summer'] = df['month_number'].isin([6, 7, 8]).astype(int)
-    df['is_winter'] = df['month_number'].isin([12, 1, 2]).astype(int)
+    # Temporal features
+    df['is_july_august'] = df['month_number'].isin([7, 8]).astype(int)  # Peak summer
     
     # Target variable (log-transformed ADR)
     df['log_avg_adr'] = np.log(df['avg_adr'])
@@ -266,6 +306,20 @@ def engineer_features(df: pd.DataFrame, distance_features: pd.DataFrame) -> pd.D
     df['city_lat'] = df['city_lat'].fillna(df['latitude'])
     df['city_lon'] = df['city_lon'].fillna(df['longitude'])
     df['dist_center_km'] = df['dist_center_km'].fillna(0)
+    
+    # Holiday features (Spanish regional holidays)
+    if cities500_path is not None:
+        df = get_hotel_holiday_features(
+            df,
+            cities500_path=cities500_path,
+            hotel_id_col='hotel_id',
+            lat_col='latitude',
+            lon_col='longitude',
+            month_col='month',
+            buffer_days=2
+        )
+        # Fill any remaining NaN in holiday_ratio with 0
+        df['holiday_ratio'] = df['holiday_ratio'].fillna(0)
     
     return df
 
@@ -281,19 +335,21 @@ def prepare_features_and_target(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.Seri
     Returns:
         X, y, numeric_features, categorical_features, boolean_features
     """
-    # Define feature groups
+    # Define feature groups - FULL SET WITH OCCUPANCY AND HOLIDAYS
     numeric_features = [
         'dist_center_km', 'dist_coast_log',
         'log_room_size', 'room_capacity_pax', 'amenities_score', 'total_capacity_log',
         'view_quality_ordinal',
-        'month_sin', 'month_cos', 'weekend_ratio'
+        'weekend_ratio',
+        'occupancy_rate',  # Now properly calculated (NULL room_ids filtered)
+        'holiday_ratio'    # Proportion of days near regional Spanish holidays
     ]
     
     # Categorical features (for CatBoost - no one-hot encoding needed)
     categorical_features = ['room_type', 'room_view', 'city_standardized']
     
     boolean_features = [
-        'is_coastal', 'is_summer', 'is_winter', 'children_allowed'
+        'is_coastal', 'is_july_august', 'children_allowed'
     ]
     
     # Combine all features
@@ -434,15 +490,17 @@ def evaluate_models(
             from sklearn.preprocessing import StandardScaler
             from sklearn.compose import make_column_transformer
             
-            # Get feature lists from parent scope
+            # Get feature lists from parent scope - FULL SET WITH OCCUPANCY AND HOLIDAYS
             numeric_features = [
                 'dist_center_km', 'dist_coast_log',
                 'log_room_size', 'room_capacity_pax', 'amenities_score', 'total_capacity_log',
                 'view_quality_ordinal',
-                'month_sin', 'month_cos', 'weekend_ratio'
+                'weekend_ratio',
+                'occupancy_rate',
+                'holiday_ratio'
             ]
             categorical_features = ['room_type', 'room_view', 'city_standardized']
-            boolean_features = ['is_coastal', 'is_summer', 'is_winter', 'children_allowed']
+            boolean_features = ['is_coastal', 'is_july_august', 'children_allowed']
             
             # Create preprocessor for CatBoost (no one-hot encoding)
             catboost_preprocessor = make_column_transformer(
@@ -908,9 +966,17 @@ def main():
     
     # Load and clean data
     print("\n1. Loading and cleaning data...")
-    config = get_cleaning_config()
+    # Initialize database
+    con = init_db()
+    
+    # Clean data
+    config = CleaningConfig(
+        exclude_reception_halls=True,
+        exclude_missing_location=True,
+        match_city_names_with_tfidf=True
+    )
     cleaner = DataCleaner(config)
-    con = cleaner.clean(init_db())
+    con = cleaner.clean(con)
     
     # Load hotel-month data
     print("\n2. Loading hotel-month aggregation...")
@@ -924,9 +990,12 @@ def main():
     distance_features = pd.read_csv(distance_features_path.resolve())
     print(f"   Loaded distance features for {len(distance_features):,} hotels")
     
+    # Path to cities500.json for holiday features
+    cities500_path = script_dir / '../../../data/cities500.json'
+    
     # Engineer features
-    print("\n4. Engineering features...")
-    df = engineer_features(df, distance_features)
+    print("\n4. Engineering features (including holiday proximity)...")
+    df = engineer_features(df, distance_features, cities500_path=cities500_path.resolve())
     df = df.dropna(subset=['log_avg_adr', 'distance_from_coast', 'distance_from_madrid'])
     print(f"   Final dataset: {len(df):,} records")
     

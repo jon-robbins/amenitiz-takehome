@@ -2,6 +2,7 @@
 import sys
 sys.path.insert(0, '../../..')
 from lib.db import init_db
+from lib.sql_loader import load_sql_file
 from lib.data_validator import CleaningConfig, DataCleaner
 import pandas as pd
 import numpy as np
@@ -12,9 +13,13 @@ from scipy.spatial.distance import cdist
 import seaborn as sns
 # 1. Setup
 print("Loading database...")
-config = CleaningConfig(match_city_names_with_tfidf=True, verbose=False)
+# Initialize database
+con = init_db()
+
+# Clean data
+config = CleaningConfig(match_city_names_with_tfidf=True)
 cleaner = DataCleaner(config)
-con = cleaner.clean(init_db())
+con = cleaner.clean(con)
 
 # Load distance features
 root_dir = Path(__file__).parent.parent.parent.parent
@@ -22,37 +27,10 @@ distance_features = pd.read_csv(root_dir / 'outputs' / 'eda' / 'spatial' / 'data
 
 # 2. Create Hotel-Month Aggregation (With RevPAR)
 print("Creating aggregation...")
-query = """
-WITH hotel_month AS (
-    SELECT 
-        b.hotel_id,
-        DATE_TRUNC('month', CAST(b.arrival_date AS DATE)) AS month,
-        br.room_type,
-        r.children_allowed,
-        hl.city,
-        -- Metrics
-        SUM(br.total_price) AS total_revenue,
-        COUNT(*) AS room_nights_sold,
-        SUM(br.total_price) / NULLIF(COUNT(*), 0) AS avg_adr,
-        AVG(br.room_size) AS avg_room_size,
-        SUM(r.number_of_rooms) AS total_capacity,
-        MAX(r.max_occupancy) AS room_capacity_pax,
-        -- Controls
-        SUM(CASE WHEN EXTRACT(ISODOW FROM CAST(b.arrival_date AS DATE)) >= 6 THEN 1 ELSE 0 END)::FLOAT / NULLIF(COUNT(*), 0) AS weekend_ratio
-    FROM bookings b
-    JOIN booked_rooms br ON b.id = CAST(br.booking_id AS BIGINT)
-    JOIN hotel_location hl ON b.hotel_id = hl.hotel_id
-    JOIN rooms r ON br.room_id = r.id
-    WHERE b.status = 'confirmed'
-    GROUP BY 1, 2, 3, 4, 5
-)
-SELECT 
-    *,
-    (total_revenue / NULLIF(total_capacity * 30, 0)) AS revpar, -- Approx days
-    (room_nights_sold::FLOAT / NULLIF(total_capacity * 30, 0)) AS occupancy_rate
-FROM hotel_month
-WHERE total_capacity > 0 AND room_nights_sold > 0
-"""
+# Load SQL query from file
+query = load_sql_file('QUERY_LOAD_HOTEL_MONTH_REVPAR.sql', __file__)
+
+# Execute query
 df = con.execute(query).fetchdf()
 df = df.merge(distance_features, on='hotel_id', how='inner')
 
@@ -94,11 +72,14 @@ for _, block in df_blocked.groupby('block_id'):
             price_diff = abs(prices[i] - prices[j]) / min(prices[i], prices[j])
             if price_diff < 0.10: continue
             
-            # Identify High vs Low
+            # Identify Premium vs Discount
             high_idx, low_idx = (i, j) if prices[i] > prices[j] else (j, i)
             
-            # THE KEY METRIC: Did High Price = High RevPAR?
+            # THE KEY METRIC: Did Premium Pricing = Higher RevPAR?
+            # Calculate Relative Lift (%)
             revpar_impact = revpars[high_idx] - revpars[low_idx]
+            revpar_lift_pct = (revpar_impact / revpars[low_idx]) * 100
+            
             is_winner = revpar_impact > 0
             
             matched_pairs.append({
@@ -106,6 +87,7 @@ for _, block in df_blocked.groupby('block_id'):
                 'low_price': prices[low_idx],
                 'price_premium_pct': price_diff,
                 'revpar_impact': revpar_impact,
+                'revpar_lift_pct': revpar_lift_pct,
                 'is_winner': is_winner,
                 'market_segment': block.iloc[i]['market_segment']
             })
@@ -132,9 +114,16 @@ print("- This threshold is our 'Safety Cap' for the algorithm.")
 plt.figure(figsize=(10,6))
 sns.barplot(x=summary.index, y=summary.values, color='steelblue')
 plt.axhline(0.5, color='red', linestyle='--', label='Breakeven Probability')
-plt.title("Risk of Overpricing: Success Rate of Price Hikes")
-plt.ylabel("Probability that High Price Twin made MORE Money")
+plt.title("Premium Strategy Success Rate: RevPAR Gain Probability")
+plt.ylabel("Probability that Premium Strategy yielded higher RevPAR")
 plt.xlabel("Price Premium vs. Twin")
+plt.ylim(0, 1.0)
+
+# Add relative lift annotation
+median_lift = results.groupby('premium_bin')['revpar_lift_pct'].median()
+for i, lift in enumerate(median_lift):
+    plt.text(i, 0.1, f"Median Lift:\n+{lift:.0f}%", ha='center', color='white', fontweight='bold')
+
 plt.legend()
 plt.savefig(root_dir / 'outputs' / 'eda' / 'elasticity' / 'figures' / 'revpar_tipping_point.png')
 print("Saved plot to outputs/figures/revpar_tipping_point.png")
