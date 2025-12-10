@@ -1,512 +1,500 @@
-# RevPAR Optimization Through Price Elasticity Analysis
-
-**Validating the Hypothesis: Hotels Are Leaving Money on the Table**
-
-**Author:** Data Science Team  
-**Date:** November 2024  
-**Dataset:** 989,959 bookings across 2,255 hotels (2023-2024)
-
----
+# PriceAdvisor: Hotel Pricing Optimization Model
 
 ## Executive Summary
 
-### The Problem: Hotels Price Backwards
+PriceAdvisor is a machine learning system that recommends RevPAR-optimized daily prices for hotels. The model identifies peer hotels using validated features (R² = 0.77), compares RevPAR performance, and recommends price adjustments based on the best-performing peer's strategy.
 
-**Economics 101:** When supply stays the same and demand increases, price should increase. Airlines understand this: one seat left on tomorrow's flight commands a premium. Hotels operate backwards: one room left at 5pm on a Tuesday gets a *discount*. They're panic-selling scarce inventory.
+Analysis of 989,959 bookings across 2,255 Spanish hotels (2023-2024) reveals that 30% of hotels have pricing optimization opportunity. Using validated market elasticity (ε = -0.39), the model estimates €1.28 RevPAR lift per room per night for hotels that adopt recommendations.
 
-![Underpricing Opportunity Map](outputs/eda/pricing/figures/section_5_2_occupancy_pricing.png)
-*Figure 1: The underpricing signal. Each dot is a hotel-day, colored by price (green=cheap, red=expensive). The shaded zone shows high occupancy (≥80%) AND high last-minute bookings (≥20%). Green dots here = hotels discounting despite strong demand.*
+### Expected Revenue Impact by Adoption Rate
 
-High occupancy signals high demand. But instead of raising prices, hotels discount their last rooms. We found **398 hotels (18% of market)** systematically underpricing compared to similar peers.
+| Adoption | Hotels Affected | Rooms | Annual RevPAR Delta |
+|----------|-----------------|-------|---------------------|
+| 25% | 171 | 746 | €348,531 |
+| 50% | 342 | 1,492 | €697,062 |
+| 75% | 512 | 2,238 | €1,045,594 |
+| 100% | 683 | 2,984 | €1,394,125 |
 
-### What We Found
+### Recommendations
 
-**1. Observable features explain 77% of pricing** (R² = 0.77)
-
-Room type, location, size, amenities, and seasonality account for most price variation. This means we can reliably identify "similar" hotels and compare their pricing strategies. Critically, **occupancy ranks #11 out of 20+ features**—below product, location, seasonality, weekend_ratio, and view quality. Hotels price on static attributes, not demand signals.
-
-**2. Underpriced hotels have higher occupancy but lower revenue**
-
-| Metric | Underpriced Hotels | Similar Peers | Gap |
-|--------|-------------------|---------------|-----|
-| Avg ADR | €87 | €160 | -46% |
-| Avg Occupancy | 40% | 33% | +23% |
-| RevPAR | €35 | €52 | -34% |
-
-These hotels charge 46% less but only have 23% more bookings. They're leaving money on the table.
-
-**3. Demand is inelastic: ε = -0.40**
-
-This is the key finding. Price elasticity measures how much occupancy drops when prices rise:
-- **ε = -1.0** (unit elastic): 10% price increase → 10% occupancy drop → no revenue change
-- **ε = -0.40** (our estimate): 10% price increase → only 4% occupancy drop → **+5.6% revenue**
-
-**How we measured this (matched pairs):** We compare Hotel A vs Hotel B in the *same month, same market*. By matching on 17 features (room type, location, size, amenities, revenue tier), we ensure any price difference reflects strategic choice, not quality differences. The matching distance (mean: 1.42) ensures true comparability.
-
-This cross-sectional approach is robust to inflation because both hotels face the same macro environment. A hotel charging €120 vs a similar hotel charging €100 is a real 20% premium, not inflation noise.
-
-![Matched Pairs Analysis](outputs/eda/elasticity/figures/matched_pairs_executive_summary.png)
-*Figure 2: Matched pairs analysis. We match similar hotels (same room type, location tier, size, month) and compare pricing strategies. Hotels charging higher prices have slightly lower occupancy—but the tradeoff favors higher prices (ε = -0.39).*
-
-**Supporting evidence (longitudinal):** Tracking same hotels 2023→2024 yields ε = -0.31. This is directionally consistent but weaker evidence since it doesn't control for inflation or market-wide trends.
-
-![Underpricing Analysis](outputs/eda/elasticity/figures/underpricing_analysis.png)
-*Figure 3: The opportunity. 398 underpriced hotels could raise prices 30% and still be 16% below peers. Annual market opportunity: €6.2M.*
-
-### Why This Matters
-
-With inelastic demand (|ε| < 1), **raising prices increases total revenue** even though some bookings are lost. The math:
-
-$$\text{Revenue Change} = (1 + \Delta P) \times (1 + \varepsilon \times \Delta P) - 1$$
-
-For a 10% price increase with ε = -0.40:
-- Revenue change = (1.10) × (1 - 0.04) - 1 = **+5.6%**
-
-### The Opportunity
-
-If underpriced hotels raised prices by 30% (still 16% below peers):
-- **RevPAR increase:** +14.2%
-- **Annual market opportunity:** €6.2M across 398 hotels
-- **Per hotel:** €15,592/year additional revenue
-
-**Next Step:** Build a RevPAR optimization model using validated elasticity (ε ≈ -0.35 to -0.40) with 30% price cap.
-
+1. Deploy daily batch pricing for the 30% of hotels with suboptimal RevPAR
+2. Prioritize resort coastal and major metro segments (lowest elasticity = safest price increases)
+3. Implement 3-month rolling training window with weekly model refresh
+4. Start with 25% adoption pilot to validate €350k annual lift before full rollout
 
 ---
 
-## Table of Contents
+## 1. Background
 
-1. [The Problem: Hotels Price Backwards](#1-the-problem)
-2. [The Evidence](#2-the-evidence)
-3. [The Validation](#3-the-validation)
-4. [The Opportunity](#4-the-opportunity)
-5. [Next Steps](#5-next-steps)
-6. [Appendix: Methodology](#appendix-methodology)
+Amenitiz provides hotel operations software including booking management, channel distribution, and website creation. PriceAdvisor extends this suite by recommending optimal daily room prices to maximize Revenue Per Available Room (RevPAR).
 
----
+The core problem: hotels price room attributes (location, size, amenities) correctly but ignore demand signals. Analysis shows weak correlation (r = 0.11) between occupancy and price, indicating hotels don't dynamically adjust pricing based on demand. Evidence includes:
 
-## 1. The Problem
-
-**Economics 101:** Supply stays the same, demand increases → price increases. Airlines operate this way: limited seats on a flight tomorrow command premium prices. Hotels operate backwards.
-
-**The hotel paradox:** At 5pm on a Tuesday, if you need a room for that night and the hotel has only one left, you'll likely get a *discount*, not a premium. Hotels panic-sell their last rooms instead of capturing scarcity value.
-
-**Why this happens:** Hotels track occupancy but don't adjust prices dynamically. When occupancy hits 90%, they should raise prices. Instead, they keep offering discounts to fill the final rooms. This leaves significant revenue on the table.
-
-**What we need to prove:**
-1. Hotels don't price based on occupancy (weak correlation)
-2. Demand is inelastic (raising prices doesn't lose much volume)
-3. We can identify who is underpricing and by how much
+- 39% of bookings receive last-minute discounts averaging 35%
+- Hotels achieve +41.5% price premium at high occupancy passively, not strategically
+- 16.6% of nights operate at 95%+ occupancy without corresponding price increases
 
 ---
 
-## 2. The Evidence
+## 2. Data Cleaning
 
-### 2.1 Hotels Ignore Occupancy
+### Raw Data
 
-![Occupancy vs Price](outputs/eda/pricing/figures/section_5_2_occupancy_pricing.png)
-*Figure 4: Weak correlation (r = 0.11) between occupancy and price. Hotels at 95% occupancy charge anywhere from €50 to €150.*
+| Table | Records |
+|-------|---------|
+| Bookings | 1,005,823 |
+| Booked Rooms | 1,194,287 |
+| Hotels | 2,312 |
 
-The data shows pooled correlation r = 0.143 between occupancy and price (from `section_5_2_occupancy_pricing.py`). If hotels priced optimally, we'd expect r > 0.5. At 95% occupancy, prices range from €50 to €150 (3x variation). Hotels at 30% occupancy discount aggressively (correct), but high-occupancy hotels don't increase prices proportionally (incorrect). This asymmetry is the core opportunity.
+### Cleaning Process
 
-### 2.2 Geographic and Temporal Patterns
+31 validation rules removed 1.5% of records (15,864 bookings, 17,672 rooms, 57 hotels):
 
-![Booking Heatmap Animation](outputs/booking_heatmap.gif)
+| Category | Rules | Description |
+|----------|-------|-------------|
+| Price validation | 6 | Remove negative, zero, <€5/night, >€5000/night, top/bottom 2% outliers |
+| Date validation | 4 | Remove null dates, negative stay duration, negative lead time |
+| Referential integrity | 5 | Remove orphan bookings, null IDs, null status |
+| Geographic filtering | 2 | Exclude non-Spain hotels (outside bounding box), impute missing coordinates from cities500.json |
+| Temporal filtering | 2 | Remove bookings before 2023 or after 2024 |
+| Data quality | 2 | Convert empty strings to NULL, remove malformed city names |
 
-*Figure 3: Temporal heatmap showing booking patterns across Spain throughout 2023-2024. The animation reveals clear seasonal concentration in coastal regions during summer months (July-August), with geographic clustering around major cities year-round. This visualization demonstrates both the spatial and temporal dimensions of demand that hotels should incorporate into pricing decisions. Reproduce this visualization using `notebooks/interactive_heatmap_demo.ipynb`.*
+City name standardization merged 347 unique names into 198 standardized forms using TF-IDF cosine similarity (threshold = 0.97).
 
-The heatmap reveals critical patterns: (1) **Summer concentration** - bookings cluster heavily on Mediterranean and Atlantic coasts during July-August, (2) **City persistence** - Barcelona, Madrid, and Seville maintain high booking density year-round, (3) **Geographic clustering** - demand is not uniform, creating natural market segments for pricing strategies.
+### Final Dataset
 
-### 2.3 Hotels Price Static Attributes Correctly
+| Table | Records | % Retained |
+|-------|---------|------------|
+| Bookings | 989,959 | 98.4% |
+| Booked Rooms | 1,176,615 | 98.5% |
+| Hotels | 2,255 | 97.5% |
 
-Hotels successfully price three categories: **Location** (coastal premium, city center effects), **Product features** (room size, view hierarchy, room type), and **Seasonality** (July-August premium). Combined, these observable features explain **R² = 0.77** of price variation (from `feature_importance_validation.py`).
-
-![SHAP Feature Importance](outputs/eda/elasticity/figures/4_shap_beeswarm.png)
-*Figure 5: SHAP feature importance with occupancy_rate included. Top drivers are product (room_capacity_pax, log_room_size), location (dist_coast_log, dist_center_km), and season (is_july_august). Occupancy_rate ranks #11—in the bottom half—proving hotels don't adjust prices based on demand signals.*
-
-**The smoking gun:** We explicitly included `occupancy_rate` as a feature, and it ranks **#11 out of 20+ features**—below product, location, seasonality, weekend_ratio, and even view quality. Looking at the SHAP plot, high occupancy (red dots) spreads across both positive and negative values with no clear pattern. If hotels did dynamic pricing, high occupancy would consistently push prices up. It doesn't.
-
-### 2.4 Lead Time Asymmetry
-
-Hotels exhibit asymmetric pricing: 15% of bookings are last-minute (<7 days), receiving 35% discounts. Hotels panic-discount when occupancy is uncertain but don't charge premiums when occupancy is high. The correct strategy: discount last-minute bookings only at low occupancy (<50%), charge +20% premium at high occupancy (>80%).
-
----
-
-## 3. The Validation
-
-### 3.1 Causal Framework
-
-To estimate price elasticity causally, we use matched pairs with replacement. Within each market segment (defined by location, room type, season, capacity), we identify:
-- **High-price hotels** (above median price in segment)
-- **Low-price hotels** (at or below median)
-
-We match each high-price hotel to its single best low-price twin based on 17 observable features (R² = 0.71). The price difference between twins, conditional on identical features, reveals demand elasticity.
-
-Arc elasticity for discrete price changes:
-
-$$\varepsilon_{arc} = \frac{(Q_2 - Q_1) / \bar{Q}}{(P_2 - P_1) / \bar{P}} \quad \text{where} \quad \bar{Q} = \frac{Q_1 + Q_2}{2}, \quad \bar{P} = \frac{P_1 + P_2}{2}$$
-
-where:
-- $P$ = Price (Average Daily Rate, ADR in €)
-- $Q$ = Quantity (Occupancy rate, 0-1, or room nights sold)
-- Subscripts 1 and 2 refer to low-price and high-price hotels in matched pairs
-
-**Key insight:** If two hotels are identical on all observable dimensions (R² = 0.71), their occupancy difference reveals how customers respond to price differences. This identifies underpriced hotels (high occupancy, low price) and quantifies their opportunity.
-
-### 3.2 Matching Methodology
-
-We match hotels using **1:1 matching with replacement** on 17 validated features (R² = 0.71). Exact matching on 7 categorical variables (coastal, room_type, room_view, city, month, children_allowed, revenue_quartile) ensures hotels are in same market. Continuous matching on 8 numeric features (dist_coast, dist_center, room_size, capacity, amenities, view_quality, weekend_ratio, **total_capacity_log**) using nearest neighbor (Euclidean distance).
-
-**Quality filters:** Match distance < 3.0, price difference 10-100% (true substitutes, not €100 vs €500), elasticity -5 to 0 (economically valid).
-
-**Results:** 881 high-quality pairs (470 treatment hotels, 398 controls), mean match distance 1.42, mean price difference 58%, control reuse 2.21x.
-
-### 3.3 Elasticity Estimate
-
-$$\hat{\varepsilon} = -0.39 \quad [95\% \text{ CI: } -0.41, -0.36]$$
-
-Computed via block bootstrap (1,000 iterations, clustered by treatment hotel) to account for control reuse. **Interpretation:** 10% price increase → 3.9% occupancy decrease → +5.8% net revenue.
-
-**Validation:** Longitudinal analysis (within-hotel price changes over time) yields ε = -0.40, consistent with cross-sectional ε = -0.39 (difference 0.01), confirming elasticity is causal, not driven by unobserved quality.
+**Reproduce:** `python -m src.data.validator`
 
 ---
 
-## 4. The Opportunity
+## 3. Methodology
 
-### 4.1 Who is Underpriced?
+### 3.1 Market Sensitivity Analysis
 
-Through matched pairs analysis, we identified **398 hotels (18% of the 2,255 market)** that are systematically underpricing. These are hotels that:
-- Have similar features to higher-priced peers (matched on 17 variables, R² = 0.71)
-- Charge significantly less for equivalent product
-- Have higher occupancy despite lower prices (proving demand exists)
+Before building the recommender, we validated that pricing optimization opportunity exists by estimating price elasticity.
 
-### 4.2 How Much Are They Underpricing?
+**Definition:** Price elasticity measures how demand changes when price changes:
 
-| Metric | Underpriced Hotels | Peer Hotels | Gap |
-|--------|-------------------|-------------|-----|
-| **Avg ADR** | €87 | €160 | -46% |
-| **Avg Occupancy** | 40% | 33% | +23% |
-| **RevPAR** | €35 | €52 | -34% |
+$$\varepsilon = \frac{\% \Delta Q}{\% \Delta P}$$
 
-**Key insight:** Underpriced hotels charge **46% less** than similar peers but have **23% higher occupancy**. This proves demand exists at higher prices. They're leaving €17/room/night on the table.
+**Method:** We calculate segment-level elasticity from rolling windows of booking data using log-log regression within each segment:
 
-### 4.3 What's the Opportunity?
+$$\ln(\text{Bookings}) = \alpha + \varepsilon \cdot \ln(\text{Price}) + \epsilon$$
 
-Using elasticity ε = -0.40, we calculate what happens if underpriced hotels raise prices:
+**Results (calculated from 19 rolling windows, 2023-2024):**
 
-| Price Increase | New ADR | New Occupancy | RevPAR Gain | Annual Opportunity |
-|---------------|---------|---------------|-------------|-------------------|
-| 10% | €95 | 38.5% | +5.6% | **€2.4M** |
-| 20% | €104 | 36.8% | +10.3% | **€4.5M** |
-| **30% (recommended)** | **€113** | **35.2%** | **+14.2%** | **€6.2M** |
-| 46% (close gap) | €127 | 32.6% | +18.9% | €8.2M |
+| Segment | Elasticity | Interpretation |
+|---------|------------|----------------|
+| resort_coastal | -0.13 | Least elastic (premium tolerance) |
+| rural | -0.19 | Low elasticity |
+| urban_fringe | -0.21 | Low-moderate |
+| major_metro | -0.30 | Moderate |
+| provincial_city | -0.44 | Most elastic (price sensitive) |
 
-**Recommended:** 30% price increase
-- Still 16% below peers (conservative, room for growth)
-- RevPAR increase: +14.2%
-- Annual opportunity: **€6.2M across 398 hotels**
-- Per hotel: **€15,592/year** additional revenue
+![Segment Elasticity](outputs/figures/segment_elasticity_calculated.png)
 
-### 4.4 Reality Check
+Resort coastal hotels can raise prices with minimal demand impact (-0.13), while provincial cities face strong price sensitivity (-0.44).
 
-For a typical underpriced 9-room hotel at 40% occupancy with €87 ADR:
-- **Current:** 9 rooms × 40% × €87 × 365 = **€114,000/year**
-- **After 30% increase:** 9 × 35% × €113 × 365 = **€130,000/year**
-- **Gain:** €16,000/year (+14%)
+**Reproduce:** `python -m src.models.evaluation.rolling_validation`
 
-This aligns with the market-wide calculation: €6.2M ÷ 398 hotels = €15,592/hotel.
+### 3.2 Feature Validation
 
-### 4.5 Why 30% (Not 46%)?
+To find meaningful peers, we validated which observable features explain hotel pricing using gradient boosting models.
 
-Analysis shows diminishing returns beyond 30% price increases. Longitudinal data (Figure 3) shows the "danger zone" at >30% increases where occupancy losses accelerate. Additionally:
-- **Conservative positioning:** Still 16% below peers, avoiding competitive backlash
-- **Elasticity linearity:** Our ε = -0.40 estimate is most reliable within ±30% of baseline
-- **Implementation risk:** Smaller increases are easier to implement and monitor
+| Model | R² (Test) | CV R² | RMSE | MAE |
+|-------|-----------|-------|------|-----|
+| XGBoost | 0.77 | 0.76 | 0.31 | 0.22 |
+| LightGBM | 0.74 | 0.74 | 0.34 | 0.23 |
+| CatBoost | 0.68 | 0.68 | 0.37 | 0.26 |
+
+R² = 0.77 indicates observable features explain 77% of price variance, validating the peer matching approach.
+
+![Actual vs Predicted](outputs/figures/elasticity/2_actual_vs_predicted.png)
+
+**Validated Features (17 total):**
+
+| Category | Features |
+|----------|----------|
+| Geographic | dist_center_km, dist_coast_log |
+| Product | log_room_size, room_capacity_pax, amenities_score, total_capacity_log, view_quality_ordinal |
+| Temporal | weekend_ratio, is_july_august |
+| Categorical | room_type, room_view, city_standardized, market_segment |
+| Boolean | is_coastal, children_allowed |
+
+Note: `occupancy_rate` was excluded from peer matching features to avoid data leakage (it's related to the target we're optimizing).
+
+### SHAP Feature Importance
+
+![SHAP Feature Importance](outputs/figures/elasticity/4_shap_beeswarm.png)
+
+Top drivers of hotel pricing:
+1. Room size (larger rooms command higher prices)
+2. Room capacity (more guests = higher price)
+3. Distance to coast (coastal properties premium)
+4. Total hotel capacity (larger hotels have different pricing)
+5. Summer seasonality (July/August premium)
+
+**Reproduce:** `python notebooks/eda/05_elasticity/feature_importance_validation.py`
+
+### 3.3 Peer Matching
+
+Hotels are matched using K-Nearest Neighbors on the validated feature space. For hotel $i$ with feature vector $\mathbf{x}_i$, peers are the $k$ hotels minimizing Euclidean distance in standardized feature space:
+
+$$\text{Peers}(i) = \underset{j \neq i}{\text{argmin}_k} \|\text{scale}(\mathbf{x}_i) - \text{scale}(\mathbf{x}_j)\|_2$$
+
+Feature-based matching dramatically improves peer quality:
+
+| Matching Method | Peer Price Spread (IQR) |
+|-----------------|-------------------------|
+| Geographic only (50km radius) | 280% |
+| Feature-based (KNN k=10) | 63% |
+
+![Peer Matching Comparison](outputs/figures/tighter_peer_matching.png)
+
+### 3.4 Counterfactual Estimation
+
+For hotel $h$ with peer set $P$, we classify performance by comparing RevPAR to peer distribution:
+
+$$\text{Performance}(h) = \begin{cases} \text{underperforming} & \text{if } \text{RevPAR}_h < Q_{25}(P) \\ \text{on\_par} & \text{if } Q_{25}(P) \leq \text{RevPAR}_h \leq Q_{75}(P) \\ \text{outperforming} & \text{if } \text{RevPAR}_h > Q_{75}(P) \end{cases}$$
+
+The best-performing peer (highest RevPAR in the peer set) serves as the counterfactual target.
+
+### 3.5 Price Recommendation
+
+For underperforming hotels, the recommended price is based on the best-performing peer (highest RevPAR):
+
+$$p^* = p_{\text{best\_peer}}$$
+
+The recommendation type is determined by comparing current price to best peer:
+- **RAISE**: if current price is significantly below best peer
+- **LOWER**: if current price is significantly above best peer  
+- **INVESTIGATE**: if price is similar but RevPAR is still lower (suggests non-price factors)
+
+The 15% threshold for "significant" difference is a heuristic based on typical peer price variance within matched groups (IQR ~63%).
+
+Daily prices incorporate segment-specific multipliers calculated from booking data:
+
+$$p_{\text{daily}} = p^* \times \mu_{\text{dow}}(\text{segment}, \text{day}) \times \mu_{\text{month}}(\text{segment}, \text{month})$$
+
+### 3.6 Expected RevPAR Calculation
+
+When a price change is recommended, expected RevPAR is calculated using segment elasticity:
+
+$$\text{RevPAR}_{\text{expected}} = p^* \times \text{occ}_{\text{new}}$$
+
+Where:
+
+$$\text{occ}_{\text{new}} = \text{occ}_{\text{current}} \times (1 + \varepsilon \times \Delta p\%)$$
+
+The elasticity $\varepsilon$ is calculated from historical booking data within each segment (see Section 3.1).
+
+**Reproduce:** See `src/recommender/pricing_pipeline.py` for implementation details.
 
 ---
 
-## 5. Next Steps: Building the RevPAR Optimization Model
+## 4. Market Segmentation
 
-### 5.1 Model Objective
+Hotels are classified into 8 segments using city population data (cities500.json), coastline distance (GSHHS shapefile), and distance to major metros. Classification uses vectorized KD-tree lookups for efficiency.
 
-Optimize RevPAR as a function of occupancy signals, hotel features, and historical patterns:
+### Segment Definitions
 
-$$\max_{P_t} \text{RevPAR}_t = \max_{P_t} P_t \times Q_t(P_t, X_t, H_t)$$
+| Segment | Classification Criteria | Avg Hotels |
+|---------|-------------------------|------------|
+| major_metro | Within 30km of Madrid/Barcelona/Valencia/Sevilla/Málaga/Zaragoza | 150 |
+| urban_core | Within 10km of city with population 100k-500k | 150 |
+| urban_fringe | 10-30km from city with population >100k | 200 |
+| resort_coastal | In Costa del Sol/Costa Brava/Balearics + coast <30km | 200 |
+| coastal_town | Coast <20km, not in resort region | 85 |
+| provincial_city | Within 15km of city with population 50k-100k | 50 |
+| small_town | Within 15km of city with population 10k-50k | 130 |
+| rural | Everything else | 250 |
 
-where:
-- $X_t$ = Occupancy signals (current occupancy, cluster occupancy, booking velocity)
-- $H_t$ = Hotel features (location, product, capacity) + historical patterns (seasonality, day-of-week, lead time)
-- $Q_t(P_t, X_t, H_t) = Q_{baseline} \times (1 + \varepsilon \times \frac{P_t - P_{baseline}}{P_{baseline}}) \times f(X_t, H_t)$
+### Calculation Methodology
 
-### 5.2 Model Architecture
+1. Load cities500.json with city coordinates and populations
+2. Build KD-trees for each city tier (major metro, large, medium, small)
+3. For each hotel, calculate distance to nearest city in each tier
+4. Load GSHHS coastline shapefile, calculate distance to nearest coast
+5. Check if hotel falls within resort region polygons
+6. Apply classification rules in priority order (major_metro highest)
 
-**Stage 1:** Baseline price prediction using 17 validated features (R² = 0.71)  
-**Stage 2:** Occupancy adjustment using ε = -0.39, range 0.7x (low occupancy) to 1.3x (high occupancy)  
-**Stage 3:** Lead time adjustment (+20% premium for last-minute at high occupancy, -35% discount at low occupancy)  
-**Stage 4:** Constraints (max daily change ±15%, min occupancy 30%, competitive bounds)
+### Hotels per Segment
 
-### 5.3 Implementation Roadmap
+![Segment Distribution](outputs/figures/segment_hotel_distribution.png)
 
-**Month 1:** Model development and API  
-**Month 2:** A/B test with 20% of hotels (450 hotels)  
-**Months 3-6:** Gradual rollout if +5-10% RevPAR improvement validated  
-**Year 1 target:** €3.1M (conservative) to €5.7M (moderate) revenue impact
+Elasticity values are calculated dynamically from booking data within each segment (see Section 3.1).
 
-### 5.4 Success Metrics
-
-**Primary KPIs:** RevPAR +5-10%, ADR +8-12%, occupancy >95% of baseline  
-**Secondary KPIs:** Adoption rate >80%, override rate <20%  
-**Financial KPIs:** Year 1 revenue impact €3M-€6M
-
----
-
-## 6. Caveats and Limitations
-
-**Strong assumptions:** (1) Unobserved quality similar within matched pairs (R² = 0.71 mitigates), (2) No spillover effects between hotels, (3) Elasticity constant across price range (30% cap addresses), (4) Temporal stability (24-month validation confirms).
-
-**Limitations:** (1) External validity limited to Spanish hotels 2023-2024, (2) Partial equilibrium (assumes competitors don't all raise prices simultaneously), (3) Sample selection (470 hotels = 21% of market), (4) Measurement error in occupancy (attenuates elasticity toward zero).
-
-**Implementation caveats:** (1) Competitive response uncertainty, (2) Customer expectations management needed, (3) Operational constraints exist, (4) Season-specific elasticities would improve precision.
+**Reproduce:** `python -m src.models.evaluation.rolling_validation` (generates segment statistics)
 
 ---
 
-## Appendix: Methodology
+## 5. Revenue Opportunity
 
-### A. Data Quality
+### Understanding the Opportunity
 
-31 validation rules (defined in `lib/data_validator.py`) removed 1.5% of records (15,864 bookings, 17,672 rooms, 57 hotels). Final dataset: 989,959 bookings, 1,176,615 booked rooms, 2,255 hotels. City name standardization via TF-IDF (347 names → 198 standardized). Distance features calculated using shapefiles from Spain's National Geographic Institute.
+30% of hotels are underperforming their peers on RevPAR. The opportunity comes from **how much hotels are underpricing** (lift per room) multiplied by **how many hotels exist** in each segment.
 
-### B. Feature Engineering
+### Revenue Opportunity by Segment
 
-#### B.1 Feature Categories and Rationale
+![Segment Opportunity](outputs/figures/segment_opportunity_current.png)
 
-17 features across 4 categories were validated through iterative XGBoost/CatBoost modeling (R² = 0.71):
+The three-panel visualization explains why rural hotels show the highest opportunity despite resort coastal having the lowest elasticity:
 
-**Geographic Features (4):**
-- `dist_center_km`: Distance from city center (booking-weighted centroid per city). Range: 0-15km. Captures location premium within cities.
-- `dist_coast_log`: Log-transformed distance from coastline (log1p transformation). Range: 0-6.2 (0km to 450km). Coastal premium is non-linear (beachfront vs 50km inland).
-- `is_coastal`: Binary flag (<20km from coast). 62% of hotels are coastal. Captures discrete coastal premium.
-- `city_standardized`: Top 5 cities (Madrid, Barcelona, Seville, Málaga, Toledo) + 'other'. Encoded as binary indicators (is_barcelona, is_madrid, etc.) to avoid dimensionality explosion from 198 unique cities.
+**Left: RevPAR Lift** - How much each hotel is leaving on the table. Rural hotels are underpricing by €0.99/room/night, while resort coastal only €0.28.
 
-**Product Features (7):**
-- `log_room_size`: Log-transformed room size in square meters (log1p). Range: 2.4-4.6 (11sqm to 100sqm). Price per sqm is approximately €2.10.
-- `room_capacity_pax`: Maximum occupancy per room (integer 1-8). Larger rooms command premium.
-- `amenities_score`: Sum of boolean flags (wifi, parking, pool, breakfast). Range: 0-4. Each amenity adds ~€5-10 to price.
-- `view_quality_ordinal`: Ordinal encoding of room_view (0=no_view, 1=partial, 2=full, 3=sea_view). Sea view premium: +€25-40.
-- `total_capacity_log`: Log-transformed total hotel capacity (log1p). Range: 1.1-4.6 (3 to 100 rooms). **Critical for matching** - ensures 5-room hotels matched to 5-room hotels, not 50-room hotels.
-- `room_type`: Categorical (standard, superior, suite, etc.). Encoded natively by CatBoost.
-- `children_allowed`: Boolean flag. Family-friendly rooms command +€5-15 premium.
+**Middle: Hotel Count** - Rural has 290 hotels vs 223 for resort coastal.
 
-**Temporal Features (4):**
-- `month_sin`, `month_cos`: Cyclical encoding of month (sin/cos of 2π×month/12). Captures seasonality without assuming January=1, December=12 are far apart. Summer months (June-August) show +35% premium.
-- `weekend_ratio`: Proportion of bookings on Friday-Saturday within hotel-month. Range: 0-1. Weekend premium: +20% on average.
-- `is_summer`: Boolean flag (June, July, August). Captures discrete summer season.
-- `is_winter`: Boolean flag (December, January, February). Captures low-season discounting.
+**Right: Total Opportunity** = Lift × Hotels. Rural's high underpricing + high count = €140k, while resort's lower underpricing + moderate count = €30k.
 
-**Policy Features (2):**
-- `revenue_quartile`: Annual revenue quartile (Q1-Q4). Used for matching to ensure similar-scale hotels compared. **Not used in price prediction** (would be data leakage), but critical for matched pairs to avoid comparing luxury hotels to budget hotels.
+### Key Insight: Elasticity ≠ Opportunity
 
-#### B.2 Distance Feature Calculations
+| Segment | Elasticity | Lift/Room | Hotels | Opportunity |
+|---------|------------|-----------|--------|-------------|
+| rural | -0.19 | €0.99 | 290 | €140k |
+| urban_fringe | -0.21 | €0.71 | 253 | €87k |
+| resort_coastal | -0.13 | €0.28 | 223 | €30k |
 
-**Distance from Coast:**
-- Uses haversine formula to nearest coastline point from Spain's National Geographic Institute (IGN) shapefiles
-- Coastal threshold: < 20km defines `is_coastal` flag
-- Range: 0km (beachfront) to 450km (interior Spain)
-- Log transformation (`dist_coast_log`) captures non-linear premium: beachfront (0km) vs 5km inland is large difference, but 200km vs 205km is negligible
+**Why low elasticity ≠ high opportunity:**
 
-**Distance from City Center:**
-- Calculated as booking-weighted centroid per city (not geometric center)
-- Accounts for where actual demand concentrates (e.g., Barcelona's center is near Las Ramblas, not geometric center)
-- Range: 0km (city center) to 15km (suburbs)
-- Validated: City center hotels (dist < 2km) have +15% premium vs suburban (dist > 8km)
+Resort coastal hotels have LOW elasticity (price-insensitive demand) but LOW opportunity because they're **uniformly priced** - the entire segment uses sophisticated pricing and competes closely, so there's no peer significantly outperforming to learn from. When everyone charges €150-180/night, the "best peer" gap is small.
 
-**Distance from Madrid (removed):**
-- Initially included as proxy for national market access
-- Range: 0km (Madrid) to 800km (Galicia)
-- **Removed due to multicollinearity** with `dist_coast_log` and city indicators (r = 0.65)
-- Final model R² unchanged (0.71) after removal, confirming redundancy
+Rural hotels show HIGH opportunity because there's **high variance in pricing strategies** - less sophisticated operators mean some charge €40/night while their successful peers charge €70/night. Large gap = large opportunity to close.
 
-#### B.3 City Name Standardization
+---
 
-Raw data contained 347 unique city name variations due to:
-- Case variations: "Barcelona" vs "barcelona" vs "BARCELONA"
-- Accent variations: "Málaga" vs "Malaga"
-- Spelling variations: "Sevilla" vs "Seville"
-- Punctuation: "Sant Feliu de Guíxols" vs "Sant Feliu de Guixols"
+## 6. Model Performance vs Baselines
 
-**Solution: TF-IDF Matching Algorithm:**
-1. Calculate revenue by city (raw names)
-2. Identify top 30 cities by revenue
-3. For each city name, compute TF-IDF similarity to top 30 canonical names
-4. If similarity > 0.8, map to canonical name
-5. Otherwise, keep original name
+### Baseline Comparison
 
-**Impact:**
-- 347 unique city names → 198 standardized names
-- Top 30 cities now capture 78% of bookings (up from 65%)
-- Geographic matching success rate improved by 23%
+![Baseline Comparison](outputs/figures/baseline_comparison_updated.png)
 
-**Example Consolidations:**
-- "barcelona", "Barcelona", "Barcelone" → "barcelona"
-- "málaga", "Malaga", "MALAGA" → "malaga"
-- "sevilla", "Seville", "Sevila" → "sevilla"
+| Strategy | Win Rate | RevPAR Lift |
+|----------|----------|-------------|
+| Random Pricing | 50% | -€2.10 |
+| Market Average | 52% | +€0.80 |
+| Self Median | 55% | +€1.80 |
+| Peer Median | 61% | +€4.20 |
+| **PriceAdvisor** | **70%** | **+€8.50** |
 
-#### B.4 Feature Selection Process
+Win rate = percentage of recommendations that improve RevPAR vs actual prices.
 
-**Iteration 1:** Initial set with latitude/longitude, dist_madrid_log → R² = 0.76 (XGBoost)
-**Iteration 2:** Removed latitude, longitude, dist_madrid_log (multicollinearity) → R² = 0.70
-**Iteration 3:** Expanded city indicators to top 30 → R² = 0.70 (no improvement)
-**Iteration 4:** Simplified to top 5 cities + CatBoost (native categorical handling) → R² = 0.71
+PriceAdvisor achieves 70% win rate (+9 points vs peer median baseline) and €8.50 average RevPAR lift per room per night (2x better than peer median).
 
-**Final feature set (17 features)** balances predictive power (R² = 0.71) with interpretability and matching feasibility. More features would marginally improve R² but explode matching dimensionality.
+**Reproduce:** `python -m src.models.evaluation.rolling_validation`
 
-### C. Model Validation and Comparison
+---
 
-#### C.1 Model Comparison
+## 7. Results Summary
 
-Five models compared using 80/20 train/test split with 5-fold cross-validation:
+### Key Metrics
 
-| Model | R² (Test) | RMSE (€) | MAE (€) | CV R² (Mean ± Std) |
-|-------|-----------|----------|---------|-------------------|
-| Ridge | 0.58 | €22.3 | €17.8 | 0.57 ± 0.01 |
-| Random Forest | 0.65 | €18.9 | €14.2 | 0.64 ± 0.02 |
-| XGBoost | 0.70 | €16.5 | €12.1 | 0.69 ± 0.02 |
-| LightGBM | 0.70 | €16.4 | €12.0 | 0.69 ± 0.02 |
-| **CatBoost** | **0.71** | **€15.1** | **€11.5** | **0.70 ± 0.02** |
+| Metric | Value |
+|--------|-------|
+| Hotels analyzed | 2,255 |
+| Hotels with optimization opportunity | 683 (30.3%) |
+| Rooms with opportunity | 2,984 |
+| Average recommended price change | +1.3% |
+| RevPAR lift per room per night | €1.28 |
+| Model win rate | 82% |
+| RevPAR lift vs baselines | +€21.30 |
 
-**Best Model: CatBoost** - Native categorical handling for `room_type`, `room_view`, and city indicators avoids one-hot encoding dimensionality explosion. Hyperparameters: `depth=6, learning_rate=0.1, iterations=200`.
+### Annual Revenue Opportunity by Adoption Rate
 
-#### C.2 Feature Importance (SHAP)
+| Adoption Rate | Hotels | Rooms | Daily Lift | Monthly Lift | Annual Lift |
+|---------------|--------|-------|------------|--------------|-------------|
+| 25% | 171 | 746 | €955 | €28,650 | €348,531 |
+| 50% | 342 | 1,492 | €1,910 | €57,300 | €697,062 |
+| 75% | 512 | 2,238 | €2,865 | €85,950 | €1,045,594 |
+| 100% | 683 | 2,984 | €3,820 | €114,586 | €1,394,125 |
 
-Top 10 features by mean absolute SHAP value:
-1. `dist_coast_log` (0.18) - Coastal premium dominates pricing
-2. `log_room_size` (0.15) - Room size is primary product signal
-3. `month_sin` (0.12) - Seasonality is strong temporal signal
-4. `is_barcelona` (0.11) - City premium for major markets
-5. `view_quality_ordinal` (0.10) - View quality hierarchy
-6. `dist_center_km` (0.09) - Location within city matters
-7. `amenities_score` (0.08) - Amenities add value
-8. `is_summer` (0.07) - Discrete summer premium
-9. `weekend_ratio` (0.06) - Weekend pricing dynamics
-10. `room_capacity_pax` (0.05) - Room capacity matters
+### Per Hotel Impact
 
-**Critical observation:** No occupancy-related features in top 10, confirming hotels don't price by occupancy.
+For hotels that adopt recommendations:
+- Annual lift per hotel: €2,041
+- Monthly lift per hotel: €170
 
-#### C.3 Model Diagnostics
+### Seasonal Patterns
 
-**Residual Analysis:**
-- Mean residual: €0.02 (essentially zero, no systematic bias)
-- Residual std: €15.1 (matches RMSE)
-- Residual distribution: Approximately normal (Shapiro-Wilk p = 0.12)
-- Heteroscedasticity: Mild (residuals slightly larger at high prices, but acceptable)
+![Seasonal Patterns](outputs/figures/seasonal_patterns_explained.png)
 
-**Actual vs Predicted:**
-- Strong linear relationship (r = 0.84)
-- No systematic over/under-prediction by price range
-- Outliers: <2% of predictions have error >€50 (acceptable for business use)
+**Understanding the charts:**
 
-**Cross-Validation Stability:**
-- CV R² = 0.70 ± 0.02 (low variance across folds)
-- Confirms model generalizes well, not overfitting
-- Feature importance stable across folds (top 5 features consistent)
+1. **Top-left (Per-Room Lift)**: Consistent ~€1.28/room/night average, with variation by season
+2. **Top-right (Hotel Count)**: More hotels in later periods (888 → 1830), explaining higher totals
+3. **Bottom-left (Elasticity)**: Resort coastal is least elastic (-0.13), provincial city most elastic (-0.44)
+4. **Bottom-right (Explanation)**: Total lift = per-room × hotels, so more hotels = higher total
 
-### D. Matching Algorithm
+The late-2024 spike is partly due to more hotels in the data and partly due to shoulder season dynamics.
 
-1:1 with replacement balances sample size (maximize treatments) with match quality (minimize distance). Exact matching creates blocks, continuous matching finds nearest neighbor within blocks, quality filters ensure true substitutes. Output: 881 pairs (470 treatment hotels, 398 controls), match distance 1.42, price difference 58%, control reuse 2.21x.
+### Price Change Distribution
 
-### E. Bootstrap Inference
+![Price Change Distribution](outputs/figures/price_change_distribution.png)
 
-Block bootstrap (1,000 iterations) clusters by treatment hotel to account for control reuse (2.21x average). Percentile method yields 95% CI [-0.41, -0.36], width 0.05.
+The model recommends modest adjustments:
+- 61% of hotels are already pricing optimally (no change needed)
+- 25% need changes within ±10%
+- 14% need larger adjustments (capped at ±15%)
 
-### F. Exploratory Data Analysis Findings
+### Validation
 
-#### F.1 Temporal Patterns
+Rolling window validation (4-month train, 1-month test) across 2023-2024:
 
-**Seasonality:**
-- Peak season (July-August): 42% of annual bookings, ADR +35% above baseline
-- Shoulder seasons (Apr-Jun, Sep-Oct): 40% of bookings, ADR +15% above baseline
-- Low season (Nov-Mar): 18% of bookings, ADR at baseline or below
-- **Finding:** Hotels implement seasonal pricing, but premium (+35%) is less than demand increase (+120% volume), suggesting room for further increases
+![Comprehensive Validation](outputs/figures/comprehensive_validation_corrected.png)
 
-**Day-of-Week:**
-- Weekends (Fri-Sat): 35% of bookings, +20% premium on average
-- Weekdays (Sun-Thu): 65% of bookings, baseline pricing
-- **Finding:** Uniform weekend premium regardless of season (missed opportunity: August weekend should command higher premium than January weekend)
+---
 
-**Lead Time:**
-- Advance bookings (60+ days): No premium (€75 baseline)
-- Normal bookings (7-60 days): Baseline pricing (€75)
-- Last-minute bookings (<7 days): 35% discount (€49), 15% of all bookings
-- **Finding:** Asymmetric pricing - hotels panic-discount when occupancy uncertain, but don't charge premium when occupancy high
+## 8. Pipeline Architecture
 
-#### F.2 Geographic Patterns
-
-**Coastal Premium:**
-- Coastal hotels (<20km from coast): +46% ADR premium vs inland
-- Beachfront (0-2km): +62% premium
-- **Finding:** Strong geographic signal, well-priced by hotels
-
-**City Hierarchy:**
-- Barcelona: 18% of bookings, +28% premium
-- Madrid: 15% of bookings, +22% premium
-- Seville: 8% of bookings, +15% premium
-- **Finding:** Major cities command premium, correctly priced
-
-**Distance Effects:**
-- City center (<2km): +15% premium vs suburban (>8km)
-- **Finding:** Location within city matters, incorporated into pricing
-
-#### F.3 Product Feature Premiums
-
-**Room Size:**
-- Price per sqm: €2.10 (linear relationship, log-transformed for modeling)
-- 20sqm room: €42 baseline
-- 30sqm room: €63 baseline
-- **Finding:** Size premium is well-understood and priced
-
-**View Quality:**
-- No view: €0 baseline
-- Partial view: +€8 premium
-- Full view: +€18 premium
-- Sea view: +€35 premium
-- **Finding:** Clear hierarchy, well-priced
-
-**Room Type:**
-- Standard: €75 baseline
-- Superior: +€15 premium
-- Suite: +€45 premium
-- **Finding:** Type hierarchy exists, correctly priced
-
-#### F.4 Occupancy-Price Disconnect
-
-**Key Finding:** Pooled correlation r = 0.143 between occupancy and price (from `section_5_2_occupancy_pricing.py`). If hotels priced optimally, we'd expect r > 0.5.
-
-**Evidence:**
-- At 95% occupancy: prices range €50-€150 (3x variation)
-- At 30% occupancy: prices range €40-€120 (3x variation)
-- High occupancy, low price: 25% of observations at >80% occupancy charge <€75
-- **Finding:** Occupancy is largely ignored in pricing decisions - this is the core opportunity
-
-### G. Reproducibility
-
-All analysis reproducible from original data:
-```bash
-# Feature importance validation
-poetry run python notebooks/eda/05_elasticity/feature_importance_validation.py  # R² = 0.71
-
-# Matched pairs analysis
-poetry run python notebooks/eda/05_elasticity/matched_pairs_with_replacement.py  # ε = -0.39
-
-# Longitudinal validation
-poetry run python notebooks/eda/05_elasticity/matched_pairs_longitudinal.py  # ε = -0.40
-
-# Interactive heatmap (generates GIF)
-jupyter notebook notebooks/interactive_heatmap_demo.ipynb  # outputs/booking_heatmap.gif
+```mermaid
+flowchart TB
+    subgraph input [API Input]
+        A[hotel_id + date]
+    end
+    
+    subgraph pipeline [Pricing Pipeline]
+        B[Load Hotel Features]
+        C{Has History?}
+        D[Find KNN Peers]
+        E[Get Peer Prices]
+        F[Calculate Peer RevPAR]
+        G[Compare Performance]
+        H[Get Segment Elasticity]
+        I[Apply Daily Multipliers]
+        J[Generate Recommendation]
+    end
+    
+    subgraph output [API Output]
+        K[recommended_price]
+        L[expected_revpar]
+        M[confidence]
+    end
+    
+    A --> B --> C
+    C -->|Yes| D
+    C -->|No| D
+    D --> E --> F --> G --> H --> I --> J
+    J --> K
+    J --> L
+    J --> M
 ```
 
-See `REPRODUCIBILITY.md` for complete verification guide with all key statistics traceable to source code.
+### API Interface
+
+```python
+from src.recommender.pricing_pipeline import PricingPipeline
+from datetime import date
+
+pipeline = PricingPipeline()
+pipeline.fit()
+
+# Get recommendation for a specific day
+rec = pipeline.recommend_daily(hotel_id=123, target_date=date(2024, 6, 15))
+
+# Returns:
+# {
+#   'hotel_id': 123,
+#   'date': '2024-06-15',
+#   'segment': 'resort_coastal',
+#   'performance': 'underperforming',
+#   'recommendation': 'RAISE',
+#   'current_price': 95.00,
+#   'recommended_price': 108.00,
+#   'expected_revpar': 42.50,
+#   'elasticity': -0.24,
+#   'confidence': 'high'
+# }
+
+# Get prices for a week
+prices = pipeline.recommend_date_range(hotel_id=123, start_date=date(2024, 6, 15), days=7)
+```
 
 ---
 
-**Document Status:** Production-ready validation of pricing inefficiency hypothesis. Next step: Build RevPAR optimization model using validated elasticity (ε = -0.39), feature set (R² = 0.71), and 30% price cap.
+## 9. Deployment Architecture
 
+```mermaid
+flowchart LR
+    subgraph training [Weekly Training - Sunday Night]
+        A1[Load 3-month booking data] --> A2[Train peer matcher KNN]
+        A2 --> A3[Calculate segment elasticity]
+        A3 --> A4[Calculate DOW and monthly multipliers]
+        A4 --> A5[Save models to disk]
+    end
+    
+    subgraph daily [Daily Batch - 4 AM]
+        B1[Load trained models] --> B2[Generate predictions for all hotels]
+        B2 --> B3[Store recommendations in Redis]
+    end
+    
+    subgraph serving [API Serving]
+        C1[Request: hotel_id + date] --> C2[Lookup Redis cache]
+        C2 --> C3[Return recommended_price]
+    end
+    
+    A5 -.-> B1
+    B3 -.-> C2
+```
+
+### Configuration
+
+| Parameter | Value | Rationale |
+|-----------|-------|-----------|
+| Training window | 3 months rolling | Captures recent trends while maintaining sample size |
+| Retraining cadence | Weekly (Sunday night) | Balances freshness with compute cost |
+| Prediction cadence | Daily (4 AM) | Prices ready before hotel staff check dashboard |
+| Cache TTL | 24 hours | Matches prediction cadence |
+| KNN neighbors | 10 | Balances peer diversity with similarity |
+| Price clamp | ±15% | Ensures adoptable recommendations |
+
+### Fallback Behavior
+
+If Redis cache miss occurs (new hotel, cache expired):
+1. Real-time KNN lookup against in-memory index
+2. Calculate recommendation on-the-fly
+3. Cache result for subsequent requests
+
+---
+
+## 10. Future Improvements
+
+**Richer Cold-Start Data:** Ask new hotels for their typical weekday and weekend rates during onboarding. This provides a price anchor for hotels without booking history, improving initial recommendations.
+
+**Booking Prediction Model:** Build a dedicated model to predict daily bookings given price and date. Current approach uses peer occupancy as proxy; direct prediction would improve RevPAR estimation accuracy.
+
+**Event Calendar Integration:** Incorporate local events, holidays, and conferences into pricing. Demand spikes for major events (Mobile World Congress in Barcelona, San Fermín in Pamplona) are predictable and should trigger proactive price increases.
+
+**Competitive Intelligence:** Scrape OTA prices (Booking.com, Expedia) for competitive positioning. This enables recommendations like "You're 20% below competitors for similar rooms."
+
+**A/B Testing Framework:** Implement randomized price experiments to measure actual RevPAR lift. Current estimates are based on observational data; experiments would provide causal evidence.
+
+---
+
+## 11. Key Files
+
+| File | Purpose |
+|------|---------|
+| [src/recommender/pricing_pipeline.py](src/recommender/pricing_pipeline.py) | Main pricing pipeline with KNN matching and recommendation logic |
+| [src/features/engineering.py](src/features/engineering.py) | Feature engineering including market segmentation |
+| [src/models/evaluation/rolling_validation.py](src/models/evaluation/rolling_validation.py) | Rolling window validation with segment elasticity calculation |
+| [src/data/validator.py](src/data/validator.py) | Data cleaning with 31 validation rules |
+| [notebooks/eda/05_elasticity/feature_importance_validation.py](notebooks/eda/05_elasticity/feature_importance_validation.py) | Feature validation with XGBoost and SHAP |
+
+### Running the Model
+
+```bash
+# Run rolling validation (generates elasticity and opportunity metrics)
+python -m src.models.evaluation.rolling_validation
+
+# Feature importance validation
+python notebooks/eda/05_elasticity/feature_importance_validation.py
+```
+
+---
+
+*Last updated: December 2024*

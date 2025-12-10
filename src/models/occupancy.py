@@ -58,18 +58,44 @@ class OccupancyModel:
         """
         Prepare features for training/prediction.
         
-        Non-price features only to avoid endogeneity.
+        Uses XGBoost-validated features (non-price to avoid endogeneity):
+        - Geographic: dist_coast_log, dist_center_km, is_coastal
+        - Product: log_room_size, room_capacity_pax, amenities_score, view_quality_ordinal
+        - Temporal: week_of_year, is_summer, is_winter
+        - Capacity: total_rooms
         """
         X = df.copy()
         
-        # Numeric features
-        numeric_cols = [
-            'month_sin', 'month_cos', 
-            'is_summer', 'is_winter',
-            'total_rooms'
+        # Core numeric features (always available)
+        # Note: Temporal features (week_of_year, is_summer, is_winter) only useful 
+        # when data spans multiple time periods. For single-month analysis, they don't vary.
+        numeric_cols = ['total_rooms']
+        
+        # Add temporal features only if they vary in the data
+        if 'week_of_year' in X.columns and X['week_of_year'].nunique() > 1:
+            numeric_cols.append('week_of_year')
+        if 'is_summer' in X.columns and 'is_winter' in X.columns:
+            # Only add if there's variation (data spans summer AND winter)
+            if X['is_summer'].nunique() > 1 or X['is_winter'].nunique() > 1:
+                numeric_cols.extend(['is_summer', 'is_winter'])
+        
+        # Validated XGBoost features (use if available)
+        validated_features = [
+            'dist_coast_log',      # Log distance to coast
+            'dist_center_km',      # Distance to hotel's own city center
+            'is_coastal',          # Coastal flag
+            'is_madrid_metro',     # Within 50km of Madrid
+            'log_room_size',       # Log of room size
+            'room_capacity_pax',   # Max occupancy
+            'amenities_score',     # Sum of amenity flags
+            'view_quality_ordinal' # View quality score
         ]
         
-        # Ensure columns exist
+        for col in validated_features:
+            if col in X.columns:
+                numeric_cols.append(col)
+        
+        # Ensure columns exist with defaults
         for col in numeric_cols:
             if col not in X.columns:
                 X[col] = 0

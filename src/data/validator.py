@@ -55,6 +55,7 @@ class CleaningConfig:
     remove_low_prices: bool = True  # <€5/night
     remove_null_prices: bool = True
     remove_extreme_prices: bool = True  # >€5000/night
+    remove_price_outliers: bool = True  # Remove top 2% and bottom 2% of prices
     remove_null_dates: bool = True
     remove_null_created_at: bool = True
     remove_negative_stay: bool = True
@@ -73,6 +74,7 @@ class CleaningConfig:
     # Exclusions (found during EDA)
     exclude_reception_halls: bool = False      # Section 2.2: Not accommodation
     exclude_missing_location: bool = False     # Section 3.1: Can't analyze location
+    exclude_non_spain_hotels: bool = True      # Exclude hotels outside Spain bounding box
     
     # Data quality fixes
     fix_empty_strings: bool = True             # Convert '' to NULL
@@ -87,6 +89,12 @@ class CleaningConfig:
 
     #if booked_rooms.room_view is empty, set it to NULL
     set_empty_room_view_to_no_view_str: bool = True
+    
+    # City name cleaning
+    clean_suspicious_city_names: bool = True  # Remove fake/test city names
+    
+    # Impute missing coordinates from cities500.json
+    impute_coordinates_from_cities500: bool = True
     
     # Logging
     verbose: bool = False
@@ -164,6 +172,9 @@ class DataCleaner:
                   AND (CAST(b.departure_date AS DATE) - CAST(b.arrival_date AS DATE)) > 0
                          AND (br.total_price / (CAST(b.departure_date AS DATE) - CAST(b.arrival_date AS DATE))) > 5000)"""
             ))
+        
+        # Note: Price outlier removal (top/bottom 2%) is handled in clean() method
+        # because it requires computing percentiles first
     
         if self.config.remove_null_dates:
             rules.append(Rule(
@@ -288,6 +299,38 @@ class DataCleaner:
                 "DELETE FROM bookings WHERE id NOT IN (SELECT DISTINCT CAST(booking_id AS BIGINT) FROM booked_rooms)"
             ))
         
+        if self.config.exclude_non_spain_hotels:
+            # Spain bounding box: lat 35.5-44°N, lon -10-5°E
+            # Canary Islands: lat 27.5-29.5°N, lon -18.5--13°W
+            rules.append(Rule(
+                "Exclude Non-Spain Hotels",
+                """SELECT COUNT(DISTINCT b.hotel_id) FROM bookings b
+                   JOIN hotel_location hl ON b.hotel_id = hl.hotel_id
+                   WHERE b.status IN ('confirmed', 'Booked')
+                     AND NOT (
+                         -- Mainland Spain + Balearic Islands
+                         (hl.latitude BETWEEN 35.5 AND 44.0 AND hl.longitude BETWEEN -10.0 AND 5.0)
+                         OR
+                         -- Canary Islands
+                         (hl.latitude BETWEEN 27.5 AND 29.5 AND hl.longitude BETWEEN -18.5 AND -13.0)
+                     )""",
+                """DELETE FROM bookings WHERE hotel_id IN (
+                    SELECT DISTINCT hl.hotel_id FROM hotel_location hl
+                    WHERE NOT (
+                        (hl.latitude BETWEEN 35.5 AND 44.0 AND hl.longitude BETWEEN -10.0 AND 5.0)
+                        OR
+                        (hl.latitude BETWEEN 27.5 AND 29.5 AND hl.longitude BETWEEN -18.5 AND -13.0)
+                    )
+                )"""
+            ))
+            rules.append(Rule(
+                "Exclude Non-Spain Booked Rooms",
+                """SELECT COUNT(*) FROM booked_rooms br
+                   WHERE CAST(br.booking_id AS BIGINT) NOT IN (SELECT id FROM bookings)""",
+                """DELETE FROM booked_rooms 
+                   WHERE CAST(booking_id AS BIGINT) NOT IN (SELECT id FROM bookings)"""
+            ))
+        
         if self.config.exclude_missing_location:
             # Phase 1: Before empty string cleaning
             rules.append(Rule(
@@ -315,15 +358,13 @@ class DataCleaner:
                 "Exclude Missing Location Bookings (Phase 1)",
                 """SELECT COUNT(DISTINCT b.id) FROM bookings b
                    JOIN hotel_location hl ON b.hotel_id = hl.hotel_id
-                   WHERE b.status IN ('confirmed', 'Booked')
-                     AND hl.city IS NULL 
+                   WHERE hl.city IS NULL 
                      AND (hl.latitude IS NULL OR hl.longitude IS NULL)""",
                 """DELETE FROM bookings
                    WHERE id IN (
                        SELECT DISTINCT b.id FROM bookings b
                        JOIN hotel_location hl ON b.hotel_id = hl.hotel_id
-                       WHERE b.status IN ('confirmed', 'Booked')
-                         AND hl.city IS NULL 
+                       WHERE hl.city IS NULL 
                          AND (hl.latitude IS NULL OR hl.longitude IS NULL)
                    )"""
             ))
@@ -381,15 +422,13 @@ class DataCleaner:
                 "Exclude Missing Location Bookings (Phase 2)",
                 """SELECT COUNT(DISTINCT b.id) FROM bookings b
                    JOIN hotel_location hl ON b.hotel_id = hl.hotel_id
-                   WHERE b.status IN ('confirmed', 'Booked')
-                     AND hl.city IS NULL 
+                   WHERE hl.city IS NULL 
                      AND (hl.latitude IS NULL OR hl.longitude IS NULL)""",
                 """DELETE FROM bookings
                    WHERE id IN (
                        SELECT DISTINCT b.id FROM bookings b
                        JOIN hotel_location hl ON b.hotel_id = hl.hotel_id
-                       WHERE b.status IN ('confirmed', 'Booked')
-                         AND hl.city IS NULL 
+                       WHERE hl.city IS NULL 
                          AND (hl.latitude IS NULL OR hl.longitude IS NULL)
                    )"""
             ))
@@ -511,6 +550,502 @@ class DataCleaner:
         if self.config.verbose:
             logger.info(f"  • Merged {len(merge_pairs)} city name(s) into {len(groups)} groups, {changes} row(s) updated.")
 
+    def _remove_price_outliers(self, con: duckdb.DuckDBPyConnection):
+        """
+        Remove top 2% and bottom 2% of booking prices (per-night rate).
+        
+        This helps eliminate data entry errors and extreme outliers that
+        would skew the model's price predictions.
+        """
+        if self.config.verbose:
+            logger.info("Removing price outliers (top/bottom 2%)...")
+        
+        # Compute per-night price and get percentiles
+        percentiles = con.execute("""
+            WITH per_night_prices AS (
+                SELECT 
+                    br.id,
+                    br.total_price / GREATEST(
+                        (CAST(b.departure_date AS DATE) - CAST(b.arrival_date AS DATE)), 1
+                    ) AS price_per_night
+                FROM booked_rooms br
+                JOIN bookings b ON CAST(br.booking_id AS BIGINT) = b.id
+                WHERE b.status IN ('confirmed', 'Booked')
+                  AND br.total_price > 0
+            )
+            SELECT 
+                PERCENTILE_CONT(0.02) WITHIN GROUP (ORDER BY price_per_night) AS p02,
+                PERCENTILE_CONT(0.98) WITHIN GROUP (ORDER BY price_per_night) AS p98
+            FROM per_night_prices
+        """).fetchone()
+        
+        if percentiles[0] is None or percentiles[1] is None:
+            if self.config.verbose:
+                logger.info("  • No valid prices found for percentile calculation")
+            return
+        
+        p02, p98 = percentiles
+        
+        if self.config.verbose:
+            logger.info(f"  • Price per night range: €{p02:.2f} (P2) to €{p98:.2f} (P98)")
+        
+        # Count and delete outliers
+        count_result = con.execute(f"""
+            SELECT COUNT(*) FROM booked_rooms br
+            JOIN bookings b ON CAST(br.booking_id AS BIGINT) = b.id
+            WHERE b.status IN ('confirmed', 'Booked')
+              AND br.total_price > 0
+              AND (
+                  br.total_price / GREATEST(
+                      (CAST(b.departure_date AS DATE) - CAST(b.arrival_date AS DATE)), 1
+                  ) < {p02}
+                  OR 
+                  br.total_price / GREATEST(
+                      (CAST(b.departure_date AS DATE) - CAST(b.arrival_date AS DATE)), 1
+                  ) > {p98}
+              )
+        """).fetchone()[0]
+        
+        if count_result > 0:
+            con.execute(f"""
+                DELETE FROM booked_rooms WHERE id IN (
+                    SELECT br.id FROM booked_rooms br
+                    JOIN bookings b ON CAST(br.booking_id AS BIGINT) = b.id
+                    WHERE b.status IN ('confirmed', 'Booked')
+                      AND br.total_price > 0
+                      AND (
+                          br.total_price / GREATEST(
+                              (CAST(b.departure_date AS DATE) - CAST(b.arrival_date AS DATE)), 1
+                          ) < {p02}
+                          OR 
+                          br.total_price / GREATEST(
+                              (CAST(b.departure_date AS DATE) - CAST(b.arrival_date AS DATE)), 1
+                          ) > {p98}
+                      )
+                )
+            """)
+            self.stats["Price Outliers (Top/Bottom 2%)"] = count_result
+            if self.config.verbose:
+                logger.info(f"  ✓ Removed {count_result:,} price outliers")
+    
+    def _clean_malicious_data(self, con: duckdb.DuckDBPyConnection):
+        """
+        Clean malicious data patterns (XSS, SQL injection attempts) from text fields.
+        """
+        if self.config.verbose:
+            logger.info("Cleaning malicious data patterns...")
+        
+        # Patterns that indicate malicious data (safe for SQL LIKE)
+        malicious_patterns = [
+            '%<script%', '%<img%', '%onerror%', '%onclick%', 
+            '%javascript:%', '%alert(%', '%document.cookie%'
+        ]
+        
+        fields = [('city', 'hotel_location'), ('zip', 'hotel_location'), ('address', 'hotel_location')]
+        
+        total_cleaned = 0
+        for field, table in fields:
+            for pattern in malicious_patterns:
+                count = con.execute(f"""
+                    SELECT COUNT(*) FROM {table}
+                    WHERE LOWER({field}) LIKE '{pattern}'
+                """).fetchone()[0]
+                
+                if count > 0:
+                    con.execute(f"""
+                        UPDATE {table} SET {field} = NULL
+                        WHERE LOWER({field}) LIKE '{pattern}'
+                    """)
+                    total_cleaned += count
+        
+        if total_cleaned > 0:
+            self.stats["Malicious Data Cleaned"] = total_cleaned
+            if self.config.verbose:
+                logger.info(f"  ✓ Cleaned {total_cleaned} malicious data entries")
+    
+    def _clean_suspicious_city_names(self, con: duckdb.DuckDBPyConnection):
+        """
+        Clean suspicious city names that appear to be fake, test data, or data entry errors.
+        
+        Patterns detected:
+        - Names with repeated words (e.g., "Very Cool Cool City")
+        - Names that are too short (< 2 chars)
+        - Names that are too long (> 50 chars)
+        - Names containing numbers
+        - Names containing suspicious words (test, sample, demo, etc.)
+        """
+        if self.config.verbose:
+            logger.info("Cleaning suspicious city names...")
+        
+        suspicious_patterns = [
+            # Repeated words
+            ("Repeated words", r"(\b\w+\b).*\b\1\b"),
+            # Too short
+            ("Too short", None),  # Handled separately
+            # Contains numbers
+            ("Contains numbers", r"[0-9]"),
+            # Suspicious words
+            ("Suspicious words", r"\b(test|sample|demo|fake|example|xxx|null|none|unknown|asdf|qwerty)\b"),
+        ]
+        
+        # Get all city names
+        cities_df = con.execute("""
+            SELECT DISTINCT city, hotel_id 
+            FROM hotel_location 
+            WHERE city IS NOT NULL
+        """).fetchdf()
+        
+        if cities_df.empty:
+            return
+        
+        import re
+        
+        suspicious_hotel_ids = set()
+        suspicious_cities = []
+        
+        for _, row in cities_df.iterrows():
+            city = row['city']
+            hotel_id = row['hotel_id']
+            
+            if pd.isna(city) or city.strip() == '':
+                continue
+            
+            city_lower = city.lower().strip()
+            
+            # Check for repeated words (like "Very Cool Cool City")
+            words = city_lower.split()
+            if len(words) != len(set(words)):
+                suspicious_hotel_ids.add(hotel_id)
+                suspicious_cities.append(city)
+                continue
+            
+            # Too short (< 2 chars)
+            if len(city_lower) < 2:
+                suspicious_hotel_ids.add(hotel_id)
+                suspicious_cities.append(city)
+                continue
+            
+            # Too long (> 50 chars)
+            if len(city_lower) > 50:
+                suspicious_hotel_ids.add(hotel_id)
+                suspicious_cities.append(city)
+                continue
+            
+            # Contains digits
+            if re.search(r'[0-9]', city_lower):
+                suspicious_hotel_ids.add(hotel_id)
+                suspicious_cities.append(city)
+                continue
+            
+            # Suspicious words
+            if re.search(r'\b(test|sample|demo|fake|example|xxx|null|none|asdf|qwerty|cool cool|very cool)\b', city_lower):
+                suspicious_hotel_ids.add(hotel_id)
+                suspicious_cities.append(city)
+                continue
+        
+        if suspicious_hotel_ids:
+            # Set suspicious city names to NULL
+            hotel_id_list = ','.join(str(h) for h in suspicious_hotel_ids)
+            con.execute(f"""
+                UPDATE hotel_location 
+                SET city = NULL 
+                WHERE hotel_id IN ({hotel_id_list})
+            """)
+            
+            self.stats["Suspicious City Names"] = len(suspicious_hotel_ids)
+            if self.config.verbose:
+                logger.info(f"  ✓ Set {len(suspicious_hotel_ids)} suspicious city names to NULL")
+                if len(suspicious_cities) <= 10:
+                    for city in suspicious_cities:
+                        logger.info(f"    - '{city}'")
+                else:
+                    for city in suspicious_cities[:5]:
+                        logger.info(f"    - '{city}'")
+                    logger.info(f"    ... and {len(suspicious_cities) - 5} more")
+
+    def _impute_city_from_nearest(self, con: duckdb.DuckDBPyConnection):
+        """
+        Impute city names for hotels that have coordinates but no city.
+        Uses cities500.json to find the nearest city.
+        """
+        import json
+        from pathlib import Path
+        
+        if self.config.verbose:
+            logger.info("Imputing city names from nearest city (lat/lon lookup)...")
+        
+        # Load cities500.json
+        project_root = Path(__file__).parent.parent.parent
+        cities_path = project_root / 'data' / 'cities500.json'
+        
+        if not cities_path.exists():
+            return
+        
+        with open(cities_path, 'r') as f:
+            cities_data = json.load(f)
+        
+        spain_cities = [c for c in cities_data if c.get('country') == 'ES']
+        
+        # Find hotels with coords but no city
+        hotels_need_city = con.execute("""
+            SELECT hotel_id, latitude, longitude
+            FROM hotel_location
+            WHERE latitude IS NOT NULL 
+              AND longitude IS NOT NULL
+              AND (city IS NULL OR city = '')
+        """).fetchdf()
+        
+        if len(hotels_need_city) == 0:
+            if self.config.verbose:
+                logger.info("  • No hotels need city imputation")
+            return
+        
+        city_updates = 0
+        for _, row in hotels_need_city.iterrows():
+            hotel_id = row['hotel_id']
+            lat, lon = row['latitude'], row['longitude']
+            
+            nearest = self._find_nearest_city(lat, lon, spain_cities)
+            if nearest:
+                con.execute(
+                    "UPDATE hotel_location SET city = ? WHERE hotel_id = ?",
+                    (nearest['name'], hotel_id)
+                )
+                city_updates += 1
+        
+        if city_updates > 0:
+            self.stats["Imputed City (post-clean)"] = city_updates
+            if self.config.verbose:
+                logger.info(f"  ✓ Imputed city names for {city_updates} hotels")
+    
+    def _find_nearest_city(self, lat: float, lon: float, cities: list, max_dist_km: float = 50.0) -> Optional[dict]:
+        """
+        Find the nearest city from a list of cities based on lat/lon.
+        
+        Args:
+            lat, lon: Coordinates to search from
+            cities: List of city dicts with 'name', 'lat', 'lon' keys
+            max_dist_km: Maximum distance to consider (default 50km)
+            
+        Returns:
+            Nearest city dict or None if none within max_dist_km
+        """
+        if not cities:
+            return None
+        
+        min_dist = float('inf')
+        nearest = None
+        
+        for city in cities:
+            # Simple Euclidean approximation (good enough for Spain)
+            dlat = (city['lat'] - lat) * 111  # ~111km per degree latitude
+            dlon = (city['lon'] - lon) * 85   # ~85km per degree longitude at Spain's latitude
+            dist = (dlat**2 + dlon**2)**0.5
+            
+            if dist < min_dist and dist < max_dist_km:
+                min_dist = dist
+                nearest = city
+        
+        return nearest
+    
+    def _impute_coordinates_from_cities500(self, con: duckdb.DuckDBPyConnection):
+        """
+        Impute missing latitude/longitude from cities500.json using city name matching.
+        
+        Uses fuzzy matching to find the best matching city in Spain.
+        """
+        import json
+        from pathlib import Path
+        
+        if self.config.verbose:
+            logger.info("Imputing missing coordinates from cities500.json...")
+        
+        # Load cities500.json
+        project_root = Path(__file__).parent.parent.parent
+        cities_path = project_root / 'data' / 'cities500.json'
+        
+        if not cities_path.exists():
+            if self.config.verbose:
+                logger.info("  • cities500.json not found, skipping imputation")
+            return
+        
+        with open(cities_path, 'r') as f:
+            cities_data = json.load(f)
+        
+        # Filter to Spain cities (country='ES')
+        spain_cities = [c for c in cities_data if c.get('country') == 'ES']
+        
+        if self.config.verbose:
+            logger.info(f"  • Loaded {len(spain_cities):,} Spanish cities from cities500.json")
+        
+        # Build lookup dict by normalized city name
+        city_lookup = {}
+        for city in spain_cities:
+            name = city['name'].lower().strip()
+            # Keep the one with higher population if duplicate
+            if name not in city_lookup or city.get('pop', 0) > city_lookup[name].get('pop', 0):
+                city_lookup[name] = city
+        
+        # Also add common variations
+        variations = {}
+        for name, city in city_lookup.items():
+            # Remove accents for matching
+            import unicodedata
+            normalized = ''.join(
+                c for c in unicodedata.normalize('NFD', name)
+                if unicodedata.category(c) != 'Mn'
+            )
+            if normalized != name and normalized not in city_lookup:
+                variations[normalized] = city
+        city_lookup.update(variations)
+        
+        # Get hotels with missing coordinates but valid city name
+        missing_coords = con.execute("""
+            SELECT hotel_id, city
+            FROM hotel_location
+            WHERE (latitude IS NULL OR longitude IS NULL)
+              AND city IS NOT NULL
+              AND city != ''
+        """).fetchdf()
+        
+        if missing_coords.empty:
+            if self.config.verbose:
+                logger.info("  • No hotels with missing coordinates found")
+            return
+        
+        if self.config.verbose:
+            logger.info(f"  • Found {len(missing_coords)} hotels with missing coordinates")
+        
+        # Match and update
+        updates = 0
+        matched_cities = []
+        
+        for _, row in missing_coords.iterrows():
+            hotel_id = row['hotel_id']
+            city_name = row['city']
+            
+            if pd.isna(city_name):
+                continue
+            
+            # Normalize city name
+            city_normalized = city_name.lower().strip()
+            
+            # Try exact match first
+            matched_city = city_lookup.get(city_normalized)
+            
+            # Try without accents
+            if not matched_city:
+                import unicodedata
+                normalized = ''.join(
+                    c for c in unicodedata.normalize('NFD', city_normalized)
+                    if unicodedata.category(c) != 'Mn'
+                )
+                matched_city = city_lookup.get(normalized)
+            
+            # Try partial match (city name contains or is contained)
+            if not matched_city:
+                for lookup_name, lookup_city in city_lookup.items():
+                    if lookup_name in city_normalized or city_normalized in lookup_name:
+                        matched_city = lookup_city
+                        break
+            
+            if matched_city:
+                lat = matched_city['lat']
+                lon = matched_city['lon']
+                con.execute(
+                    "UPDATE hotel_location SET latitude = ?, longitude = ? WHERE hotel_id = ?",
+                    (lat, lon, hotel_id)
+                )
+                updates += 1
+                matched_cities.append((city_name, matched_city['name']))
+        
+        self.stats["Imputed Coordinates"] = updates
+        if self.config.verbose:
+            logger.info(f"  ✓ Imputed coordinates for {updates} hotels")
+            if updates > 0 and updates <= 10:
+                for orig, matched in matched_cities:
+                    logger.info(f"    - '{orig}' → '{matched}'")
+            elif updates > 10:
+                for orig, matched in matched_cities[:5]:
+                    logger.info(f"    - '{orig}' → '{matched}'")
+                logger.info(f"    ... and {updates - 5} more")
+        
+        # Second pass: impute city names from nearest city in cities500 for hotels with coords but no city
+        if self.config.verbose:
+            logger.info("  Imputing city names from nearest city (lat/lon lookup)...")
+        
+        hotels_with_coords_no_city = con.execute("""
+            SELECT hotel_id, latitude, longitude
+            FROM hotel_location
+            WHERE latitude IS NOT NULL 
+              AND longitude IS NOT NULL
+              AND (city IS NULL OR city = '')
+        """).fetchdf()
+        
+        if len(hotels_with_coords_no_city) > 0:
+            city_updates = 0
+            for _, row in hotels_with_coords_no_city.iterrows():
+                hotel_id = row['hotel_id']
+                lat, lon = row['latitude'], row['longitude']
+                
+                # Find nearest city
+                nearest_city = self._find_nearest_city(lat, lon, spain_cities)
+                if nearest_city:
+                    con.execute(
+                        "UPDATE hotel_location SET city = ? WHERE hotel_id = ?",
+                        (nearest_city['name'], hotel_id)
+                    )
+                    city_updates += 1
+            
+            if city_updates > 0:
+                self.stats["Imputed City from Coords"] = city_updates
+                if self.config.verbose:
+                    logger.info(f"  ✓ Imputed city names for {city_updates} hotels from nearest city")
+        
+        # Third pass: impute from zip codes using other hotels with same zip
+        if self.config.verbose:
+            logger.info("  Imputing coordinates from zip codes...")
+        
+        still_missing = con.execute("""
+            SELECT hotel_id, zip
+            FROM hotel_location
+            WHERE (latitude IS NULL OR longitude IS NULL)
+              AND zip IS NOT NULL
+              AND zip != ''
+        """).fetchdf()
+        
+        zip_updates = 0
+        for _, row in still_missing.iterrows():
+            hotel_id = row['hotel_id']
+            zip_code = row['zip']
+            
+            # Skip invalid zip codes (must be alphanumeric only)
+            if not zip_code or not str(zip_code).replace(' ', '').replace('-', '').isalnum():
+                continue
+            
+            # Find another hotel with same zip that has coordinates (parameterized query)
+            match = con.execute("""
+                SELECT latitude, longitude, city
+                FROM hotel_location
+                WHERE zip = ?
+                  AND latitude IS NOT NULL
+                  AND longitude IS NOT NULL
+                LIMIT 1
+            """, [zip_code]).fetchone()
+            
+            if match:
+                lat, lon, city = match
+                con.execute(
+                    "UPDATE hotel_location SET latitude = ?, longitude = ? WHERE hotel_id = ?",
+                    (lat, lon, hotel_id)
+                )
+                zip_updates += 1
+        
+        if zip_updates > 0:
+            self.stats["Imputed from Zip Code"] = zip_updates
+            if self.config.verbose:
+                logger.info(f"  ✓ Imputed coordinates from zip code for {zip_updates} hotels")
+
     def clean(self, con: duckdb.DuckDBPyConnection) -> 'DuckDBConnectionWrapper':
         """
         Apply all enabled rules to clean the data, including tf-idf city merge if enabled.
@@ -518,6 +1053,10 @@ class DataCleaner:
         """
         if self.config.verbose:
             logger.info(f"Applying {len(self.rules)} data cleaning rules...")
+        
+        # Impute missing coordinates BEFORE rules (so exclude_missing_location has a chance to keep imputed hotels)
+        if getattr(self.config, "impute_coordinates_from_cities500", True):
+            self._impute_coordinates_from_cities500(con)
         
         # Apply rules
         for rule in self.rules:
@@ -534,6 +1073,21 @@ class DataCleaner:
                     logger.info(f"  ✓ {rule.name}: {affected:,} rows")
             elif self.config.verbose:
                 logger.info(f"  - {rule.name}: 0 rows")
+        
+        # Remove price outliers (top/bottom 2%) - requires computing percentiles
+        if getattr(self.config, "remove_price_outliers", True):
+            self._remove_price_outliers(con)
+        
+        # Clean malicious data (XSS, SQL injection attempts)
+        self._clean_malicious_data(con)
+        
+        # Clean suspicious city names
+        if getattr(self.config, "clean_suspicious_city_names", True):
+            self._clean_suspicious_city_names(con)
+        
+        # Re-run nearest city imputation for hotels whose city was just cleaned
+        if getattr(self.config, "impute_coordinates_from_cities500", True):
+            self._impute_city_from_nearest(con)
         
         # Match/merge city names using tfidf if configured
         if getattr(self.config, "match_city_names_with_tfidf", False):

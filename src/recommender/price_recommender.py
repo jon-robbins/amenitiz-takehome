@@ -1,23 +1,43 @@
 """
 Unified Price Recommender.
 
-Main API for generating price recommendations.
+Main API for generating price recommendations with RevPAR optimization.
+
+Features:
+1. RevPAR-optimized pricing using validated elasticity (ε=-0.39)
+2. Peer comparison with tiered fallback (Twin → Peer Group → Geographic)
+3. Occupancy model for demand prediction
+4. Triangulated scoring for scenario classification
+5. Support for cold-start hotels via HotelProfile
 """
 
 import sys
+from datetime import date
 from pathlib import Path
-from dataclasses import dataclass
-from typing import Dict, List, Optional
+from dataclasses import dataclass, field
+from typing import Dict, List, Optional, Union
 import pickle
 
 import numpy as np
 import pandas as pd
 
 from src.data.loader import load_hotel_month_data, get_clean_connection, load_distance_features
+from src.data.temporal_loader import HotelProfile, load_hotel_locations
 from src.features.engineering import engineer_features, standardize_city, get_market_segment, MARKET_ELASTICITY
 from src.features.peers import compute_peer_stats, add_peer_features
 from src.models.occupancy import OccupancyModel
 from src.recommender.diagnosis import diagnose_pricing, calculate_recommended_price, PriceDiagnosis
+from src.recommender.revpar_peers import (
+    RevPARComparison,
+    get_revpar_comparison_for_hotel,
+    get_revpar_comparison_for_profile,
+)
+from src.recommender.triangulated_scorer import (
+    get_revpar_optimized_recommendation,
+    RevPAROptimizedRecommendation,
+    Confidence,
+)
+from src.recommender.geo_search import HotelSpatialIndex, build_hotel_index
 
 
 @dataclass
@@ -77,6 +97,76 @@ class PriceRecommendation:
         }
 
 
+@dataclass
+class DailyRecommendation:
+    """
+    Daily RevPAR-optimized price recommendation.
+    
+    This is the new output format that includes RevPAR metrics
+    and is designed for both existing and cold-start hotels.
+    """
+    hotel_id: Optional[int]
+    target_date: date
+    
+    # RevPAR-optimized recommendation
+    recommended_price: float
+    change_pct: float
+    
+    # Current/expected state
+    current_price: float
+    current_occupancy: float
+    current_revpar: float
+    
+    # Peer context
+    peer_price: float
+    peer_occupancy: float
+    peer_revpar: float
+    revpar_gap_pct: float
+    
+    # Expected outcome at recommended price
+    expected_occupancy: float
+    expected_revpar: float
+    revpar_lift_pct: float
+    
+    # Metadata
+    n_peers: int
+    peer_source: str  # "twin", "peer_group", "geographic"
+    confidence: str   # "high", "medium", "low"
+    reasoning: str
+    
+    def __repr__(self) -> str:
+        direction = "↑" if self.change_pct > 0 else ("↓" if self.change_pct < 0 else "→")
+        return (
+            f"DailyRecommendation({self.target_date})\n"
+            f"  Price: €{self.current_price:.0f} {direction} €{self.recommended_price:.0f} ({self.change_pct:+.1f}%)\n"
+            f"  RevPAR: €{self.current_revpar:.0f} → €{self.expected_revpar:.0f} (lift: {self.revpar_lift_pct:+.1f}%)\n"
+            f"  vs Peers: {self.revpar_gap_pct:+.1f}% | {self.confidence} confidence"
+        )
+    
+    def to_dict(self) -> Dict:
+        """Convert to dictionary for serialization."""
+        return {
+            'hotel_id': self.hotel_id,
+            'target_date': self.target_date.isoformat(),
+            'recommended_price': round(self.recommended_price, 2),
+            'change_pct': round(self.change_pct, 1),
+            'current_price': round(self.current_price, 2),
+            'current_occupancy': round(self.current_occupancy, 3),
+            'current_revpar': round(self.current_revpar, 2),
+            'peer_price': round(self.peer_price, 2),
+            'peer_occupancy': round(self.peer_occupancy, 3),
+            'peer_revpar': round(self.peer_revpar, 2),
+            'revpar_gap_pct': round(self.revpar_gap_pct, 1),
+            'expected_occupancy': round(self.expected_occupancy, 3),
+            'expected_revpar': round(self.expected_revpar, 2),
+            'revpar_lift_pct': round(self.revpar_lift_pct, 1),
+            'n_peers': self.n_peers,
+            'peer_source': self.peer_source,
+            'confidence': self.confidence,
+            'reasoning': self.reasoning,
+        }
+
+
 class PriceRecommender:
     """
     Unified price recommendation system.
@@ -101,6 +191,9 @@ class PriceRecommender:
         self.distance_features = None
         self._city_encoder = None
         self._is_fitted = False
+        self._con = None  # Database connection for temporal queries
+        self._spatial_index = None  # For geographic peer search
+        self._twin_pairs = None  # Pre-loaded matched pairs
     
     def fit(self, quick: bool = False) -> 'PriceRecommender':
         """
@@ -150,6 +243,26 @@ class PriceRecommender:
         # 5. Load distance features
         print("\n5. Loading distance features...")
         self.distance_features = load_distance_features()
+        
+        # 6. Build spatial index for geographic peer search
+        print("\n6. Building spatial index...")
+        self._con = con
+        hotel_locations = load_hotel_locations(con)
+        self._spatial_index = HotelSpatialIndex()
+        self._spatial_index.build(hotel_locations)
+        print(f"   {self._spatial_index.n_hotels:,} hotels indexed")
+        
+        # 7. Load twin pairs if available
+        print("\n7. Loading matched pairs...")
+        try:
+            twin_pairs_path = Path('outputs/data/elasticity_results/matched_pairs_validated.csv')
+            if twin_pairs_path.exists():
+                self._twin_pairs = pd.read_csv(twin_pairs_path)
+                print(f"   {len(self._twin_pairs):,} twin pairs loaded")
+            else:
+                print("   No twin pairs file found")
+        except Exception as e:
+            print(f"   Could not load twin pairs: {e}")
         
         self._is_fitted = True
         print("\n✓ Recommender fitted")
@@ -301,6 +414,167 @@ class PriceRecommender:
                 print(f"Error for hotel {hotel_id}: {e}")
         
         return pd.DataFrame(results)
+    
+    def recommend_price_revpar(
+        self,
+        hotel_id: Optional[int] = None,
+        profile: Optional[HotelProfile] = None,
+        target_dates: Optional[List[date]] = None,
+        as_of_date: Optional[date] = None
+    ) -> List[DailyRecommendation]:
+        """
+        Get RevPAR-optimized price recommendations.
+        
+        This is the new recommended API that:
+        - Uses validated elasticity to optimize RevPAR (not just price)
+        - Supports cold-start hotels via HotelProfile
+        - Respects temporal constraints (as_of_date prevents future data leakage)
+        - Returns daily recommendations for each target date
+        
+        Args:
+            hotel_id: Existing hotel identifier (mutually exclusive with profile)
+            profile: HotelProfile for cold-start hotels
+            target_dates: List of dates to recommend prices for
+            as_of_date: Only use data available as of this date
+        
+        Returns:
+            List of DailyRecommendation for each target date
+        """
+        if not self._is_fitted:
+            raise ValueError("Recommender not fitted. Call fit() first.")
+        
+        if hotel_id is None and profile is None:
+            raise ValueError("Must provide either hotel_id or profile")
+        
+        if hotel_id is not None and profile is not None:
+            raise ValueError("Provide hotel_id OR profile, not both")
+        
+        # Default dates
+        if target_dates is None:
+            # Default to next 7 days
+            today = date.today()
+            target_dates = [today + pd.Timedelta(days=i) for i in range(7)]
+        
+        if as_of_date is None:
+            as_of_date = date.today()
+        
+        recommendations = []
+        
+        # Get RevPAR comparison
+        if hotel_id is not None:
+            comparison = get_revpar_comparison_for_hotel(
+                self._con,
+                hotel_id,
+                target_dates,
+                as_of_date,
+                twin_pairs_df=self._twin_pairs
+            )
+        else:
+            comparison = get_revpar_comparison_for_profile(
+                self._con,
+                profile,
+                target_dates,
+                as_of_date
+            )
+        
+        if comparison is None:
+            # Return empty list if no comparison possible
+            return []
+        
+        # Get RevPAR-optimized recommendation
+        revpar_rec = get_revpar_optimized_recommendation(
+            comparison,
+            occupancy_model=self.occupancy_model,
+            hotel_features=self._get_hotel_features_df(hotel_id, profile),
+            hotel_id=hotel_id,
+            elasticity=self.elasticity
+        )
+        
+        # Create daily recommendations
+        # For now, same recommendation applies to all dates
+        # (In production, would adjust for day-of-week, seasonality, etc.)
+        for target_date in target_dates:
+            rec = DailyRecommendation(
+                hotel_id=hotel_id,
+                target_date=target_date,
+                recommended_price=revpar_rec.optimal_price,
+                change_pct=revpar_rec.change_pct,
+                current_price=revpar_rec.current_price,
+                current_occupancy=revpar_rec.current_occupancy,
+                current_revpar=revpar_rec.current_revpar,
+                peer_price=revpar_rec.peer_price,
+                peer_occupancy=revpar_rec.peer_occupancy,
+                peer_revpar=revpar_rec.peer_revpar,
+                revpar_gap_pct=revpar_rec.revpar_gap * 100,
+                expected_occupancy=revpar_rec.optimal_occupancy,
+                expected_revpar=revpar_rec.optimal_revpar,
+                revpar_lift_pct=revpar_rec.revpar_lift * 100,
+                n_peers=revpar_rec.n_peers,
+                peer_source=revpar_rec.peer_source,
+                confidence=revpar_rec.confidence.value,
+                reasoning=revpar_rec.reasoning
+            )
+            recommendations.append(rec)
+        
+        return recommendations
+    
+    def _get_hotel_features_df(
+        self,
+        hotel_id: Optional[int],
+        profile: Optional[HotelProfile]
+    ) -> Optional[pd.DataFrame]:
+        """Get feature DataFrame for occupancy model prediction."""
+        if hotel_id is not None:
+            # Look up existing hotel
+            mask = self.hotel_data['hotel_id'] == hotel_id
+            if mask.any():
+                return self.hotel_data[mask].head(1)
+        
+        if profile is not None:
+            # Create features from profile
+            return pd.DataFrame([{
+                'month_sin': 0,
+                'month_cos': 1,
+                'is_summer': 0,
+                'is_winter': 0,
+                'total_rooms': profile.num_rooms,
+                'city_standardized': 'other'
+            }])
+        
+        return None
+    
+    def recommend_batch_revpar(
+        self,
+        hotel_ids: List[int],
+        target_dates: List[date],
+        as_of_date: date
+    ) -> pd.DataFrame:
+        """
+        Get RevPAR-optimized recommendations for multiple hotels.
+        
+        Args:
+            hotel_ids: List of hotel IDs
+            target_dates: Dates to recommend for
+            as_of_date: Query date
+        
+        Returns:
+            DataFrame with recommendations for all hotels
+        """
+        all_results = []
+        
+        for hotel_id in hotel_ids:
+            try:
+                recs = self.recommend_price_revpar(
+                    hotel_id=hotel_id,
+                    target_dates=target_dates,
+                    as_of_date=as_of_date
+                )
+                for rec in recs:
+                    all_results.append(rec.to_dict())
+            except Exception as e:
+                print(f"Error for hotel {hotel_id}: {e}")
+        
+        return pd.DataFrame(all_results)
     
     def get_recommendation_distribution(self, n_samples: int = 200) -> Dict:
         """

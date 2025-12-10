@@ -1,0 +1,501 @@
+hotel_id,target_date,segment,performance,recommendation,current_price,recommended_price,current_revpar,expected_revpar,peer_median_price,best_peer_price,best_peer_revpar,elasticity_used,reasoning,confidence,n_peers
+24285,2024-06-15,urban_fringe,underperforming,RAISE,52.47489007825944,262.0,10.15,13.1,60.0,262.0,889.65,-0.496,Hotel is underpriced vs best peer. Raise to €262.,high,9
+7920,2024-06-15,provincial_city,underperforming,INVESTIGATE,113.66703809523808,113.67,45.47,45.47,123.68,111.9,4092.47,-0.976,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,medium,7
+8102,2024-06-15,urban_fringe,underperforming,INVESTIGATE,142.5831271502066,142.58,47.29,47.29,113.29,134.28,3686.37,-0.478,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,high,10
+10057,2024-06-15,small_town,underperforming,RAISE,21.977863212545873,149.91,8.47,7.5,52.25,149.91,661.41,-0.675,Hotel is underpriced vs best peer. Raise to €150.,high,9
+9787,2024-06-15,major_metro,new_hotel,SET,,117.37,,35.21,117.37,156.68,2014.41,-0.761,New hotel. Start at peer median €117.,low,9
+12950,2024-06-15,rural,underperforming,RAISE,61.18512553676077,81.14,126.4,77.08,99.0,81.14,1159.09,-0.322,Hotel is underpriced vs best peer. Raise to €81.,high,9
+17964,2024-06-15,major_metro,underperforming,INVESTIGATE,147.15993724173455,147.16,82.59,82.59,130.9,134.28,3686.37,-0.532,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,high,10
+11630,2024-06-15,urban_core,underperforming,RAISE,74.32674742346624,100.97,18.2,15.95,65.75,100.97,1434.36,-0.991,Hotel is underpriced vs best peer. Raise to €101.,high,10
+11913,2024-06-15,resort_coastal,on_par,HOLD,66.6073839679863,66.61,165.84,165.84,49.41,152.92,2250.1,-0.24,Hotel is performing on par with peers. Minor adjustments optional.,medium,5
+11783,2024-06-15,major_metro,underperforming,LOWER,84.36001121479417,50.87,53.01,37.97,74.06,50.87,443.31,-0.473,Hotel is overpriced vs best peer. Lower to €51.,high,8
+23852,2024-06-15,urban_core,underperforming,RAISE,57.333621852623416,126.2,40.19,31.79,110.82,126.2,1840.04,-0.533,Hotel is underpriced vs best peer. Raise to €126.,medium,5
+19333,2024-06-15,small_town,underperforming,LOWER,98.84786972342168,79.54,459.95,75.56,81.45,79.54,4215.57,-0.403,Hotel is overpriced vs best peer. Lower to €80.,high,8
+10777,2024-06-15,urban_fringe,underperforming,RAISE,122.90891503267974,323.54,6.04,16.18,89.48,323.54,1475.19,-0.496,Hotel is underpriced vs best peer. Raise to €324.,medium,10
+6551,2024-06-15,resort_coastal,underperforming,RAISE,63.44544246824603,98.93,75.75,93.98,118.3,98.93,6062.91,-0.24,Hotel is underpriced vs best peer. Raise to €99.,high,8
+7657,2024-06-15,resort_coastal,underperforming,RAISE,112.9117736985237,318.18,173.71,276.28,150.0,318.18,3772.71,-0.24,Hotel is underpriced vs best peer. Raise to €318.,medium,7
+8998,2024-06-15,rural,underperforming,LOWER,93.46204680074639,48.76,17.99,12.07,58.93,48.76,445.76,-0.597,Hotel is overpriced vs best peer. Lower to €49.,high,8
+8981,2024-06-15,rural,underperforming,RAISE,135.32395687645686,183.63,110.04,132.18,139.18,183.63,4958.11,-0.322,Hotel is underpriced vs best peer. Raise to €184.,high,8
+10895,2024-06-15,urban_fringe,underperforming,RAISE,37.16605311071032,149.88,18.93,7.49,108.0,149.88,1117.68,-0.376,Hotel is underpriced vs best peer. Raise to €150.,high,10
+12623,2024-06-15,urban_core,underperforming,RAISE,5.11,121.56,0.12,6.08,121.66,121.56,1319.77,-0.991,Hotel is underpriced vs best peer. Raise to €122.,low,10
+10474,2024-06-15,resort_coastal,underperforming,INVESTIGATE,172.2093981029959,172.21,168.42,168.42,129.04,190.09,4616.49,-0.24,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,high,8
+13296,2024-06-15,resort_coastal,underperforming,RAISE,58.81081515398853,128.43,29.86,39.09,127.24,128.43,1186.41,-0.338,Hotel is underpriced vs best peer. Raise to €128.,high,9
+23824,2024-06-15,rural,underperforming,LOWER,225.16714393939392,108.35,87.73,53.95,99.83,108.35,3002.98,-0.536,Hotel is overpriced vs best peer. Lower to €108.,medium,5
+11936,2024-06-15,urban_fringe,underperforming,RAISE,50.053442759626826,159.19,21.41,7.96,102.75,159.19,545.78,-0.423,Hotel is underpriced vs best peer. Raise to €159.,high,10
+24567,2024-06-15,major_metro,underperforming,RAISE,110.16569617690764,132.09,44.78,46.55,90.0,132.09,992.56,-0.668,Hotel is underpriced vs best peer. Raise to €132.,high,9
+7761,2024-06-15,provincial_city,underperforming,RAISE,109.8802506105006,142.42,103.84,110.92,114.86,142.42,3967.35,-0.594,Hotel is underpriced vs best peer. Raise to €142.,medium,7
+12646,2024-06-15,small_town,underperforming,INVESTIGATE,104.68769230769232,104.69,55.22,55.22,86.9,111.57,9036.99,-0.552,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,medium,7
+6848,2024-06-15,urban_core,underperforming,INVESTIGATE,66.77636593204775,66.78,16.26,16.26,74.75,61.99,1954.06,-0.991,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,medium,7
+19870,2024-06-15,rural,underperforming,RAISE,44.46418225623582,71.77,34.03,44.08,114.76,71.77,3916.77,-0.322,Hotel is underpriced vs best peer. Raise to €72.,high,8
+13209,2024-06-15,major_metro,underperforming,LOWER,154.38845644074613,112.4,36.05,31.68,89.18,112.4,826.93,-0.761,Hotel is overpriced vs best peer. Lower to €112.,medium,6
+14347,2024-06-15,urban_fringe,underperforming,RAISE,99.81659357337176,141.84,89.94,113.45,111.67,141.84,2391.04,-0.267,Hotel is underpriced vs best peer. Raise to €142.,high,9
+6251,2024-06-15,urban_fringe,underperforming,RAISE,67.51100044824338,129.58,101.78,123.1,95.08,129.58,3554.22,-0.267,Hotel is underpriced vs best peer. Raise to €130.,high,8
+5956,2024-06-15,urban_fringe,underperforming,RAISE,71.01943259098512,118.15,101.46,112.24,89.22,118.15,3595.15,-0.267,Hotel is underpriced vs best peer. Raise to €118.,medium,7
+11819,2024-06-15,rural,underperforming,RAISE,58.094449156406924,120.38,40.57,54.98,67.63,120.38,471.19,-0.323,Hotel is underpriced vs best peer. Raise to €120.,high,8
+10303,2024-06-15,resort_coastal,underperforming,LOWER,115.38424991674992,94.89,25.36,22.5,121.5,94.89,1464.03,-0.445,Hotel is overpriced vs best peer. Lower to €95.,high,9
+10997,2024-06-15,small_town,underperforming,LOWER,213.89134807256235,127.48,126.59,90.59,111.24,127.48,7284.47,-0.497,Hotel is overpriced vs best peer. Lower to €127.,high,9
+14395,2024-06-15,resort_coastal,on_par,HOLD,68.10333441742932,68.1,603.9,603.9,85.66,121.6,3005.2,-0.24,Hotel is performing on par with peers. Minor adjustments optional.,high,9
+9221,2024-06-15,resort_coastal,underperforming,RAISE,62.232371794871796,199.27,6.64,9.96,56.94,199.27,1076.06,-0.445,Hotel is underpriced vs best peer. Raise to €199.,high,8
+10019,2024-06-15,major_metro,underperforming,RAISE,97.39904502075748,219.73,27.23,10.99,80.0,219.73,582.47,-0.761,Hotel is underpriced vs best peer. Raise to €220.,medium,7
+23832,2024-06-15,provincial_city,underperforming,RAISE,91.70969026689623,210.09,40.05,10.5,80.5,210.09,2701.21,-0.929,Hotel is underpriced vs best peer. Raise to €210.,medium,7
+12262,2024-06-15,major_metro,underperforming,INVESTIGATE,227.42143741226033,227.42,712.43,712.43,125.8,200.9,8581.1,-0.41,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,high,9
+19866,2024-06-15,resort_coastal,underperforming,RAISE,64.684,187.41,33.27,35.13,167.44,187.41,3239.54,-0.335,Hotel is underpriced vs best peer. Raise to €187.,medium,6
+6271,2024-06-15,rural,underperforming,LOWER,167.5913034188034,85.39,108.66,65.07,127.69,85.39,9673.9,-0.357,Hotel is overpriced vs best peer. Lower to €85.,high,8
+10176,2024-06-15,resort_coastal,on_par,HOLD,166.28318568155697,166.28,310.64,310.64,85.0,88.41,10748.31,-0.24,Hotel is performing on par with peers. Minor adjustments optional.,medium,7
+2016,2024-06-15,rural,underperforming,RAISE,74.52649572649572,255.89,15.23,12.79,126.5,255.89,609.26,-0.597,Hotel is underpriced vs best peer. Raise to €256.,low,3
+8826,2024-06-15,small_town,underperforming,LOWER,89.2245574980575,72.25,28.63,26.41,80.0,72.25,1543.11,-0.731,Hotel is overpriced vs best peer. Lower to €72.,medium,7
+7883,2024-06-15,rural,underperforming,INVESTIGATE,124.25265285996056,124.25,142.0,142.0,107.86,138.82,2459.08,-0.322,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,medium,7
+13700,2024-06-15,resort_coastal,underperforming,RAISE,88.36667484815752,210.09,27.19,25.37,77.78,210.09,2701.21,-0.441,Hotel is underpriced vs best peer. Raise to €210.,medium,7
+8641,2024-06-15,rural,underperforming,INVESTIGATE,100.0,100.0,14.29,14.29,124.84,111.9,4092.47,-0.597,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,low,8
+7742,2024-06-15,urban_core,on_par,HOLD,89.42433669792368,89.42,279.08,279.08,90.09,80.16,2003.98,-0.533,Hotel is performing on par with peers. Minor adjustments optional.,high,9
+15372,2024-06-15,major_metro,underperforming,LOWER,369.7560256410256,288.84,150.34,134.6,142.58,288.84,6478.34,-0.668,Hotel is overpriced vs best peer. Lower to €289.,medium,7
+14172,2024-06-15,urban_fringe,underperforming,RAISE,56.27454459344266,149.88,12.34,7.49,81.5,149.88,1117.68,-0.496,Hotel is underpriced vs best peer. Raise to €150.,high,10
+18505,2024-06-15,rural,underperforming,RAISE,159.05586805555558,288.84,32.19,29.97,134.29,288.84,6478.34,-0.597,Hotel is underpriced vs best peer. Raise to €289.,high,8
+11705,2024-06-15,urban_fringe,underperforming,LOWER,159.52042328042327,94.89,12.66,9.04,125.69,94.89,1464.03,-0.496,Hotel is overpriced vs best peer. Lower to €95.,medium,7
+10289,2024-06-15,small_town,on_par,HOLD,110.84179850258236,110.84,470.51,470.51,130.17,490.19,3641.4,-0.403,Hotel is performing on par with peers. Minor adjustments optional.,high,8
+14435,2024-06-15,urban_core,underperforming,INVESTIGATE,96.13084901715028,96.13,113.79,113.79,113.61,100.71,4344.97,-0.533,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,high,8
+13281,2024-06-15,provincial_city,underperforming,INVESTIGATE,94.6258805340318,94.63,10.88,10.88,75.6,90.92,1337.81,-1.103,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,medium,7
+19857,2024-06-15,resort_coastal,underperforming,LOWER,277.69979117904956,126.2,58.79,33.2,54.5,126.2,1840.04,-0.445,Hotel is overpriced vs best peer. Lower to €126.,medium,6
+7790,2024-06-15,urban_core,on_par,HOLD,93.12695682382835,93.13,285.52,285.52,119.46,88.41,10748.31,-0.533,Hotel is performing on par with peers. Minor adjustments optional.,medium,7
+11051,2024-06-15,urban_fringe,underperforming,RAISE,160.6721536796537,199.27,26.51,28.96,51.42,199.27,1076.06,-0.496,Hotel is underpriced vs best peer. Raise to €199.,high,10
+10847,2024-06-15,urban_fringe,underperforming,LOWER,481.99629870129866,240.75,27.39,17.07,118.18,240.75,4104.27,-0.496,Hotel is overpriced vs best peer. Lower to €241.,medium,8
+15368,2024-06-15,rural,underperforming,RAISE,94.2531085233427,145.32,43.59,49.53,80.5,145.32,1413.39,-0.485,Hotel is underpriced vs best peer. Raise to €145.,high,9
+11947,2024-06-15,provincial_city,underperforming,RAISE,36.820209302656615,91.08,8.3,4.55,76.5,91.08,434.16,-1.103,Hotel is underpriced vs best peer. Raise to €91.,high,9
+10202,2024-06-15,urban_fringe,underperforming,RAISE,82.0,323.54,1.26,16.18,77.5,323.54,1475.19,-0.496,Hotel is underpriced vs best peer. Raise to €324.,low,10
+7355,2024-06-15,urban_fringe,underperforming,INVESTIGATE,95.50424603174604,95.5,29.56,29.56,105.0,98.93,6062.91,-0.49,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,medium,7
+10413,2024-06-15,rural,underperforming,LOWER,104.35050861029367,59.5,28.81,20.64,62.5,59.5,1579.48,-0.597,Hotel is overpriced vs best peer. Lower to €59.,high,9
+14515,2024-06-15,urban_fringe,underperforming,INVESTIGATE,176.9650488605597,176.97,33.62,33.62,63.42,163.74,701.76,-0.496,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,medium,5
+7070,2024-06-15,resort_coastal,on_par,HOLD,77.82409078282828,77.82,66.71,66.71,60.5,66.9,3086.82,-0.24,Hotel is performing on par with peers. Minor adjustments optional.,medium,6
+10500,2024-06-15,resort_coastal,underperforming,RAISE,70.3908462960571,110.54,13.15,15.41,69.47,110.54,1579.13,-0.445,Hotel is underpriced vs best peer. Raise to €111.,high,8
+22218,2024-06-15,major_metro,on_par,HOLD,189.42635573259696,189.43,274.77,274.77,114.62,120.98,1728.31,-0.41,Hotel is performing on par with peers. Minor adjustments optional.,medium,7
+4084,2024-06-15,rural,underperforming,INVESTIGATE,142.9749771062271,142.97,20.03,20.03,88.55,142.28,1105.73,-0.597,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,medium,5
+12244,2024-06-15,urban_core,underperforming,INVESTIGATE,62.543223744004024,62.54,21.63,21.63,66.3,64.95,704.21,-0.938,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,medium,7
+14629,2024-06-15,rural,new_hotel,SET,,77.76,,23.33,77.76,106.44,507.51,-0.597,New hotel. Start at peer median €78.,low,9
+12959,2024-06-15,small_town,underperforming,RAISE,67.69814022089022,159.76,61.0,65.0,79.48,159.76,5386.35,-0.403,Hotel is underpriced vs best peer. Raise to €160.,high,9
+6445,2024-06-15,urban_fringe,underperforming,RAISE,99.41679841686094,127.48,195.56,121.1,126.72,127.48,7284.47,-0.267,Hotel is underpriced vs best peer. Raise to €127.,high,9
+18391,2024-06-15,major_metro,underperforming,INVESTIGATE,89.33322387125322,89.33,46.85,46.85,115.43,94.39,809.05,-0.564,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,medium,7
+6308,2024-06-15,urban_fringe,underperforming,RAISE,91.63716083916083,240.75,6.4,12.04,107.82,240.75,4104.27,-0.496,Hotel is underpriced vs best peer. Raise to €241.,medium,10
+14720,2024-06-15,rural,underperforming,RAISE,91.71041666666666,123.95,49.13,56.25,102.53,123.95,3860.29,-0.435,Hotel is underpriced vs best peer. Raise to €124.,medium,6
+13694,2024-06-15,coastal_town,underperforming,INVESTIGATE,89.56917463235295,89.57,35.19,35.19,87.01,104.42,3058.04,-0.788,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,medium,8
+3532,2024-06-15,small_town,underperforming,RAISE,116.36409729159729,171.63,103.58,123.51,133.0,171.63,6080.47,-0.403,Hotel is underpriced vs best peer. Raise to €172.,high,9
+22894,2024-06-15,urban_fringe,on_par,HOLD,59.768475229275204,59.77,85.38,85.38,97.0,209.58,3173.61,-0.267,Hotel is performing on par with peers. Minor adjustments optional.,medium,5
+13285,2024-06-15,resort_coastal,underperforming,RAISE,81.30368589743588,175.53,8.93,9.34,124.86,175.53,4622.22,-0.445,Hotel is underpriced vs best peer. Raise to €176.,high,8
+16462,2024-06-15,urban_core,underperforming,INVESTIGATE,79.27877777777778,79.28,22.65,22.65,68.25,91.28,2986.11,-0.991,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,low,5
+18406,2024-06-15,urban_fringe,underperforming,LOWER,157.69757142857142,118.15,75.09,61.83,82.06,118.15,3595.15,-0.395,Hotel is overpriced vs best peer. Lower to €118.,medium,8
+13066,2024-06-15,urban_core,underperforming,LOWER,213.87175925925928,110.79,61.11,46.77,97.65,110.79,2738.14,-0.991,Hotel is overpriced vs best peer. Lower to €111.,low,9
+11581,2024-06-15,small_town,underperforming,RAISE,151.54319820209122,239.65,249.8,227.67,217.0,239.65,39507.92,-0.403,Hotel is underpriced vs best peer. Raise to €240.,high,8
+8508,2024-06-15,coastal_town,underperforming,INVESTIGATE,133.80910365560365,133.81,110.28,110.28,144.42,127.5,4954.34,-0.475,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,high,8
+10067,2024-06-15,resort_coastal,new_hotel,SET,,136.3,,40.89,136.3,159.95,7289.17,-0.445,New hotel. Start at peer median €136.,low,8
+9125,2024-06-15,resort_coastal,underperforming,LOWER,252.6625,122.77,54.14,32.33,100.04,122.77,1525.81,-0.445,Hotel is overpriced vs best peer. Lower to €123.,low,9
+14559,2024-06-15,rural,underperforming,RAISE,64.3167303992304,133.97,69.68,94.58,98.66,133.97,12650.62,-0.322,Hotel is underpriced vs best peer. Raise to €134.,high,8
+12195,2024-06-15,major_metro,underperforming,LOWER,164.2689018815942,110.19,189.54,104.68,90.86,110.19,5950.19,-0.41,Hotel is overpriced vs best peer. Lower to €110.,medium,7
+12236,2024-06-15,rural,new_hotel,SET,,107.86,,32.36,107.86,123.95,3860.29,-0.597,New hotel. Start at peer median €108.,low,7
+10604,2024-06-15,rural,underperforming,LOWER,81.56913835885409,69.49,7.8,7.23,95.0,69.49,607.32,-0.597,Hotel is overpriced vs best peer. Lower to €69.,high,9
+17745,2024-06-15,major_metro,new_hotel,SET,,90.96,,27.29,90.96,110.19,5950.19,-0.761,New hotel. Start at peer median €91.,low,8
+15740,2024-06-15,major_metro,underperforming,LOWER,135.51690476190475,85.39,77.44,58.23,117.0,85.39,9673.9,-0.523,Hotel is overpriced vs best peer. Lower to €85.,low,8
+21844,2024-06-15,urban_core,underperforming,RAISE,73.42744989662533,113.13,43.96,43.95,83.93,113.13,4606.07,-0.649,Hotel is underpriced vs best peer. Raise to €113.,high,8
+12879,2024-06-15,urban_fringe,underperforming,RAISE,170.24589610389611,238.72,72.96,84.94,142.56,238.72,3137.5,-0.422,Hotel is underpriced vs best peer. Raise to €239.,medium,9
+8036,2024-06-15,urban_fringe,underperforming,RAISE,65.95874478657989,143.05,15.55,14.19,80.82,143.05,633.53,-0.496,Hotel is underpriced vs best peer. Raise to €143.,high,10
+9072,2024-06-15,urban_fringe,underperforming,LOWER,260.2272138218924,150.27,15.64,10.92,63.25,150.27,2485.66,-0.496,Hotel is overpriced vs best peer. Lower to €150.,high,9
+24324,2024-06-15,rural,underperforming,RAISE,100.95623344199659,207.58,95.41,129.54,188.94,207.58,77161.27,-0.322,Hotel is underpriced vs best peer. Raise to €208.,high,8
+15480,2024-06-15,coastal_town,underperforming,RAISE,51.54202786796537,118.4,46.28,40.76,115.02,118.4,5970.96,-0.475,Hotel is underpriced vs best peer. Raise to €118.,medium,7
+20360,2024-06-15,rural,underperforming,LOWER,101.19809027777778,62.08,5.06,3.82,57.28,62.08,617.38,-0.597,Hotel is overpriced vs best peer. Lower to €62.,medium,8
+21737,2024-06-15,coastal_town,underperforming,RAISE,80.85378787878788,147.72,6.3,7.39,88.55,147.72,1308.41,-0.883,Hotel is underpriced vs best peer. Raise to €148.,medium,7
+14095,2024-06-15,coastal_town,on_par,HOLD,62.659436723773425,62.66,179.03,179.03,85.46,72.8,1809.56,-0.475,Hotel is performing on par with peers. Minor adjustments optional.,high,8
+8271,2024-06-15,rural,underperforming,LOWER,136.69444444444443,110.63,93.45,80.43,191.19,110.63,8787.05,-0.333,Hotel is overpriced vs best peer. Lower to €111.,high,9
+6807,2024-06-15,resort_coastal,underperforming,RAISE,131.55765713684463,436.78,139.39,205.52,131.56,436.78,13914.52,-0.24,Hotel is underpriced vs best peer. Raise to €437.,medium,7
+22340,2024-06-15,rural,underperforming,RAISE,65.62943463959108,185.27,23.98,9.26,78.0,185.27,507.28,-0.552,Hotel is underpriced vs best peer. Raise to €185.,high,9
+13794,2024-06-15,urban_core,underperforming,LOWER,347.9767559523809,239.65,107.71,96.8,142.16,239.65,39507.92,-0.98,Hotel is overpriced vs best peer. Lower to €240.,high,9
+14860,2024-06-15,rural,underperforming,RAISE,193.6470512820513,346.39,95.76,108.7,252.0,346.39,6235.02,-0.463,Hotel is underpriced vs best peer. Raise to €346.,high,9
+8076,2024-06-15,urban_core,underperforming,LOWER,382.71111705601186,323.54,52.72,51.4,160.39,323.54,1475.19,-0.991,Hotel is overpriced vs best peer. Lower to €324.,high,10
+9709,2024-06-15,small_town,underperforming,RAISE,212.41565634920636,271.32,242.76,257.75,273.83,271.32,1472.88,-0.403,Hotel is underpriced vs best peer. Raise to €271.,medium,5
+15317,2024-06-15,resort_coastal,underperforming,LOWER,235.39229024943307,125.03,48.04,30.84,93.12,125.03,2304.15,-0.445,Hotel is overpriced vs best peer. Lower to €125.,medium,9
+20712,2024-06-15,major_metro,underperforming,LOWER,293.7389984545369,85.39,419.63,81.12,117.0,85.39,9673.9,-0.41,Hotel is overpriced vs best peer. Lower to €85.,high,8
+11843,2024-06-15,urban_core,underperforming,RAISE,52.5,83.99,4.5,4.2,68.0,83.99,1323.81,-0.991,Hotel is underpriced vs best peer. Raise to €84.,low,9
+8379,2024-06-15,urban_fringe,underperforming,RAISE,79.87533107917723,103.18,85.14,98.03,76.0,103.18,16627.51,-0.267,Hotel is underpriced vs best peer. Raise to €103.,high,9
+14362,2024-06-15,urban_fringe,underperforming,RAISE,83.76083333333334,347.57,0.75,17.38,351.0,347.57,27408.43,-0.496,Hotel is underpriced vs best peer. Raise to €348.,medium,8
+7648,2024-06-15,rural,underperforming,RAISE,51.666666666666664,147.27,1.97,7.36,110.66,147.27,880.13,-0.597,Hotel is underpriced vs best peer. Raise to €147.,low,5
+18565,2024-06-15,urban_core,on_par,HOLD,156.00149431818184,156.0,181.47,181.47,114.17,133.97,12650.62,-0.533,Hotel is performing on par with peers. Minor adjustments optional.,high,9
+8631,2024-06-15,rural,underperforming,LOWER,153.75571428571428,116.24,21.97,19.03,122.85,116.24,2208.51,-0.597,Hotel is overpriced vs best peer. Lower to €116.,medium,6
+10281,2024-06-15,resort_coastal,underperforming,RAISE,83.40785714285714,125.43,15.32,17.87,98.85,125.43,3529.94,-0.445,Hotel is underpriced vs best peer. Raise to €125.,medium,8
+23976,2024-06-15,rural,underperforming,RAISE,65.28525224775225,110.63,95.42,105.1,173.6,110.63,8787.05,-0.322,Hotel is underpriced vs best peer. Raise to €111.,high,10
+6389,2024-06-15,small_town,underperforming,LOWER,270.60527336860673,149.91,8.39,7.5,66.15,149.91,661.41,-0.749,Hotel is overpriced vs best peer. Lower to €150.,medium,9
+12659,2024-06-15,major_metro,underperforming,INVESTIGATE,97.33863095238095,97.34,35.76,35.76,123.84,113.61,2840.27,-0.702,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,medium,8
+11440,2024-06-15,urban_core,underperforming,RAISE,103.37933119658118,126.32,11.5,10.97,75.6,126.32,987.99,-0.991,Hotel is underpriced vs best peer. Raise to €126.,high,9
+22023,2024-06-15,rural,underperforming,INVESTIGATE,646.3433333333332,646.34,92.33,92.33,458.36,659.16,2919.15,-0.597,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,low,9
+10448,2024-06-15,major_metro,underperforming,LOWER,380.0,92.32,54.29,20.79,79.55,92.32,7992.08,-0.761,Hotel is overpriced vs best peer. Lower to €92.,low,6
+14786,2024-06-15,major_metro,underperforming,RAISE,103.44935724460723,288.84,84.12,62.33,135.98,288.84,6478.34,-0.41,Hotel is underpriced vs best peer. Raise to €289.,high,8
+12489,2024-06-15,urban_core,new_hotel,SET,,94.0,,28.2,94.0,108.7,1521.75,-0.991,New hotel. Start at peer median €94.,low,9
+23737,2024-06-15,provincial_city,underperforming,RAISE,49.928924750101864,150.27,14.03,7.51,83.68,150.27,2485.66,-1.103,Hotel is underpriced vs best peer. Raise to €150.,high,8
+13021,2024-06-15,urban_core,underperforming,RAISE,71.62862192937571,161.91,8.84,8.1,78.75,161.91,1428.27,-0.991,Hotel is underpriced vs best peer. Raise to €162.,medium,7
+15350,2024-06-15,major_metro,underperforming,INVESTIGATE,154.6020795050235,154.6,165.65,165.65,111.69,171.43,2669.46,-0.41,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,high,9
+20546,2024-06-15,small_town,underperforming,LOWER,144.75037037037038,116.24,37.91,34.93,98.5,116.24,2208.51,-0.749,Hotel is overpriced vs best peer. Lower to €116.,high,8
+14613,2024-06-15,major_metro,underperforming,RAISE,230.56059034626344,341.84,103.88,107.26,159.5,341.84,9864.63,-0.629,Hotel is underpriced vs best peer. Raise to €342.,medium,7
+14945,2024-06-15,rural,underperforming,LOWER,125.63456152489485,75.95,115.97,72.15,82.95,75.95,6531.79,-0.322,Hotel is overpriced vs best peer. Lower to €76.,high,8
+18221,2024-06-15,urban_core,underperforming,RAISE,81.73164102564103,98.93,35.93,35.88,97.44,98.93,6062.91,-0.831,Hotel is underpriced vs best peer. Raise to €99.,medium,6
+20392,2024-06-15,urban_fringe,underperforming,INVESTIGATE,192.25685334418665,192.26,36.62,36.62,143.55,211.4,5949.39,-0.496,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,medium,8
+7983,2024-06-15,small_town,underperforming,RAISE,148.0,181.61,21.14,21.53,136.73,181.61,7705.56,-0.749,Hotel is underpriced vs best peer. Raise to €182.,low,9
+13018,2024-06-15,resort_coastal,underperforming,LOWER,86.5,66.9,12.36,10.52,66.27,66.9,3086.82,-0.445,Hotel is overpriced vs best peer. Lower to €67.,low,6
+19643,2024-06-15,resort_coastal,underperforming,RAISE,73.48263194444445,135.73,31.49,39.5,90.0,135.73,1202.19,-0.379,Hotel is underpriced vs best peer. Raise to €136.,medium,9
+6291,2024-06-15,rural,underperforming,LOWER,187.94569749694753,70.74,32.01,16.54,80.0,70.74,468.67,-0.597,Hotel is overpriced vs best peer. Lower to €71.,high,9
+8340,2024-06-15,urban_fringe,underperforming,LOWER,151.26169871794872,98.93,86.44,63.19,107.33,98.93,6062.91,-0.34,Hotel is overpriced vs best peer. Lower to €99.,high,9
+10541,2024-06-15,urban_fringe,underperforming,RAISE,94.05616239316238,169.57,60.98,83.78,132.0,169.57,9907.92,-0.296,Hotel is underpriced vs best peer. Raise to €170.,medium,5
+17737,2024-06-15,major_metro,underperforming,RAISE,68.41411209593728,169.97,127.75,124.26,70.27,169.97,2015.34,-0.41,Hotel is underpriced vs best peer. Raise to €170.,medium,6
+23635,2024-06-15,major_metro,underperforming,LOWER,188.8138110355253,85.39,123.31,69.55,117.0,85.39,9673.9,-0.451,Hotel is overpriced vs best peer. Lower to €85.,high,8
+10557,2024-06-15,provincial_city,new_hotel,SET,,94.73,,28.42,94.73,104.4,775.54,-1.103,New hotel. Start at peer median €95.,low,9
+13282,2024-06-15,urban_fringe,new_hotel,SET,,111.67,,33.5,111.67,163.71,1309.71,-0.496,New hotel. Start at peer median €112.,low,7
+13277,2024-06-15,urban_core,underperforming,RAISE,52.77777777777778,126.32,1.88,6.32,75.0,126.32,987.99,-0.991,Hotel is underpriced vs best peer. Raise to €126.,low,9
+17968,2024-06-15,urban_fringe,underperforming,RAISE,114.86001275510203,707.17,32.82,35.36,100.6,707.17,3636.89,-0.496,Hotel is underpriced vs best peer. Raise to €707.,medium,8
+7798,2024-06-15,resort_coastal,underperforming,INVESTIGATE,137.24856547619046,137.25,47.06,47.06,106.71,126.6,3020.27,-0.423,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,medium,6
+26601,2024-06-15,provincial_city,underperforming,RAISE,52.49305555555555,99.33,27.5,14.05,83.27,99.33,652.75,-0.818,Hotel is underpriced vs best peer. Raise to €99.,low,4
+8559,2024-06-15,rural,underperforming,LOWER,176.32000000000002,140.56,25.19,22.51,152.2,140.56,2670.62,-0.597,Hotel is overpriced vs best peer. Lower to €141.,low,7
+7605,2024-06-15,coastal_town,new_hotel,SET,,140.78,,42.23,140.78,141.39,1514.92,-0.883,New hotel. Start at peer median €141.,low,9
+25078,2024-06-15,rural,underperforming,INVESTIGATE,105.39999999999999,105.4,20.08,20.08,114.94,119.5,2902.18,-0.597,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,low,9
+19725,2024-06-15,urban_fringe,underperforming,LOWER,238.7305429292929,133.08,55.81,37.93,191.2,133.08,7395.23,-0.496,Hotel is overpriced vs best peer. Lower to €133.,medium,7
+12590,2024-06-15,rural,underperforming,LOWER,218.8888888888889,163.16,31.27,26.85,147.76,163.16,2097.72,-0.597,Hotel is overpriced vs best peer. Lower to €163.,medium,8
+17133,2024-06-15,urban_core,on_par,HOLD,140.05348920395843,140.05,198.54,198.54,98.33,122.84,1386.28,-0.533,Hotel is performing on par with peers. Minor adjustments optional.,medium,7
+13160,2024-06-15,major_metro,underperforming,INVESTIGATE,125.29039571543636,125.29,24.59,24.59,109.0,112.26,3175.49,-0.761,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,high,8
+13395,2024-06-15,coastal_town,new_hotel,SET,,105.78,,31.73,105.78,129.04,737.35,-0.883,New hotel. Start at peer median €106.,low,8
+11180,2024-06-15,rural,new_hotel,SET,,131.56,,39.47,131.56,127.5,4954.34,-0.597,New hotel. Start at peer median €132.,low,5
+7240,2024-06-15,coastal_town,underperforming,LOWER,173.75158333333334,65.76,69.5,39.07,137.22,65.76,3363.05,-0.781,Hotel is overpriced vs best peer. Lower to €66.,medium,9
+18441,2024-06-15,resort_coastal,underperforming,INVESTIGATE,176.7345238095238,176.73,50.5,50.5,104.8,162.05,3403.11,-0.445,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,medium,6
+13315,2024-06-15,major_metro,underperforming,RAISE,69.38468614718614,92.32,10.81,10.77,89.51,92.32,7992.08,-0.761,Hotel is underpriced vs best peer. Raise to €92.,medium,5
+12853,2024-06-15,major_metro,underperforming,LOWER,457.99666666666667,239.65,65.43,46.66,141.63,239.65,39507.92,-0.761,Hotel is overpriced vs best peer. Lower to €240.,low,8
+7931,2024-06-15,resort_coastal,underperforming,RAISE,89.4233526170799,160.51,38.32,48.07,125.64,160.51,4975.9,-0.379,Hotel is underpriced vs best peer. Raise to €161.,medium,8
+14737,2024-06-15,resort_coastal,underperforming,RAISE,178.34124999999997,723.76,50.95,36.19,173.92,723.76,3618.82,-0.445,Hotel is underpriced vs best peer. Raise to €724.,low,9
+5852,2024-06-15,major_metro,underperforming,RAISE,72.20180555555555,164.58,45.56,41.32,120.1,164.58,8064.29,-0.471,Hotel is underpriced vs best peer. Raise to €165.,medium,7
+5962,2024-06-15,rural,underperforming,INVESTIGATE,118.90609523809525,118.91,21.23,21.23,127.5,131.38,1257.54,-0.597,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,medium,9
+22940,2024-06-15,resort_coastal,underperforming,LOWER,239.61605699855699,162.05,146.26,108.06,150.0,162.05,3403.11,-0.286,Hotel is overpriced vs best peer. Lower to €162.,medium,7
+23998,2024-06-15,major_metro,underperforming,INVESTIGATE,132.30140659996655,132.3,56.25,56.25,70.2,151.98,3365.24,-0.651,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,medium,7
+11166,2024-06-15,rural,underperforming,INVESTIGATE,176.03333333333333,176.03,41.91,41.91,142.16,161.46,4036.44,-0.597,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,medium,9
+12700,2024-06-15,rural,underperforming,INVESTIGATE,185.29999999999998,185.3,26.47,26.47,100.38,175.48,1554.24,-0.597,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,low,8
+11407,2024-06-15,urban_fringe,underperforming,RAISE,600.0,862.63,85.71,96.5,635.83,862.63,5422.23,-0.496,Hotel is underpriced vs best peer. Raise to €863.,low,7
+14770,2024-06-15,rural,new_hotel,SET,,86.25,,25.88,86.25,217.77,914.65,-0.597,New hotel. Start at peer median €86.,low,10
+8596,2024-06-15,resort_coastal,underperforming,LOWER,349.6849206349207,159.95,49.95,28.37,119.5,159.95,7289.17,-0.445,Hotel is overpriced vs best peer. Lower to €160.,low,7
+12581,2024-06-15,coastal_town,underperforming,LOWER,517.1575,160.51,147.76,73.78,101.6,160.51,4975.9,-0.883,Hotel is overpriced vs best peer. Lower to €161.,medium,9
+11152,2024-06-15,rural,new_hotel,SET,,117.33,,35.2,117.33,152.15,7433.82,-0.597,New hotel. Start at peer median €117.,low,9
+14560,2024-06-15,coastal_town,underperforming,LOWER,500.0,324.36,95.24,80.94,275.32,324.36,2687.56,-0.883,Hotel is overpriced vs best peer. Lower to €324.,low,7
+26141,2024-06-15,resort_coastal,underperforming,INVESTIGATE,102.75679194247844,102.76,117.44,117.44,119.21,105.92,4085.62,-0.24,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,medium,10
+8808,2024-06-15,rural,underperforming,RAISE,96.36866666666667,131.39,13.77,14.7,119.0,131.39,9516.68,-0.597,Hotel is underpriced vs best peer. Raise to €131.,low,9
+21033,2024-06-15,urban_core,underperforming,LOWER,384.91333333333336,239.65,73.32,62.71,222.15,239.65,39507.92,-0.991,Hotel is overpriced vs best peer. Lower to €240.,low,6
+23073,2024-06-15,small_town,underperforming,RAISE,75.97728359140858,111.57,110.86,105.99,89.22,111.57,9036.99,-0.403,Hotel is underpriced vs best peer. Raise to €112.,high,9
+15934,2024-06-15,urban_fringe,underperforming,LOWER,191.94166666666666,98.6,3.74,4.93,54.6,98.6,1380.43,-0.496,Hotel is overpriced vs best peer. Lower to €99.,low,9
+22544,2024-06-15,major_metro,underperforming,RAISE,86.42669913419913,127.48,23.57,22.2,117.31,127.48,7284.47,-0.761,Hotel is underpriced vs best peer. Raise to €127.,medium,10
+9824,2024-06-15,small_town,new_hotel,SET,,74.75,,22.42,74.75,92.34,2789.96,-0.749,New hotel. Start at peer median €75.,low,7
+3444,2024-06-15,major_metro,underperforming,LOWER,431.03818181818184,315.21,95.16,83.83,230.79,315.21,10311.72,-0.761,Hotel is overpriced vs best peer. Lower to €315.,medium,8
+7107,2024-06-15,resort_coastal,underperforming,LOWER,211.17366358024688,159.95,36.87,30.94,200.92,159.95,7289.17,-0.445,Hotel is overpriced vs best peer. Lower to €160.,medium,8
+22176,2024-06-15,coastal_town,underperforming,RAISE,106.2799074074074,175.53,12.65,8.88,124.86,175.53,4622.22,-0.883,Hotel is underpriced vs best peer. Raise to €176.,high,8
+24862,2024-06-15,small_town,underperforming,RAISE,84.22848717948719,100.71,29.62,30.53,93.75,100.71,4344.97,-0.704,Hotel is underpriced vs best peer. Raise to €101.,medium,7
+6590,2024-06-15,rural,new_hotel,SET,,303.67,,91.1,303.67,186.42,2157.14,-0.597,New hotel. Start at peer median €304.,low,9
+25517,2024-06-15,major_metro,underperforming,RAISE,102.66053124454912,151.98,83.99,99.86,114.62,151.98,3365.24,-0.41,Hotel is underpriced vs best peer. Raise to €152.,medium,7
+22579,2024-06-15,major_metro,underperforming,INVESTIGATE,157.7535,157.75,30.05,30.05,115.67,164.58,8064.29,-0.761,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,low,8
+9643,2024-06-15,urban_fringe,new_hotel,SET,,272.55,,81.77,272.55,216.6,4177.28,-0.496,New hotel. Start at peer median €273.,low,7
+22683,2024-06-15,coastal_town,underperforming,RAISE,46.22402777777777,113.13,24.21,5.66,72.9,113.13,4606.07,-0.655,Hotel is underpriced vs best peer. Raise to €113.,medium,7
+13784,2024-06-15,major_metro,underperforming,LOWER,728.2347083333334,540.02,169.05,150.03,321.38,540.02,3085.8,-0.761,Hotel is overpriced vs best peer. Lower to €540.,medium,8
+23782,2024-06-15,urban_core,underperforming,LOWER,93.4993838899196,79.54,116.4,75.56,77.95,79.54,4215.57,-0.533,Hotel is overpriced vs best peer. Lower to €80.,high,8
+5703,2024-06-15,rural,new_hotel,SET,,87.0,,26.1,87.0,111.32,9032.53,-0.597,New hotel. Start at peer median €87.,low,9
+12342,2024-06-15,urban_fringe,underperforming,INVESTIGATE,149.36266666666666,149.36,21.34,21.34,125.79,141.39,1514.92,-0.496,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,low,8
+23162,2024-06-15,urban_core,underperforming,LOWER,134.24514583333334,75.23,54.34,42.11,57.64,75.23,4212.97,-0.871,Hotel is overpriced vs best peer. Lower to €75.,medium,6
+13219,2024-06-15,coastal_town,underperforming,RAISE,78.60067460317461,175.53,6.46,8.78,128.84,175.53,4622.22,-0.883,Hotel is underpriced vs best peer. Raise to €176.,medium,9
+17339,2024-06-15,urban_core,underperforming,RAISE,39.42069444444445,76.66,9.39,3.83,95.7,76.66,2168.36,-0.991,Hotel is underpriced vs best peer. Raise to €77.,medium,5
+23879,2024-06-15,rural,underperforming,LOWER,429.565,110.63,61.37,22.81,298.75,110.63,8787.05,-0.597,Hotel is overpriced vs best peer. Lower to €111.,low,8
+15893,2024-06-15,major_metro,underperforming,RAISE,200.94,540.02,28.71,27.0,392.53,540.02,3085.8,-0.761,Hotel is underpriced vs best peer. Raise to €540.,low,8
+26448,2024-06-15,resort_coastal,underperforming,INVESTIGATE,83.19152777777778,83.19,19.02,19.02,88.06,95.31,694.43,-0.445,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,low,8
+10314,2024-06-15,resort_coastal,underperforming,RAISE,86.90733333333334,125.43,18.62,21.58,99.45,125.43,3529.94,-0.445,Hotel is underpriced vs best peer. Raise to €125.,medium,9
+8095,2024-06-15,small_town,underperforming,INVESTIGATE,156.39142857142858,156.39,38.3,38.3,124.26,171.63,6080.47,-0.749,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,medium,9
+8270,2024-06-15,urban_fringe,underperforming,RAISE,185.09333333333333,368.52,52.88,53.58,180.73,368.52,6580.63,-0.496,Hotel is underpriced vs best peer. Raise to €369.,low,9
+25163,2024-06-15,resort_coastal,underperforming,LOWER,210.00830357142854,138.71,30.0,22.81,105.88,138.71,4319.89,-0.445,Hotel is overpriced vs best peer. Lower to €139.,medium,9
+18576,2024-06-15,provincial_city,underperforming,LOWER,220.95,104.4,31.56,23.59,89.72,104.4,775.54,-1.103,Hotel is overpriced vs best peer. Lower to €104.,low,8
+20614,2024-06-15,coastal_town,underperforming,INVESTIGATE,89.45629870129869,89.46,18.59,18.59,89.51,92.32,7992.08,-0.883,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,medium,5
+15484,2024-06-15,rural,new_hotel,SET,,135.0,,40.5,135.0,238.99,2424.02,-0.597,New hotel. Start at peer median €135.,low,7
+20960,2024-06-15,resort_coastal,underperforming,LOWER,88.94398148148149,61.0,29.65,23.07,78.77,61.0,2553.09,-0.428,Hotel is overpriced vs best peer. Lower to €61.,medium,9
+20489,2024-06-15,small_town,underperforming,INVESTIGATE,94.38619551282052,94.39,44.6,44.6,105.52,98.93,6062.91,-0.6,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,medium,7
+25562,2024-06-15,urban_fringe,underperforming,RAISE,51.48660714285714,273.85,0.74,13.69,75.21,273.85,1455.32,-0.496,Hotel is underpriced vs best peer. Raise to €274.,low,6
+20732,2024-06-15,urban_core,underperforming,RAISE,84.49476851851853,187.41,20.12,9.37,155.0,187.41,3239.54,-0.991,Hotel is underpriced vs best peer. Raise to €187.,medium,5
+24418,2024-06-15,urban_fringe,underperforming,RAISE,106.78544326732994,200.9,116.17,167.16,100.82,200.9,8581.1,-0.267,Hotel is underpriced vs best peer. Raise to €201.,medium,6
+13787,2024-06-15,small_town,underperforming,LOWER,376.418,184.15,53.77,36.37,127.65,184.15,6024.19,-0.749,Hotel is overpriced vs best peer. Lower to €184.,low,9
+13040,2024-06-15,resort_coastal,underperforming,LOWER,540.025,187.41,135.01,60.47,165.14,187.41,3239.54,-0.445,Hotel is overpriced vs best peer. Lower to €187.,low,7
+23326,2024-06-15,major_metro,underperforming,LOWER,313.0394166666667,200.86,53.66,43.83,165.2,200.86,1520.81,-0.761,Hotel is overpriced vs best peer. Lower to €201.,medium,9
+9410,2024-06-15,small_town,underperforming,LOWER,506.1818181818182,347.57,72.31,61.31,461.41,347.57,27408.43,-0.749,Hotel is overpriced vs best peer. Lower to €348.,medium,8
+27942,2024-06-15,major_metro,new_hotel,SET,,118.03,,35.41,118.03,156.68,2014.41,-0.761,New hotel. Start at peer median €118.,low,8
+18271,2024-06-15,urban_core,underperforming,INVESTIGATE,116.41714285714286,116.42,16.63,16.63,97.2,106.17,803.88,-0.991,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,low,7
+8983,2024-06-15,rural,underperforming,LOWER,363.4241666666667,239.65,51.92,41.2,149.56,239.65,39507.92,-0.597,Hotel is overpriced vs best peer. Lower to €240.,low,8
+22490,2024-06-15,urban_core,underperforming,RAISE,103.93912393162394,131.39,38.83,37.34,140.06,131.39,9516.68,-0.907,Hotel is underpriced vs best peer. Raise to €131.,high,9
+22536,2024-06-15,major_metro,underperforming,RAISE,78.23369047619047,138.95,22.35,16.24,142.24,138.95,14371.23,-0.761,Hotel is underpriced vs best peer. Raise to €139.,low,5
+24130,2024-06-15,urban_fringe,underperforming,RAISE,60.083697845707206,111.89,31.47,40.03,69.77,111.89,1470.61,-0.368,Hotel is underpriced vs best peer. Raise to €112.,low,4
+23402,2024-06-15,rural,underperforming,RAISE,69.79333333333334,86.1,12.46,13.23,71.5,86.1,3333.25,-0.597,Hotel is underpriced vs best peer. Raise to €86.,low,7
+23572,2024-06-15,urban_fringe,underperforming,INVESTIGATE,197.00866099773245,197.01,34.17,34.17,146.59,194.98,2980.35,-0.496,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,high,8
+22058,2024-06-15,resort_coastal,underperforming,LOWER,186.8,162.05,17.79,16.34,150.0,162.05,3403.11,-0.445,Hotel is overpriced vs best peer. Lower to €162.,low,7
+21808,2024-06-15,major_metro,underperforming,LOWER,257.4,156.45,36.77,29.02,600.0,156.45,938.72,-0.761,Hotel is overpriced vs best peer. Lower to €156.,low,3
+26191,2024-06-15,urban_core,underperforming,INVESTIGATE,180.6264642857143,180.63,93.54,93.54,144.03,158.07,2032.35,-0.742,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,medium,10
+25121,2024-06-15,rural,underperforming,INVESTIGATE,102.5625,102.56,14.65,14.65,106.2,96.54,634.4,-0.597,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,low,10
+19148,2024-06-15,resort_coastal,underperforming,RAISE,56.1,70.97,8.01,8.94,88.05,70.97,1459.87,-0.445,Hotel is underpriced vs best peer. Raise to €71.,low,8
+25376,2024-06-15,major_metro,underperforming,RAISE,97.8756875,151.98,15.38,13.83,115.0,151.98,3365.24,-0.761,Hotel is underpriced vs best peer. Raise to €152.,medium,7
+14451,2024-06-15,urban_fringe,underperforming,RAISE,49.5,175.53,1.77,8.78,151.32,175.53,4622.22,-0.496,Hotel is underpriced vs best peer. Raise to €176.,low,9
+23757,2024-06-15,urban_fringe,underperforming,RAISE,59.54363795518207,100.97,1.99,5.05,76.62,100.97,1434.36,-0.496,Hotel is underpriced vs best peer. Raise to €101.,medium,8
+18184,2024-06-15,rural,underperforming,LOWER,341.26690476190475,136.98,69.65,37.95,84.8,136.98,32308.5,-0.597,Hotel is overpriced vs best peer. Lower to €137.,medium,6
+21131,2024-06-15,urban_fringe,underperforming,INVESTIGATE,95.23342857142858,95.23,13.6,13.6,91.1,106.17,803.88,-0.496,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,low,7
+27933,2024-06-15,urban_core,underperforming,RAISE,37.888888888888886,84.08,6.96,4.2,80.5,84.08,1135.09,-0.991,Hotel is underpriced vs best peer. Raise to €84.,low,5
+27822,2024-06-15,urban_fringe,new_hotel,SET,,113.25,,33.98,113.25,89.87,2721.77,-0.496,New hotel. Start at peer median €113.,low,7
+7839,2024-06-15,coastal_town,new_hotel,SET,,46.19,,13.86,46.19,209.34,707.19,-0.883,New hotel. Start at peer median €46.,low,8
+7097,2024-06-15,major_metro,new_hotel,SET,,119.34,,35.8,119.34,123.55,1429.68,-0.761,New hotel. Start at peer median €119.,low,7
+6577,2024-06-15,major_metro,new_hotel,SET,,89.51,,26.85,89.51,92.32,7992.08,-0.761,New hotel. Start at peer median €90.,low,7
+11227,2024-06-15,major_metro,new_hotel,SET,,94.97,,28.49,94.97,77.29,2373.8,-0.761,New hotel. Start at peer median €95.,low,9
+7280,2024-06-15,rural,new_hotel,SET,,93.72,,28.12,93.72,77.05,4689.31,-0.597,New hotel. Start at peer median €94.,low,5
+11402,2024-06-15,urban_fringe,new_hotel,SET,,58.0,,17.4,58.0,157.78,1262.24,-0.496,New hotel. Start at peer median €58.,low,9
+6283,2024-06-15,small_town,new_hotel,SET,,121.75,,36.52,121.75,133.5,3661.85,-0.749,New hotel. Start at peer median €122.,low,8
+11198,2024-06-15,urban_core,new_hotel,SET,,126.14,,37.84,126.14,137.06,6285.27,-0.991,New hotel. Start at peer median €126.,low,10
+16084,2024-06-15,rural,underperforming,LOWER,185.73,110.63,26.53,19.62,196.75,110.63,8787.05,-0.597,Hotel is overpriced vs best peer. Lower to €111.,low,10
+10714,2024-06-15,rural,new_hotel,SET,,233.84,,70.15,233.84,454.6,1428.74,-0.597,New hotel. Start at peer median €234.,low,8
+11660,2024-06-15,small_town,new_hotel,SET,,70.13,,21.04,70.13,166.73,373.15,-0.749,New hotel. Start at peer median €70.,low,8
+26106,2024-06-15,coastal_town,underperforming,LOWER,184.25,156.19,39.48,37.97,176.14,156.19,4462.65,-0.883,Hotel is overpriced vs best peer. Lower to €156.,low,10
+6639,2024-06-15,rural,new_hotel,SET,,110.31,,33.09,110.31,141.06,1769.28,-0.597,New hotel. Start at peer median €110.,low,8
+8059,2024-06-15,rural,new_hotel,SET,,96.52,,28.96,96.52,111.57,9036.99,-0.597,New hotel. Start at peer median €97.,low,8
+12980,2024-06-15,urban_core,new_hotel,SET,,54.0,,16.2,54.0,262.0,889.65,-0.991,New hotel. Start at peer median €54.,low,7
+15324,2024-06-15,urban_fringe,underperforming,LOWER,250.0,116.82,35.71,21.09,119.06,116.82,801.03,-0.496,Hotel is overpriced vs best peer. Lower to €117.,low,6
+28023,2024-06-15,major_metro,new_hotel,SET,,118.25,,35.48,118.25,94.39,809.05,-0.761,New hotel. Start at peer median €118.,low,6
+24751,2024-06-15,resort_coastal,underperforming,RAISE,42.27777777777778,66.9,6.04,7.08,71.3,66.9,3086.82,-0.445,Hotel is underpriced vs best peer. Raise to €67.,low,7
+22205,2024-06-15,small_town,underperforming,LOWER,189.5625,86.73,47.39,30.49,194.5,86.73,1734.52,-0.749,Hotel is overpriced vs best peer. Lower to €87.,low,7
+20979,2024-06-15,small_town,underperforming,RAISE,89.36562499999998,123.55,21.28,20.99,66.26,123.55,1429.68,-0.749,Hotel is underpriced vs best peer. Raise to €124.,high,8
+27250,2024-06-15,provincial_city,underperforming,RAISE,67.32,138.82,19.23,6.94,105.68,138.82,2459.08,-1.103,Hotel is underpriced vs best peer. Raise to €139.,low,8
+9996,2024-06-15,resort_coastal,new_hotel,SET,,89.88,,26.97,89.88,89.87,2721.77,-0.445,New hotel. Start at peer median €90.,low,8
+9764,2024-06-15,urban_core,new_hotel,SET,,64.03,,19.21,64.03,96.48,627.09,-0.991,New hotel. Start at peer median €64.,low,8
+11415,2024-06-15,major_metro,new_hotel,SET,,125.9,,37.77,125.9,240.61,13164.57,-0.761,New hotel. Start at peer median €126.,low,8
+14919,2024-06-15,rural,new_hotel,SET,,74.75,,22.42,74.75,83.99,1323.81,-0.597,New hotel. Start at peer median €75.,low,9
+28379,2024-06-15,urban_core,new_hotel,SET,,77.25,,23.18,77.25,78.35,5215.88,-0.991,New hotel. Start at peer median €77.,low,8
+26835,2024-06-15,major_metro,new_hotel,SET,,265.59,,79.68,265.59,211.4,5949.39,-0.761,New hotel. Start at peer median €266.,low,9
+26379,2024-06-15,resort_coastal,underperforming,LOWER,468.8125,280.55,83.72,59.05,308.42,280.55,4488.78,-0.445,Hotel is overpriced vs best peer. Lower to €281.,low,8
+28183,2024-06-15,rural,new_hotel,SET,,121.33,,36.4,121.33,152.15,7433.82,-0.597,New hotel. Start at peer median €121.,low,9
+25439,2024-06-15,coastal_town,underperforming,RAISE,112.0,315.21,16.0,15.76,214.99,315.21,10311.72,-0.883,Hotel is underpriced vs best peer. Raise to €315.,low,8
+26914,2024-06-15,urban_fringe,new_hotel,SET,,119.46,,35.84,119.46,88.41,10748.31,-0.496,New hotel. Start at peer median €119.,low,7
+27324,2024-06-15,resort_coastal,underperforming,RAISE,69.53875,111.89,9.93,11.65,71.08,111.89,1470.61,-0.445,Hotel is underpriced vs best peer. Raise to €112.,low,4
+25391,2024-06-15,major_metro,underperforming,LOWER,184.33937500000002,139.89,39.5,35.48,101.96,139.89,15548.3,-0.761,Hotel is overpriced vs best peer. Lower to €140.,medium,10
+26643,2024-06-15,major_metro,underperforming,LOWER,109.3,71.77,15.61,12.93,97.22,71.77,3916.77,-0.761,Hotel is overpriced vs best peer. Lower to €72.,low,8
+22990,2024-06-15,urban_core,underperforming,RAISE,191.4,341.84,27.34,17.09,142.71,341.84,9864.63,-0.991,Hotel is underpriced vs best peer. Raise to €342.,low,10
+23874,2024-06-15,rural,underperforming,LOWER,125.125,78.9,17.88,13.76,70.75,78.9,5613.39,-0.597,Hotel is overpriced vs best peer. Lower to €79.,low,8
+25264,2024-06-15,major_metro,underperforming,RAISE,16.979629629629628,210.09,0.35,10.5,129.6,210.09,2701.21,-0.761,Hotel is underpriced vs best peer. Raise to €210.,low,9
+27699,2024-06-15,rural,new_hotel,SET,,107.33,,32.2,107.33,227.5,4192.45,-0.597,New hotel. Start at peer median €107.,low,9
+27413,2024-06-15,rural,underperforming,RAISE,15.0,69.49,0.09,3.47,55.8,69.49,607.32,-0.597,Hotel is underpriced vs best peer. Raise to €69.,low,9
+15454,2024-06-15,urban_fringe,underperforming,RAISE,228.9825,839.88,32.71,41.99,387.66,839.88,1679.76,-0.496,Hotel is underpriced vs best peer. Raise to €840.,low,8
+18812,2024-06-15,resort_coastal,new_hotel,SET,,112.2,,33.66,112.2,162.05,3403.11,-0.445,New hotel. Start at peer median €112.,low,7
+22627,2024-06-15,rural,underperforming,LOWER,169.79166666666669,98.93,27.29,19.86,100.76,98.93,6062.91,-0.597,Hotel is overpriced vs best peer. Lower to €99.,medium,7
+15557,2024-06-15,provincial_city,underperforming,INVESTIGATE,116.28888888888888,116.29,38.76,38.76,83.49,123.48,9190.77,-1.061,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,medium,9
+24827,2024-06-15,resort_coastal,underperforming,RAISE,575.0,862.63,82.14,95.8,542.89,862.63,5422.23,-0.445,Hotel is underpriced vs best peer. Raise to €863.,low,8
+25837,2024-06-15,major_metro,underperforming,LOWER,110.31500000000001,71.77,15.76,12.98,115.67,71.77,3916.77,-0.761,Hotel is overpriced vs best peer. Lower to €72.,low,8
+25617,2024-06-15,urban_core,new_hotel,SET,,65.88,,19.76,65.88,75.23,4212.97,-0.991,New hotel. Start at peer median €66.,low,7
+22972,2024-06-15,major_metro,new_hotel,SET,,118.69,,35.61,118.69,127.5,4954.34,-0.761,New hotel. Start at peer median €119.,low,9
+25695,2024-06-15,urban_fringe,underperforming,INVESTIGATE,782.6033333333334,782.6,111.8,111.8,485.78,862.63,5422.23,-0.496,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,low,7
+23906,2024-06-15,resort_coastal,underperforming,RAISE,139.87211111111114,200.28,22.2,25.68,95.28,200.28,2288.93,-0.445,Hotel is underpriced vs best peer. Raise to €200.,medium,9
+27386,2024-06-15,resort_coastal,new_hotel,SET,,55.92,,16.78,55.92,62.35,3269.05,-0.445,New hotel. Start at peer median €56.,low,6
+7034,2024-06-15,resort_coastal,new_hotel,SET,,70.0,,21.0,70.0,111.89,1470.61,-0.445,New hotel. Start at peer median €70.,low,5
+24336,2024-06-15,urban_core,underperforming,INVESTIGATE,100.0,100.0,14.29,14.29,89.51,92.32,7992.08,-0.991,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,low,7
+13874,2024-06-15,small_town,new_hotel,SET,,128.35,,38.5,128.35,116.24,2208.51,-0.749,New hotel. Start at peer median €128.,low,8
+11664,2024-06-15,major_metro,new_hotel,SET,,68.18,,20.45,68.18,66.3,2055.3,-0.761,New hotel. Start at peer median €68.,low,6
+11832,2024-06-15,urban_fringe,new_hotel,SET,,57.5,,17.25,57.5,59.09,1135.87,-0.496,New hotel. Start at peer median €58.,low,7
+19799,2024-06-15,rural,underperforming,RAISE,77.67333333333333,100.71,11.1,11.84,125.93,100.71,4344.97,-0.597,Hotel is underpriced vs best peer. Raise to €101.,low,8
+8116,2024-06-15,urban_fringe,new_hotel,SET,,62.5,,18.75,62.5,99.33,652.75,-0.496,New hotel. Start at peer median €62.,low,4
+6106,2024-06-15,small_town,new_hotel,SET,,87.0,,26.1,87.0,81.83,491.01,-0.749,New hotel. Start at peer median €87.,low,4
+11665,2024-06-15,major_metro,new_hotel,SET,,66.36,,19.91,66.36,66.3,2055.3,-0.761,New hotel. Start at peer median €66.,low,5
+24028,2024-06-15,small_town,underperforming,RAISE,70.0,83.99,3.33,4.2,61.5,83.99,1323.81,-0.749,Hotel is underpriced vs best peer. Raise to €84.,low,4
+10593,2024-06-15,rural,new_hotel,SET,,118.81,,35.64,118.81,112.26,3175.49,-0.597,New hotel. Start at peer median €119.,low,8
+11159,2024-06-15,urban_fringe,new_hotel,SET,,39.35,,11.8,39.35,111.19,306.65,-0.496,New hotel. Start at peer median €39.,low,5
+12982,2024-06-15,urban_fringe,new_hotel,SET,,60.0,,18.0,60.0,110.6,541.45,-0.496,New hotel. Start at peer median €60.,low,10
+22960,2024-06-15,urban_core,underperforming,LOWER,126.83,100.71,36.24,34.65,120.96,100.71,4344.97,-0.991,Hotel is overpriced vs best peer. Lower to €101.,low,7
+14106,2024-06-15,rural,new_hotel,SET,,97.1,,29.13,97.1,98.93,6062.91,-0.597,New hotel. Start at peer median €97.,low,8
+14997,2024-06-15,rural,new_hotel,SET,,89.66,,26.9,89.66,61.99,1954.06,-0.597,New hotel. Start at peer median €90.,low,10
+12644,2024-06-15,resort_coastal,new_hotel,SET,,99.5,,29.85,99.5,121.6,3005.2,-0.445,New hotel. Start at peer median €100.,low,9
+8525,2024-06-15,provincial_city,new_hotel,SET,,114.42,,34.32,114.42,142.42,3967.35,-1.103,New hotel. Start at peer median €114.,low,8
+16768,2024-06-15,major_metro,underperforming,RAISE,149.51384449378745,202.54,1156.44,192.41,85.67,202.54,3240.58,-0.41,Hotel is underpriced vs best peer. Raise to €203.,low,4
+9300,2024-06-15,resort_coastal,underperforming,LOWER,111.74858058608059,67.43,61.4,41.71,87.84,67.43,10153.54,-0.317,Hotel is overpriced vs best peer. Lower to €67.,high,10
+18784,2024-06-15,urban_fringe,underperforming,LOWER,165.87013605442175,94.76,101.55,65.9,90.8,94.76,5049.53,-0.317,Hotel is overpriced vs best peer. Lower to €95.,medium,6
+12537,2024-06-15,provincial_city,underperforming,RAISE,93.14563915901304,219.73,53.56,10.99,60.0,219.73,582.47,-0.753,Hotel is underpriced vs best peer. Raise to €220.,high,9
+14586,2024-06-15,rural,underperforming,RAISE,116.63517703421978,161.91,24.92,26.57,70.0,161.91,1428.27,-0.597,Hotel is underpriced vs best peer. Raise to €162.,medium,7
+25523,2024-06-15,urban_core,underperforming,RAISE,163.14340625,471.7,128.18,23.59,131.17,471.7,12264.28,-0.533,Hotel is underpriced vs best peer. Raise to €472.,medium,8
+20719,2024-06-15,urban_fringe,on_par,HOLD,145.25998576740403,145.26,26.5,26.5,55.38,209.34,707.19,-0.496,Hotel is performing on par with peers. Minor adjustments optional.,medium,5
+9445,2024-06-15,coastal_town,underperforming,LOWER,107.83593756457218,84.69,107.84,80.45,87.0,84.69,6448.34,-0.475,Hotel is overpriced vs best peer. Lower to €85.,high,9
+9025,2024-06-15,major_metro,underperforming,RAISE,106.69001374507447,132.09,45.12,47.17,114.68,132.09,992.56,-0.653,Hotel is underpriced vs best peer. Raise to €132.,high,10
+9462,2024-06-15,resort_coastal,underperforming,INVESTIGATE,96.96102128427128,96.96,22.62,22.62,86.7,95.31,694.43,-0.445,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,medium,10
+10243,2024-06-15,urban_core,underperforming,RAISE,29.15332536183268,111.19,1.96,5.56,96.54,111.19,306.65,-0.991,Hotel is underpriced vs best peer. Raise to €111.,medium,6
+21925,2024-06-15,urban_core,on_par,HOLD,59.66094415904662,59.66,198.46,198.46,71.88,65.45,673.24,-0.533,Hotel is performing on par with peers. Minor adjustments optional.,medium,5
+14340,2024-06-15,urban_core,underperforming,RAISE,80.43163461538462,166.57,47.73,29.48,138.05,166.57,5568.09,-0.655,Hotel is underpriced vs best peer. Raise to €167.,medium,5
+12460,2024-06-15,major_metro,on_par,HOLD,69.90227167947675,69.9,218.98,218.98,117.5,113.61,2840.27,-0.41,Hotel is performing on par with peers. Minor adjustments optional.,medium,7
+9855,2024-06-15,rural,new_hotel,SET,,75.0,,22.5,75.0,96.48,627.09,-0.597,New hotel. Start at peer median €75.,low,9
+10850,2024-06-15,coastal_town,underperforming,RAISE,73.76344737925474,100.97,16.25,15.0,68.25,100.97,1434.36,-0.883,Hotel is underpriced vs best peer. Raise to €101.,medium,7
+6597,2024-06-15,coastal_town,underperforming,RAISE,106.63178280311821,151.29,279.64,143.72,154.75,151.29,5900.24,-0.475,Hotel is underpriced vs best peer. Raise to €151.,medium,6
+6638,2024-06-15,urban_fringe,underperforming,RAISE,86.63541666666667,125.5,24.75,27.89,124.35,125.5,2277.01,-0.496,Hotel is underpriced vs best peer. Raise to €126.,low,9
+8191,2024-06-15,urban_fringe,underperforming,RAISE,79.36780009276438,174.05,9.31,8.7,90.0,174.05,1019.44,-0.496,Hotel is underpriced vs best peer. Raise to €174.,high,9
+7320,2024-06-15,urban_core,underperforming,RAISE,100.46726140755723,168.33,41.95,29.64,88.55,168.33,847.64,-0.856,Hotel is underpriced vs best peer. Raise to €168.,medium,7
+6857,2024-06-15,provincial_city,underperforming,RAISE,87.74272882541615,133.08,226.27,126.42,117.55,133.08,7395.23,-0.594,Hotel is underpriced vs best peer. Raise to €133.,high,8
+10601,2024-06-15,rural,underperforming,RAISE,100.88615729884151,136.32,10.99,11.74,107.19,136.32,769.26,-0.597,Hotel is underpriced vs best peer. Raise to €136.,high,8
+11040,2024-06-15,rural,underperforming,INVESTIGATE,79.25067155067154,79.25,70.54,70.54,103.82,85.39,9673.9,-0.322,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,high,9
+15298,2024-06-15,major_metro,underperforming,INVESTIGATE,94.05308597883598,94.05,81.65,81.65,80.71,104.42,3058.04,-0.41,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,medium,7
+12648,2024-06-15,rural,underperforming,LOWER,141.07338548752836,111.9,18.35,16.36,97.27,111.9,4092.47,-0.597,Hotel is overpriced vs best peer. Lower to €112.,high,8
+11899,2024-06-15,resort_coastal,underperforming,RAISE,70.14926870748299,239.94,49.39,70.96,338.02,239.94,5758.58,-0.24,Hotel is underpriced vs best peer. Raise to €240.,high,8
+15375,2024-06-15,provincial_city,on_par,HOLD,164.15981330875857,164.16,425.48,425.48,98.54,92.67,2118.16,-0.594,Hotel is performing on par with peers. Minor adjustments optional.,medium,7
+8309,2024-06-15,urban_core,underperforming,LOWER,238.36493333333334,120.35,170.26,108.67,110.0,120.35,4177.9,-0.533,Hotel is overpriced vs best peer. Lower to €120.,low,9
+9106,2024-06-15,urban_fringe,underperforming,RAISE,119.79697656047657,240.61,184.59,228.58,126.0,240.61,13164.57,-0.267,Hotel is underpriced vs best peer. Raise to €241.,high,10
+10499,2024-06-15,resort_coastal,underperforming,LOWER,89.18780348965774,73.9,16.66,14.86,77.0,73.9,709.41,-0.445,Hotel is overpriced vs best peer. Lower to €74.,high,10
+6896,2024-06-15,urban_fringe,underperforming,INVESTIGATE,112.10044696969697,112.1,11.65,11.65,74.75,101.41,6514.28,-0.496,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,medium,7
+7520,2024-06-15,resort_coastal,underperforming,RAISE,64.72822420557395,186.59,16.05,9.33,119.38,186.59,491.22,-0.445,Hotel is underpriced vs best peer. Raise to €187.,high,9
+10820,2024-06-15,urban_fringe,on_par,HOLD,159.24513336155374,159.25,28.65,28.65,30.66,111.19,306.65,-0.496,Hotel is performing on par with peers. Minor adjustments optional.,medium,5
+11874,2024-06-15,rural,underperforming,INVESTIGATE,120.4195573870574,120.42,101.89,101.89,95.25,108.35,3002.98,-0.322,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,high,8
+9491,2024-06-15,major_metro,underperforming,INVESTIGATE,60.496546044166685,60.5,31.29,31.29,95.0,69.49,607.32,-0.571,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,high,9
+12653,2024-06-15,major_metro,underperforming,LOWER,150.49411057500598,106.15,38.85,33.55,110.88,106.15,1061.53,-0.761,Hotel is overpriced vs best peer. Lower to €106.,high,9
+11252,2024-06-15,urban_fringe,underperforming,RAISE,88.20964779031205,111.59,52.03,60.06,69.0,111.59,726.9,-0.33,Hotel is underpriced vs best peer. Raise to €112.,high,9
+11900,2024-06-15,rural,underperforming,RAISE,78.75323515886103,144.0,55.6,74.58,80.5,144.0,521.16,-0.322,Hotel is underpriced vs best peer. Raise to €144.,medium,5
+10002,2024-06-15,resort_coastal,underperforming,RAISE,89.13049407735123,162.05,31.83,38.19,136.12,162.05,3403.11,-0.416,Hotel is underpriced vs best peer. Raise to €162.,high,8
+8961,2024-06-15,major_metro,on_par,HOLD,423.5844217100056,423.58,637.7,637.7,134.4,273.7,5825.98,-0.41,Hotel is performing on par with peers. Minor adjustments optional.,medium,7
+12840,2024-06-15,urban_fringe,underperforming,RAISE,110.62914328231292,315.21,94.82,136.85,201.18,315.21,10311.72,-0.267,Hotel is underpriced vs best peer. Raise to €315.,high,10
+12256,2024-06-15,rural,on_par,HOLD,214.16498983274644,214.16,1284.99,1284.99,255.1,218.4,12043.05,-0.322,Hotel is performing on par with peers. Minor adjustments optional.,medium,7
+9783,2024-06-15,coastal_town,underperforming,RAISE,39.81901175695551,149.91,2.13,7.5,52.25,149.91,661.41,-0.883,Hotel is underpriced vs best peer. Raise to €150.,high,9
+19940,2024-06-15,coastal_town,underperforming,LOWER,142.3533306878307,84.69,99.99,70.94,87.0,84.69,6448.34,-0.475,Hotel is overpriced vs best peer. Lower to €85.,high,9
+19190,2024-06-15,small_town,underperforming,RAISE,46.23715150605442,209.34,3.37,10.47,51.18,209.34,707.19,-0.749,Hotel is underpriced vs best peer. Raise to €209.,medium,6
+11745,2024-06-15,major_metro,underperforming,LOWER,158.17123418607255,104.0,52.14,42.92,114.66,104.0,6819.46,-0.735,Hotel is overpriced vs best peer. Lower to €104.,high,8
+11406,2024-06-15,urban_fringe,underperforming,LOWER,150.7797194921092,123.48,222.03,117.31,124.26,123.48,9190.77,-0.267,Hotel is overpriced vs best peer. Lower to €123.,high,9
+19426,2024-06-15,urban_core,underperforming,RAISE,328.75,723.76,46.96,36.19,121.09,723.76,3618.82,-0.991,Hotel is underpriced vs best peer. Raise to €724.,low,9
+15626,2024-06-15,urban_core,underperforming,LOWER,119.00047619047618,75.95,82.38,62.9,77.88,75.95,6531.79,-0.542,Hotel is overpriced vs best peer. Lower to €76.,high,8
+23022,2024-06-15,rural,underperforming,LOWER,112.89184697363794,59.09,22.66,15.23,72.66,59.09,1135.87,-0.597,Hotel is overpriced vs best peer. Lower to €59.,high,10
+6333,2024-06-15,resort_coastal,on_par,HOLD,116.93234920634922,116.93,93.27,93.27,121.0,124.58,1939.86,-0.24,Hotel is performing on par with peers. Minor adjustments optional.,medium,6
+7166,2024-06-15,rural,underperforming,INVESTIGATE,141.62478930966327,141.62,34.92,34.92,110.66,151.42,404.82,-0.597,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,medium,5
+7423,2024-06-15,rural,underperforming,RAISE,83.70980208333333,110.05,2.78,5.5,69.0,110.05,953.0,-0.597,Hotel is underpriced vs best peer. Raise to €110.,medium,9
+13070,2024-06-15,small_town,underperforming,INVESTIGATE,123.08436609686608,123.08,11.72,11.72,104.09,125.02,2406.64,-0.749,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,medium,9
+14575,2024-06-15,urban_fringe,underperforming,LOWER,200.80763888888887,120.54,105.18,72.42,88.0,120.54,2410.8,-0.368,Hotel is overpriced vs best peer. Lower to €121.,medium,7
+11162,2024-06-15,coastal_town,underperforming,RAISE,62.32880723446771,100.97,7.44,5.45,79.25,100.97,1434.36,-0.883,Hotel is underpriced vs best peer. Raise to €101.,high,10
+10458,2024-06-15,urban_fringe,underperforming,RAISE,72.99000850340137,120.6,10.85,12.14,116.32,120.6,1297.07,-0.496,Hotel is underpriced vs best peer. Raise to €121.,high,9
+15527,2024-06-15,urban_fringe,underperforming,INVESTIGATE,104.83824404761904,104.84,63.65,63.65,96.82,110.19,5950.19,-0.32,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,medium,8
+21087,2024-06-15,major_metro,underperforming,RAISE,98.63456549879545,240.61,234.51,228.58,126.0,240.61,13164.57,-0.41,Hotel is underpriced vs best peer. Raise to €241.,high,9
+10406,2024-06-15,urban_fringe,underperforming,RAISE,58.37192307692307,86.41,22.45,26.1,79.28,86.41,2999.56,-0.447,Hotel is underpriced vs best peer. Raise to €86.,low,4
+8538,2024-06-15,small_town,underperforming,LOWER,129.98666666666668,92.34,4.13,4.62,74.75,92.34,2789.96,-0.749,Hotel is overpriced vs best peer. Lower to €92.,low,7
+13739,2024-06-15,rural,underperforming,LOWER,108.64821992634367,62.08,20.3,14.57,60.83,62.08,617.38,-0.597,Hotel is overpriced vs best peer. Lower to €62.,high,8
+12324,2024-06-15,urban_fringe,underperforming,RAISE,127.21088435374149,341.84,23.37,17.09,128.91,341.84,9864.63,-0.496,Hotel is underpriced vs best peer. Raise to €342.,medium,10
+11589,2024-06-15,urban_fringe,underperforming,RAISE,73.10039913880628,150.27,7.73,7.57,109.05,150.27,2485.66,-0.496,Hotel is underpriced vs best peer. Raise to €150.,high,10
+8710,2024-06-15,major_metro,underperforming,RAISE,120.09025285900796,471.7,133.57,23.59,132.3,471.7,12264.28,-0.41,Hotel is underpriced vs best peer. Raise to €472.,high,8
+11213,2024-06-15,major_metro,underperforming,INVESTIGATE,153.40919969961163,153.41,28.18,28.18,125.67,175.53,4622.22,-0.761,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,high,8
+10417,2024-06-15,rural,underperforming,LOWER,268.8494627750125,150.27,29.08,20.54,83.68,150.27,2485.66,-0.597,Hotel is overpriced vs best peer. Lower to €150.,high,8
+14535,2024-06-15,small_town,underperforming,LOWER,353.23807692307696,130.5,205.73,100.2,416.2,130.5,5890.95,-0.505,Hotel is overpriced vs best peer. Lower to €130.,high,10
+18552,2024-06-15,resort_coastal,underperforming,RAISE,90.4606227106227,157.94,72.57,104.05,124.35,157.94,2933.21,-0.24,Hotel is underpriced vs best peer. Raise to €158.,high,9
+14910,2024-06-15,major_metro,underperforming,LOWER,93.68496471783118,60.86,18.53,15.25,87.25,60.86,813.6,-0.761,Hotel is overpriced vs best peer. Lower to €61.,high,8
+11667,2024-06-15,resort_coastal,underperforming,INVESTIGATE,101.48268180959253,101.48,14.33,14.33,142.77,94.89,1464.03,-0.445,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,medium,9
+12345,2024-06-15,major_metro,on_par,HOLD,134.245747814093,134.25,415.07,415.07,119.0,117.23,1055.1,-0.41,Hotel is performing on par with peers. Minor adjustments optional.,medium,7
+13440,2024-06-15,urban_core,underperforming,LOWER,132.51023670882495,89.72,33.17,29.64,75.02,89.72,319.38,-0.991,Hotel is overpriced vs best peer. Lower to €90.,medium,6
+12452,2024-06-15,resort_coastal,underperforming,INVESTIGATE,111.335,111.34,17.5,17.5,134.3,119.56,3433.09,-0.445,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,medium,7
+12933,2024-06-15,urban_fringe,underperforming,RAISE,93.9294342948718,200.9,34.66,35.63,156.33,200.9,8581.1,-0.456,Hotel is underpriced vs best peer. Raise to €201.,high,8
+15217,2024-06-15,urban_core,underperforming,RAISE,98.60390170940171,181.61,39.01,18.54,146.03,181.61,7705.56,-0.881,Hotel is underpriced vs best peer. Raise to €182.,high,9
+11052,2024-06-15,small_town,underperforming,RAISE,143.13089008214007,239.65,154.14,187.9,178.9,239.65,39507.92,-0.403,Hotel is underpriced vs best peer. Raise to €240.,high,9
+9982,2024-06-15,provincial_city,underperforming,RAISE,49.987108471030886,108.7,10.81,5.43,69.04,108.7,1521.75,-1.103,Hotel is underpriced vs best peer. Raise to €109.,medium,5
+7676,2024-06-15,major_metro,underperforming,LOWER,168.69355097680096,104.0,146.45,98.8,125.0,104.0,6819.46,-0.41,Hotel is overpriced vs best peer. Lower to €104.,high,8
+14783,2024-06-15,urban_core,underperforming,LOWER,155.27582175925926,120.6,19.41,18.41,95.0,120.6,1297.07,-0.991,Hotel is overpriced vs best peer. Lower to €121.,medium,7
+15310,2024-06-15,urban_fringe,underperforming,LOWER,171.25074072455322,120.6,23.3,18.81,119.11,120.6,1297.07,-0.496,Hotel is overpriced vs best peer. Lower to €121.,high,8
+5912,2024-06-15,provincial_city,underperforming,LOWER,239.8247403628118,130.5,178.64,123.52,521.7,130.5,5890.95,-0.594,Hotel is overpriced vs best peer. Lower to €130.,high,10
+10758,2024-06-15,urban_fringe,underperforming,INVESTIGATE,81.24486224364607,81.24,15.2,15.2,93.22,75.4,492.99,-0.496,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,medium,7
+9745,2024-06-15,small_town,underperforming,RAISE,65.09515972222222,79.9,8.3,8.46,69.04,79.9,515.57,-0.749,Hotel is underpriced vs best peer. Raise to €80.,medium,7
+21012,2024-06-15,urban_fringe,underperforming,RAISE,113.68203703703703,565.65,48.72,28.28,313.34,565.65,4605.98,-0.422,Hotel is underpriced vs best peer. Raise to €566.,medium,6
+14355,2024-06-15,coastal_town,underperforming,LOWER,196.97753707758406,149.88,12.35,11.38,81.5,149.88,1117.68,-0.883,Hotel is overpriced vs best peer. Lower to €150.,high,10
+12592,2024-06-15,urban_fringe,underperforming,LOWER,190.035749349453,101.94,81.86,52.48,84.39,101.94,2048.41,-0.421,Hotel is overpriced vs best peer. Lower to €102.,medium,7
+13120,2024-06-15,resort_coastal,new_hotel,SET,,234.48,,70.34,234.48,159.95,7289.17,-0.445,New hotel. Start at peer median €234.,low,9
+24071,2024-06-15,urban_core,underperforming,RAISE,72.93766967029333,113.88,11.59,8.03,84.39,113.88,2321.0,-0.991,Hotel is underpriced vs best peer. Raise to €114.,medium,7
+12454,2024-06-15,rural,underperforming,RAISE,114.6,156.95,22.92,24.46,100.2,156.95,1614.38,-0.597,Hotel is underpriced vs best peer. Raise to €157.,low,9
+14714,2024-06-15,small_town,underperforming,LOWER,155.17954478458051,133.08,76.01,70.61,118.0,133.08,7395.23,-0.585,Hotel is overpriced vs best peer. Lower to €133.,high,9
+14650,2024-06-15,small_town,underperforming,LOWER,463.7396326728827,216.6,43.32,28.31,102.67,216.6,4177.28,-0.749,Hotel is overpriced vs best peer. Lower to €217.,high,9
+9319,2024-06-15,resort_coastal,underperforming,RAISE,119.52884353741494,281.37,101.23,160.99,169.73,281.37,3135.23,-0.24,Hotel is underpriced vs best peer. Raise to €281.,medium,7
+9107,2024-06-15,rural,underperforming,RAISE,125.9837857142857,239.65,32.4,28.41,178.9,239.65,39507.92,-0.597,Hotel is underpriced vs best peer. Raise to €240.,low,9
+14097,2024-06-15,rural,underperforming,LOWER,76.48116033272284,59.09,8.42,7.39,60.0,59.09,1135.87,-0.597,Hotel is overpriced vs best peer. Lower to €59.,high,8
+10649,2024-06-15,rural,underperforming,RAISE,72.49447755675698,106.44,13.66,14.44,71.5,106.44,507.51,-0.597,Hotel is underpriced vs best peer. Raise to €106.,medium,7
+6426,2024-06-15,urban_fringe,underperforming,RAISE,46.08069958343148,111.19,2.78,5.56,57.88,111.19,306.65,-0.496,Hotel is underpriced vs best peer. Raise to €111.,high,8
+6056,2024-06-15,coastal_town,underperforming,LOWER,262.7476190476191,113.88,12.51,8.14,95.7,113.88,2321.0,-0.883,Hotel is overpriced vs best peer. Lower to €114.,low,7
+9217,2024-06-15,rural,underperforming,LOWER,134.18258680555556,72.25,12.67,8.7,83.6,72.25,1543.11,-0.597,Hotel is overpriced vs best peer. Lower to €72.,medium,7
+6727,2024-06-15,resort_coastal,underperforming,RAISE,92.5118611111111,169.57,13.22,15.25,132.0,169.57,9907.92,-0.445,Hotel is underpriced vs best peer. Raise to €170.,medium,9
+13042,2024-06-15,resort_coastal,underperforming,LOWER,94.12414529914531,77.05,47.58,41.35,89.98,77.05,4689.31,-0.339,Hotel is overpriced vs best peer. Lower to €77.,medium,6
+18405,2024-06-15,urban_core,underperforming,LOWER,137.33169642857143,111.32,98.09,87.55,70.75,111.32,9032.53,-0.533,Hotel is overpriced vs best peer. Lower to €111.,medium,8
+8436,2024-06-15,resort_coastal,underperforming,LOWER,185.82,86.41,26.55,15.28,108.55,86.41,2999.56,-0.445,Hotel is overpriced vs best peer. Lower to €86.,low,4
+6542,2024-06-15,urban_fringe,underperforming,RAISE,57.560713064713056,214.1,57.56,58.72,74.5,214.1,3089.1,-0.267,Hotel is underpriced vs best peer. Raise to €214.,medium,6
+6545,2024-06-15,urban_fringe,underperforming,RAISE,131.08694337606838,242.8,70.59,90.71,174.14,242.8,3052.38,-0.359,Hotel is underpriced vs best peer. Raise to €243.,medium,7
+13520,2024-06-15,resort_coastal,underperforming,LOWER,221.64621212121213,162.05,46.06,37.7,169.73,162.05,3403.11,-0.445,Hotel is overpriced vs best peer. Lower to €162.,medium,5
+7635,2024-06-15,rural,new_hotel,SET,,70.0,,21.0,70.0,117.14,420.23,-0.597,New hotel. Start at peer median €70.,low,7
+5789,2024-06-15,resort_coastal,underperforming,LOWER,87.18657407407406,67.43,23.53,20.03,90.03,67.43,10153.54,-0.445,Hotel is overpriced vs best peer. Lower to €67.,medium,9
+27434,2024-06-15,urban_fringe,new_hotel,SET,,92.33,,27.7,92.33,88.41,10748.31,-0.496,New hotel. Start at peer median €92.,low,8
+8878,2024-06-15,rural,underperforming,INVESTIGATE,157.11435185185186,157.11,74.82,74.82,124.17,183.63,4958.11,-0.476,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,high,8
+15143,2024-06-15,urban_fringe,underperforming,RAISE,79.55575961538463,157.94,39.34,48.52,106.97,157.94,2933.21,-0.384,Hotel is underpriced vs best peer. Raise to €158.,high,9
+13064,2024-06-15,major_metro,new_hotel,SET,,108.92,,32.68,108.92,306.0,972.64,-0.761,New hotel. Start at peer median €109.,low,6
+11564,2024-06-15,resort_coastal,underperforming,RAISE,112.1064864259005,159.95,38.04,44.43,138.75,159.95,7289.17,-0.425,Hotel is underpriced vs best peer. Raise to €160.,medium,7
+14040,2024-06-15,small_town,underperforming,INVESTIGATE,179.53333333333336,179.53,46.17,46.17,125.37,166.57,5568.09,-0.749,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,medium,6
+22754,2024-06-15,urban_fringe,on_par,HOLD,104.79180350798151,104.79,179.64,179.64,90.09,123.55,1429.68,-0.267,Hotel is performing on par with peers. Minor adjustments optional.,high,9
+22857,2024-06-15,resort_coastal,underperforming,RAISE,53.20892319676659,95.54,39.18,56.93,80.0,95.54,2279.39,-0.24,Hotel is underpriced vs best peer. Raise to €96.,high,9
+8485,2024-06-15,rural,underperforming,LOWER,196.66897959183672,111.9,28.1,20.1,103.08,111.9,4092.47,-0.597,Hotel is overpriced vs best peer. Lower to €112.,medium,9
+8275,2024-06-15,rural,underperforming,LOWER,123.94499999999998,89.24,48.29,39.98,89.9,89.24,2473.19,-0.536,Hotel is overpriced vs best peer. Lower to €89.,medium,10
+23446,2024-06-15,urban_fringe,underperforming,RAISE,84.21117195767197,110.79,52.42,62.19,112.8,110.79,2738.14,-0.311,Hotel is underpriced vs best peer. Raise to €111.,high,9
+15853,2024-06-15,rural,underperforming,INVESTIGATE,105.3526136735813,105.35,165.55,165.55,101.46,108.35,3002.98,-0.322,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,medium,8
+20652,2024-06-15,urban_fringe,underperforming,INVESTIGATE,91.76666666666667,91.77,16.39,16.39,97.12,97.64,3166.37,-0.496,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,low,10
+12552,2024-06-15,urban_core,new_hotel,SET,,78.93,,23.68,78.93,113.13,4606.07,-0.991,New hotel. Start at peer median €79.,low,8
+10053,2024-06-15,urban_core,new_hotel,SET,,95.82,,28.75,95.82,145.3,996.32,-0.991,New hotel. Start at peer median €96.,low,10
+18050,2024-06-15,coastal_town,underperforming,RAISE,78.5999537037037,123.48,27.14,22.26,82.5,123.48,9190.77,-0.837,Hotel is underpriced vs best peer. Raise to €123.,medium,7
+9669,2024-06-15,resort_coastal,underperforming,LOWER,217.23818783068782,77.05,41.38,18.89,157.54,77.05,4689.31,-0.445,Hotel is overpriced vs best peer. Lower to €77.,medium,6
+8640,2024-06-15,rural,underperforming,RAISE,91.97569444444446,133.97,16.42,17.4,104.46,133.97,12650.62,-0.597,Hotel is underpriced vs best peer. Raise to €134.,high,9
+14081,2024-06-15,major_metro,underperforming,RAISE,122.61467254967255,179.53,63.33,68.14,123.59,179.53,3847.18,-0.571,Hotel is underpriced vs best peer. Raise to €180.,high,9
+13863,2024-06-15,urban_core,on_par,HOLD,83.64444444444443,83.64,64.72,64.72,105.0,86.41,2999.56,-0.533,Hotel is performing on par with peers. Minor adjustments optional.,low,4
+19344,2024-06-15,resort_coastal,underperforming,LOWER,93.39114686544008,68.61,12.64,10.38,58.41,68.61,557.95,-0.445,Hotel is overpriced vs best peer. Lower to €69.,medium,7
+20559,2024-06-15,resort_coastal,underperforming,RAISE,35.92238095238095,420.41,9.24,21.02,457.0,420.41,1981.94,-0.445,Hotel is underpriced vs best peer. Raise to €420.,medium,5
+5708,2024-06-15,rural,underperforming,RAISE,61.21658452380952,128.73,47.22,64.08,77.05,128.73,2868.89,-0.322,Hotel is underpriced vs best peer. Raise to €129.,medium,7
+24471,2024-06-15,rural,new_hotel,SET,,85.25,,25.58,85.25,72.25,1543.11,-0.597,New hotel. Start at peer median €85.,low,6
+8423,2024-06-15,urban_fringe,underperforming,INVESTIGATE,155.24104242979243,155.24,73.36,73.36,120.89,140.36,15980.74,-0.397,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,high,10
+19296,2024-06-15,coastal_town,underperforming,INVESTIGATE,69.33507937895439,69.34,3.77,3.77,58.5,81.21,905.62,-0.883,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,high,9
+6383,2024-06-15,urban_fringe,underperforming,LOWER,660.7354875283447,454.6,121.36,96.41,443.33,454.6,1428.74,-0.496,Hotel is overpriced vs best peer. Lower to €455.,medium,5
+11909,2024-06-15,rural,underperforming,LOWER,222.8151282051282,176.48,20.81,18.53,84.62,176.48,1247.95,-0.597,Hotel is overpriced vs best peer. Lower to €176.,high,9
+12955,2024-06-15,coastal_town,new_hotel,SET,,148.99,,44.7,148.99,563.28,14243.05,-0.883,New hotel. Start at peer median €149.,low,9
+11944,2024-06-15,urban_core,new_hotel,SET,,119.38,,35.81,119.38,134.28,3686.37,-0.991,New hotel. Start at peer median €119.,low,9
+24935,2024-06-15,small_town,underperforming,RAISE,122.75333333333333,171.63,28.5,27.96,133.0,171.63,6080.47,-0.749,Hotel is underpriced vs best peer. Raise to €172.,medium,9
+26786,2024-06-15,resort_coastal,new_hotel,SET,,248.79,,74.64,248.79,190.09,4616.49,-0.445,New hotel. Start at peer median €249.,low,8
+17985,2024-06-15,urban_fringe,underperforming,LOWER,199.28043209876546,171.63,33.21,30.57,109.56,171.63,6080.47,-0.496,Hotel is overpriced vs best peer. Lower to €172.,medium,9
+21744,2024-06-15,rural,underperforming,LOWER,167.47912896825395,59.09,12.85,6.29,77.76,59.09,1135.87,-0.597,Hotel is overpriced vs best peer. Lower to €59.,high,9
+10138,2024-06-15,coastal_town,underperforming,RAISE,68.7454696969697,92.32,25.89,25.18,95.38,92.32,7992.08,-0.805,Hotel is underpriced vs best peer. Raise to €92.,medium,6
+16065,2024-06-15,resort_coastal,underperforming,LOWER,97.76403846153845,68.12,23.64,18.69,83.64,68.12,486.58,-0.445,Hotel is overpriced vs best peer. Lower to €68.,high,8
+11735,2024-06-15,rural,underperforming,LOWER,113.30416666666667,92.72,16.19,14.68,176.46,92.72,11046.35,-0.597,Hotel is overpriced vs best peer. Lower to €93.,low,9
+23344,2024-06-15,small_town,new_hotel,SET,,79.2,,23.76,79.2,95.56,1360.55,-0.749,New hotel. Start at peer median €79.,low,10
+12965,2024-06-15,major_metro,underperforming,LOWER,122.51414529914528,94.39,35.0,31.68,118.25,94.39,809.05,-0.761,Hotel is overpriced vs best peer. Lower to €94.,medium,6
+14578,2024-06-15,urban_fringe,new_hotel,SET,,80.54,,24.16,80.54,91.28,2986.11,-0.496,New hotel. Start at peer median €81.,low,8
+21868,2024-06-15,urban_fringe,underperforming,RAISE,104.82931216931217,238.72,14.98,12.52,178.11,238.72,3137.5,-0.496,Hotel is underpriced vs best peer. Raise to €239.,low,9
+13486,2024-06-15,coastal_town,underperforming,LOWER,130.03819444444446,60.86,6.19,4.26,88.28,60.86,813.6,-0.883,Hotel is overpriced vs best peer. Lower to €61.,medium,7
+22508,2024-06-15,major_metro,underperforming,RAISE,78.91605837325068,123.48,97.13,116.8,84.94,123.48,9190.77,-0.41,Hotel is underpriced vs best peer. Raise to €123.,high,8
+24444,2024-06-15,small_town,underperforming,LOWER,108.559962635709,70.76,192.75,67.22,90.25,70.76,1506.08,-0.403,Hotel is overpriced vs best peer. Lower to €71.,medium,6
+9641,2024-06-15,rural,underperforming,LOWER,482.0,59.5,11.48,2.97,81.0,59.5,1579.48,-0.597,Hotel is overpriced vs best peer. Lower to €59.,low,9
+9499,2024-06-15,coastal_town,new_hotel,SET,,135.4,,40.62,135.4,436.78,13914.52,-0.883,New hotel. Start at peer median €135.,low,8
+15296,2024-06-15,urban_fringe,underperforming,RAISE,418.3194805194805,784.68,114.09,121.12,467.29,784.68,2802.44,-0.496,Hotel is underpriced vs best peer. Raise to €785.,medium,8
+14950,2024-06-15,coastal_town,underperforming,INVESTIGATE,195.38571428571427,195.39,34.89,34.89,123.4,179.53,3847.18,-0.883,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,medium,9
+18392,2024-06-15,rural,underperforming,LOWER,131.77083333333334,111.9,47.06,43.33,114.96,111.9,4092.47,-0.558,Hotel is overpriced vs best peer. Lower to €112.,low,8
+11885,2024-06-15,rural,underperforming,LOWER,166.45833333333331,70.76,44.59,25.46,80.5,70.76,1506.08,-0.597,Hotel is overpriced vs best peer. Lower to €71.,medium,5
+20931,2024-06-15,urban_fringe,underperforming,RAISE,115.44022959183674,341.84,25.92,17.09,121.55,341.84,9864.63,-0.496,Hotel is underpriced vs best peer. Raise to €342.,medium,9
+22878,2024-06-15,urban_fringe,underperforming,RAISE,199.78941094259278,465.66,5.03,23.28,108.0,465.66,1549.97,-0.496,Hotel is underpriced vs best peer. Raise to €466.,medium,9
+17845,2024-06-15,rural,underperforming,INVESTIGATE,95.90171666666667,95.9,32.88,32.88,97.95,111.57,9036.99,-0.568,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,medium,6
+26229,2024-06-15,provincial_city,underperforming,RAISE,575.9644444444444,701.72,82.28,76.1,436.58,701.72,16841.18,-1.103,Hotel is underpriced vs best peer. Raise to €702.,low,9
+13512,2024-06-15,resort_coastal,underperforming,RAISE,196.49393707482994,315.21,36.09,42.33,163.96,315.21,10311.72,-0.445,Hotel is underpriced vs best peer. Raise to €315.,medium,10
+10587,2024-06-15,urban_core,underperforming,INVESTIGATE,93.2956829004329,93.3,16.96,16.96,104.75,106.17,803.88,-0.991,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,medium,8
+6612,2024-06-15,rural,underperforming,RAISE,212.02999999999997,471.7,39.38,23.59,146.03,471.7,12264.28,-0.597,Hotel is underpriced vs best peer. Raise to €472.,medium,7
+12351,2024-06-15,small_town,new_hotel,SET,,93.66,,28.1,93.66,118.15,3595.15,-0.749,New hotel. Start at peer median €94.,low,8
+26306,2024-06-15,small_town,underperforming,RAISE,98.13595238095239,185.27,4.76,9.26,81.94,185.27,507.28,-0.749,Hotel is underpriced vs best peer. Raise to €185.,medium,10
+24326,2024-06-15,coastal_town,underperforming,INVESTIGATE,75.74309807256236,75.74,30.92,30.92,124.0,88.41,10748.31,-0.773,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,medium,7
+18420,2024-06-15,urban_fringe,underperforming,RAISE,222.73849790764788,310.26,38.18,42.83,245.93,310.26,4609.59,-0.496,Hotel is underpriced vs best peer. Raise to €310.,medium,8
+9018,2024-06-15,small_town,underperforming,RAISE,70.19036324786325,85.72,25.45,26.31,66.36,85.72,1102.07,-0.695,Hotel is underpriced vs best peer. Raise to €86.,low,3
+12453,2024-06-15,rural,underperforming,LOWER,169.3525,84.23,36.29,23.47,250.0,84.23,2671.28,-0.597,Hotel is overpriced vs best peer. Lower to €84.,low,7
+23963,2024-06-15,rural,underperforming,LOWER,72.75,59.09,4.38,3.96,83.6,59.09,1135.87,-0.597,Hotel is overpriced vs best peer. Lower to €59.,medium,9
+12764,2024-06-15,urban_fringe,new_hotel,SET,,75.6,,22.68,75.6,126.2,1840.04,-0.496,New hotel. Start at peer median €76.,low,9
+25952,2024-06-15,small_town,underperforming,RAISE,61.857368220015275,96.12,10.8,9.82,78.0,96.12,1199.25,-0.749,Hotel is underpriced vs best peer. Raise to €96.,medium,9
+11992,2024-06-15,urban_fringe,underperforming,LOWER,912.96875,204.75,179.33,55.68,173.92,204.75,3568.57,-0.496,Hotel is overpriced vs best peer. Lower to €205.,medium,9
+10603,2024-06-15,urban_core,new_hotel,SET,,40.31,,12.09,40.31,111.19,306.65,-0.991,New hotel. Start at peer median €40.,low,6
+21334,2024-06-15,urban_core,underperforming,INVESTIGATE,133.7340451388889,133.73,57.31,57.31,118.18,152.15,7433.82,-0.844,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,high,8
+23155,2024-06-15,major_metro,underperforming,RAISE,119.68832051282052,240.61,43.4,25.0,156.67,240.61,13164.57,-0.706,Hotel is underpriced vs best peer. Raise to €241.,high,9
+9966,2024-06-15,urban_fringe,underperforming,RAISE,54.799344375431325,110.19,11.18,11.22,90.96,110.19,5950.19,-0.496,Hotel is underpriced vs best peer. Raise to €110.,medium,8
+14302,2024-06-15,resort_coastal,underperforming,LOWER,168.88162703145264,137.06,40.21,35.37,119.54,137.06,6285.27,-0.445,Hotel is overpriced vs best peer. Lower to €137.,medium,8
+12472,2024-06-15,urban_core,underperforming,RAISE,107.84081349206349,189.42,15.41,9.47,140.38,189.42,2218.93,-0.991,Hotel is underpriced vs best peer. Raise to €189.,medium,6
+15293,2024-06-15,small_town,underperforming,LOWER,260.3066666666667,104.52,37.19,21.62,270.55,104.52,1821.58,-0.749,Hotel is overpriced vs best peer. Lower to €105.,low,4
+21999,2024-06-15,coastal_town,underperforming,RAISE,89.64631868131869,125.43,25.61,23.21,99.45,125.43,3529.94,-0.883,Hotel is underpriced vs best peer. Raise to €125.,medium,7
+23613,2024-06-15,rural,underperforming,LOWER,276.5358333333333,123.03,150.12,82.73,80.5,123.03,1353.36,-0.43,Hotel is overpriced vs best peer. Lower to €123.,medium,5
+15409,2024-06-15,provincial_city,underperforming,RAISE,82.16666666666667,115.48,11.74,9.12,302.44,115.48,1270.24,-1.103,Hotel is underpriced vs best peer. Raise to €115.,medium,8
+11575,2024-06-15,major_metro,underperforming,RAISE,115.9366278375149,218.4,22.08,13.61,156.97,218.4,12043.05,-0.761,Hotel is underpriced vs best peer. Raise to €218.,medium,7
+24962,2024-06-15,coastal_town,underperforming,INVESTIGATE,130.1325,130.13,5.58,5.58,108.16,149.76,2816.95,-0.883,Price is similar to best peer but RevPAR is lower. Check quality/marketing.,low,8
+9826,2024-06-15,resort_coastal,new_hotel,SET,,66.38,,19.91,66.38,105.92,4085.62,-0.445,New hotel. Start at peer median €66.,low,10
+12357,2024-06-15,resort_coastal,new_hotel,SET,,212.13,,63.64,212.13,315.21,10311.72,-0.445,New hotel. Start at peer median €212.,low,10
+18519,2024-06-15,coastal_town,underperforming,RAISE,197.0,454.76,28.14,22.74,600.0,454.76,1494.2,-0.883,Hotel is underpriced vs best peer. Raise to €455.,low,5
+10252,2024-06-15,rural,new_hotel,SET,,100.74,,30.22,100.74,240.75,4104.27,-0.597,New hotel. Start at peer median €101.,low,10
+25247,2024-06-15,resort_coastal,underperforming,RAISE,71.42023757988044,138.71,17.49,19.73,113.5,138.71,4319.89,-0.445,Hotel is underpriced vs best peer. Raise to €139.,medium,9
+17922,2024-06-15,resort_coastal,underperforming,LOWER,137.39606022408967,112.48,21.59,19.1,124.35,112.48,1687.26,-0.445,Hotel is overpriced vs best peer. Lower to €112.,medium,5
+27534,2024-06-15,provincial_city,new_hotel,SET,,101.25,,30.38,101.25,71.77,3916.77,-1.103,New hotel. Start at peer median €101.,low,9

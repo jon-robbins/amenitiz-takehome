@@ -1,0 +1,20 @@
+{
+  "option2_metrics": {},
+  "option2_scenarios": {},
+  "option4_count": 376,
+  "validation": {
+    "matching_quality": {
+      "passed": false,
+      "reason": "No overpriced pairs to validate"
+    },
+    "elasticity_consistency": {
+      "passed": false,
+      "reason": "No overpriced pairs to validate"
+    },
+    "cross_validation": {
+      "consistent": false,
+      "reason": "Insufficient data"
+    },
+    "overall_passed": false
+  }
+}

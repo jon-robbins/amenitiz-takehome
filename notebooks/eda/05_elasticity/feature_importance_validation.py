@@ -19,7 +19,9 @@ Methodology:
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
+# Project root directory (3 levels up from notebooks/eda/05_elasticity/)
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(PROJECT_ROOT))
 
 import numpy as np
 import pandas as pd
@@ -228,11 +230,23 @@ def engineer_features(
     - Product: log_room_size, view_quality_ordinal, room_capacity_pax, amenities_score, total_capacity_log
     - Temporal: month_sin, month_cos, weekend_ratio, is_summer, is_winter, holiday_ratio
     - City indicators: Binary flags for top 10 cities (is_madrid, is_barcelona, etc.)
+    - Market Segment v2: Granular 8-segment classification (major_metro, urban_core, etc.)
     """
     df = df.copy()
     
-    # Merge distance features
-    df = df.merge(distance_features, on='hotel_id', how='left')
+    # Merge distance features (drop city columns from distance_features to avoid conflict)
+    # The hotel-month data already has city from the hotel_location table
+    distance_cols_to_keep = ['hotel_id', 'distance_from_madrid', 'distance_from_coast']
+    distance_features_clean = distance_features[[c for c in distance_cols_to_keep if c in distance_features.columns]]
+    df = df.merge(distance_features_clean, on='hotel_id', how='left')
+    
+    # Add granular market segment (vectorized, uses city population from cities500)
+    from src.features.engineering import get_market_segments_vectorized
+    df['market_segment_v2'] = get_market_segments_vectorized(
+        df['latitude'].values,
+        df['longitude'].values,
+        df['distance_from_coast'].values
+    )
     
     # Top 5 cities by revenue with canonical names
     top_5_canonical = {
@@ -346,7 +360,9 @@ def prepare_features_and_target(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.Seri
     ]
     
     # Categorical features (for CatBoost - no one-hot encoding needed)
-    categorical_features = ['room_type', 'room_view', 'city_standardized']
+    # Now includes market_segment_v2 (8-segment: major_metro, urban_core, urban_fringe, 
+    # resort_coastal, coastal_town, provincial_city, small_town, rural)
+    categorical_features = ['room_type', 'room_view', 'city_standardized', 'market_segment_v2']
     
     boolean_features = [
         'is_coastal', 'is_july_august', 'children_allowed'
@@ -499,7 +515,8 @@ def evaluate_models(
                 'occupancy_rate',
                 'holiday_ratio'
             ]
-            categorical_features = ['room_type', 'room_view', 'city_standardized']
+            # Include market_segment_v2 (8-segment classification)
+            categorical_features = ['room_type', 'room_view', 'city_standardized', 'market_segment_v2']
             boolean_features = ['is_coastal', 'is_july_august', 'children_allowed']
             
             # Create preprocessor for CatBoost (no one-hot encoding)
@@ -985,13 +1002,12 @@ def main():
     
     # Load distance features
     print("\n3. Loading distance features...")
-    script_dir = Path(__file__).parent
-    distance_features_path = script_dir / '../../../outputs/eda/spatial/data/hotel_distance_features.csv'
-    distance_features = pd.read_csv(distance_features_path.resolve())
+    distance_features_path = PROJECT_ROOT / 'outputs/data/hotel_distance_features.csv'
+    distance_features = pd.read_csv(distance_features_path)
     print(f"   Loaded distance features for {len(distance_features):,} hotels")
     
     # Path to cities500.json for holiday features
-    cities500_path = script_dir / '../../../data/cities500.json'
+    cities500_path = PROJECT_ROOT / 'data/cities500.json'
     
     # Engineer features
     print("\n4. Engineering features (including holiday proximity)...")
@@ -1027,7 +1043,7 @@ def main():
     
     # Create visualizations
     print("\n9. Creating visualizations...")
-    output_dir = script_dir / '../../../outputs/eda/elasticity/figures'
+    output_dir = PROJECT_ROOT / 'outputs/figures/elasticity'
     create_visualizations(results, best_model_name, best_pipeline, X_test, y_test, output_dir)
     
     # SHAP analysis
@@ -1040,7 +1056,7 @@ def main():
     
     # Save results
     print("\n11. Saving results...")
-    results_path = script_dir / '../../../outputs/eda/elasticity/data/feature_importance_results.csv'
+    results_path = PROJECT_ROOT / 'outputs/data/elasticity_results/feature_importance_results.csv'
     save_results(results, results_path)
     
     print("\n" + "=" * 80)

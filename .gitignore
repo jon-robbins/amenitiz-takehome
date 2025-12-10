@@ -59,3 +59,13 @@ Thumbs.db
 #data
 data/*
 notebooks/eda/gshhg-shp-2.3.7.zip
+
+# Large geospatial files (use Git LFS or download separately)
+lib/data/GSHHS_shp/
+*.shp
+*.shx
+*.dbf
+*.prj
+
+# Large data outputs
+outputs/data/dbscan_labeled_bookings.csv
