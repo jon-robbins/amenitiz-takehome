@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-PriceAdvisor is a machine learning system that recommends the RevPAR-optimized daily price for a certain hotel's room type on a certain day. We estimate the optimal price by using *counterfactual estimation*. By using a KNN algorithm (R^2 0.78) to match hotels to their peers based on their endogenous features (where are they, how many rooms do they have, what kinds of amenities do they offer, etc.), we can say **these two hotels behave similarly, and if one hotel adopted its peer's pricing strategy**.
+PriceAdvisor is a machine learning system that recommends the RevPAR-optimized daily price for a certain hotel's room type on a certain day. We estimate the optimal price by using *counterfactual estimation*. By using a KNN algorithm (R^2 0.78) to match hotels to their peers based on their endogenous features (where are they, how many rooms do they have, what kinds of amenities do they offer, etc.), we can say **these two hotels behave similarly, and if a hotel adopts its peer's pricing strategy it will have similar outcomes**.
 
 PriceAdvisor is a machine learning system that recommends RevPAR-optimized daily prices for hotels. The model identifies peer hotels using validated features (R² = 0.78), compares RevPAR performance, and recommends price adjustments based on the best-performing peer's strategy.
 
