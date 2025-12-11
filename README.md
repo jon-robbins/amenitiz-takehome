@@ -2,8 +2,6 @@
 
 ## Executive Summary
 
-MAKE SLIGHTLY MORE TECHNICAL AND DEVELOP, INTRODUCE COUNTERFACTUAL ESTIMATION AND LINK TO THE TECH SPECS AND MATH BEHIND IT
-
 PriceAdvisor is a machine learning system that recommends the RevPAR-optimized daily price for a certain hotel's room type on a certain day. We estimate the optimal price by using *counterfactual estimation*. By using a KNN algorithm (R^2 0.78) to match hotels to their peers based on their endogenous features (where are they, how many rooms do they have, what kinds of amenities do they offer, etc.), we can say **these two hotels behave similarly, and if one hotel adopted its peer's pricing strategy**.
 
 PriceAdvisor is a machine learning system that recommends RevPAR-optimized daily prices for hotels. The model identifies peer hotels using validated features (R² = 0.78), compares RevPAR performance, and recommends price adjustments based on the best-performing peer's strategy.
@@ -513,31 +511,6 @@ prices = pipeline.recommend_date_range(hotel_id=123, start_date=date(2024, 6, 15
 
 ---
 
-## 8. Deployment Architecture
-
-```mermaid
-flowchart LR
-    subgraph training [Weekly Training - Sunday Night]
-        A1[Load 3-month booking data] --> A2[Train peer matcher KNN]
-        A2 --> A3[Calculate segment elasticity]
-        A3 --> A4[Calculate DOW and monthly multipliers]
-        A4 --> A5[Save models to disk]
-    end
-    
-    subgraph daily [Daily Batch - 4 AM]
-        B1[Load trained models] --> B2[Generate predictions for all hotels]
-        B2 --> B3[Store recommendations in Redis]
-    end
-    
-    subgraph serving [API Serving]
-        C1[Request: hotel_id + date] --> C2[Lookup Redis cache]
-        C2 --> C3[Return recommended_price]
-    end
-    
-    A5 -.-> B1
-    B3 -.-> C2
-```
-
 ### Configuration
 
 | Parameter | Value | Rationale |
@@ -558,7 +531,7 @@ If Redis cache miss occurs (new hotel, cache expired):
 
 ---
 
-## 9. Future Improvements
+## 8. Future Improvements
 
 **Richer Cold-Start Data:** Ask new hotels for their typical weekday and weekend rates during onboarding. This provides a price anchor for hotels without booking history, improving initial recommendations.
 
@@ -572,7 +545,7 @@ If Redis cache miss occurs (new hotel, cache expired):
 
 ---
 
-## 10. Key Files
+## 9. Key Files
 
 | File | Purpose |
 |------|---------|
