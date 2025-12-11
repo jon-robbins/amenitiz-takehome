@@ -455,6 +455,93 @@ class RollingValidator:
             'avg_price_diff': df['avg_price_diff'].mean(),
             'segment_elasticity': avg_elasticity,
         }
+    
+    def calculate_lead_time_metrics(self) -> Dict:
+        """
+        Calculate lead time pricing patterns across the data.
+        
+        This analyzes how prices vary by lead time (booking window)
+        and calculates segment-level lead time multipliers.
+        
+        Returns:
+            Dict with lead time metrics and multipliers
+        """
+        print("\n=== LEAD TIME ANALYSIS ===")
+        
+        # Get lead time distribution and pricing patterns
+        query = """
+        WITH booking_lead AS (
+            SELECT 
+                b.hotel_id,
+                b.total_price / GREATEST(1, DATE_DIFF('day', b.arrival_date, b.departure_date)) as price_per_night,
+                DATE_DIFF('day', b.created_at::DATE, b.arrival_date) as lead_time_days,
+                CASE 
+                    WHEN DATE_DIFF('day', b.created_at::DATE, b.arrival_date) = 0 THEN 'same_day'
+                    WHEN DATE_DIFF('day', b.created_at::DATE, b.arrival_date) BETWEEN 1 AND 3 THEN 'very_short'
+                    WHEN DATE_DIFF('day', b.created_at::DATE, b.arrival_date) BETWEEN 4 AND 7 THEN 'short'
+                    WHEN DATE_DIFF('day', b.created_at::DATE, b.arrival_date) BETWEEN 8 AND 14 THEN 'medium'
+                    WHEN DATE_DIFF('day', b.created_at::DATE, b.arrival_date) BETWEEN 15 AND 30 THEN 'standard'
+                    WHEN DATE_DIFF('day', b.created_at::DATE, b.arrival_date) BETWEEN 31 AND 60 THEN 'advance'
+                    ELSE 'far_advance'
+                END as lead_bucket
+            FROM bookings b
+            WHERE b.status IN ('confirmed', 'Booked', 'cancelled')
+              AND b.created_at IS NOT NULL
+              AND DATE_DIFF('day', b.created_at::DATE, b.arrival_date) >= 0
+              AND DATE_DIFF('day', b.created_at::DATE, b.arrival_date) < 365
+              AND b.total_price > 0
+              AND b.arrival_date >= '2023-01-01'
+              AND b.arrival_date < '2025-01-01'
+        )
+        SELECT 
+            lead_bucket,
+            COUNT(*) as bookings,
+            AVG(price_per_night) as avg_price,
+            PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY price_per_night) as median_price
+        FROM booking_lead
+        GROUP BY lead_bucket
+        ORDER BY MIN(lead_time_days)
+        """
+        
+        lead_df = self.con.execute(query).fetchdf()
+        
+        # Calculate multipliers relative to 'standard' (15-30 days)
+        if 'standard' in lead_df['lead_bucket'].values:
+            baseline = lead_df[lead_df['lead_bucket'] == 'standard']['avg_price'].values[0]
+        else:
+            baseline = lead_df['avg_price'].median()
+        
+        lead_multipliers = {}
+        for _, row in lead_df.iterrows():
+            lead_multipliers[row['lead_bucket']] = round(row['avg_price'] / baseline, 3)
+        
+        print("Lead time pricing patterns:")
+        print(lead_df.to_string(index=False))
+        
+        print("\nLead time multipliers (vs standard booking window):")
+        for bucket in ['same_day', 'very_short', 'short', 'medium', 'standard', 'advance', 'far_advance']:
+            if bucket in lead_multipliers:
+                print(f"  {bucket}: {lead_multipliers[bucket]:.2f}x")
+        
+        # Calculate potential RevPAR impact from lead time optimization
+        total_bookings = lead_df['bookings'].sum()
+        short_term_bookings = lead_df[lead_df['lead_bucket'].isin(['same_day', 'very_short', 'short'])]['bookings'].sum()
+        pct_short_term = short_term_bookings / total_bookings * 100
+        
+        # If we raised short-term prices by 10%, what's the impact?
+        short_term_revenue = (lead_df[lead_df['lead_bucket'].isin(['same_day', 'very_short', 'short'])]['avg_price'] * 
+                             lead_df[lead_df['lead_bucket'].isin(['same_day', 'very_short', 'short'])]['bookings']).sum()
+        potential_uplift = short_term_revenue * 0.1  # 10% increase
+        
+        print(f"\nShort-term bookings (≤7 days): {pct_short_term:.1f}%")
+        print(f"Potential uplift from 10% price increase on short-term: €{potential_uplift:,.0f}")
+        
+        return {
+            'lead_multipliers': lead_multipliers,
+            'lead_df': lead_df,
+            'pct_short_term': pct_short_term,
+            'potential_uplift': potential_uplift
+        }
 
 
 def main():
@@ -491,9 +578,19 @@ def main():
     for seg, elas in sorted(summary['segment_elasticity'].items(), key=lambda x: x[1]):
         print(f"  {seg}: {elas:.3f}")
     
+    # Lead time analysis
+    lead_metrics = validator.calculate_lead_time_metrics()
+    
     # Save results
     results_df.to_csv('outputs/data/rolling_validation_results.csv', index=False)
     print(f"\nSaved to outputs/data/rolling_validation_results.csv")
+    
+    # Save lead time metrics
+    import json
+    lead_multipliers_path = 'outputs/data/lead_time_multipliers.json'
+    with open(lead_multipliers_path, 'w') as f:
+        json.dump(lead_metrics['lead_multipliers'], f, indent=2)
+    print(f"Saved lead time multipliers to {lead_multipliers_path}")
     
     return results_df, summary
 

@@ -1,4 +1,7 @@
-"""Price recommendation system."""
-from .diagnosis import diagnose_pricing, PriceDiagnosis
-from .price_recommender import PriceRecommender, PriceRecommendation
+"""Price recommendation system.
 
+Main pipeline: pricing_pipeline.PricingPipeline
+"""
+from .pricing_pipeline import PricingPipeline, PricingConfig
+
+__all__ = ['PricingPipeline', 'PricingConfig']

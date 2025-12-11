@@ -768,21 +768,17 @@ class DataCleaner:
         Impute city names for hotels that have coordinates but no city.
         Uses cities500.json to find the nearest city.
         """
-        import json
-        from pathlib import Path
-        
         if self.config.verbose:
             logger.info("Imputing city names from nearest city (lat/lon lookup)...")
         
-        # Load cities500.json
-        project_root = Path(__file__).parent.parent.parent
-        cities_path = project_root / 'data' / 'cities500.json'
-        
-        if not cities_path.exists():
+        # Load cities500.json (auto-downloads if not present)
+        from src.data.cities_downloader import load_cities500
+        try:
+            cities_data = load_cities500()
+        except Exception as e:
+            if self.config.verbose:
+                logger.info(f"  • Could not load cities500.json: {e}")
             return
-        
-        with open(cities_path, 'r') as f:
-            cities_data = json.load(f)
         
         spain_cities = [c for c in cities_data if c.get('country') == 'ES']
         
@@ -854,23 +850,17 @@ class DataCleaner:
         
         Uses fuzzy matching to find the best matching city in Spain.
         """
-        import json
-        from pathlib import Path
-        
         if self.config.verbose:
             logger.info("Imputing missing coordinates from cities500.json...")
         
-        # Load cities500.json
-        project_root = Path(__file__).parent.parent.parent
-        cities_path = project_root / 'data' / 'cities500.json'
-        
-        if not cities_path.exists():
+        # Load cities500.json (auto-downloads if not present)
+        from src.data.cities_downloader import load_cities500
+        try:
+            cities_data = load_cities500()
+        except Exception as e:
             if self.config.verbose:
-                logger.info("  • cities500.json not found, skipping imputation")
+                logger.info(f"  • Could not load cities500.json: {e}")
             return
-        
-        with open(cities_path, 'r') as f:
-            cities_data = json.load(f)
         
         # Filter to Spain cities (country='ES')
         spain_cities = [c for c in cities_data if c.get('country') == 'ES']

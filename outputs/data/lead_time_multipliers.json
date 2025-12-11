@@ -1,0 +1,9 @@
+{
+  "same_day": 0.643,
+  "very_short": 0.83,
+  "short": 0.818,
+  "medium": 0.905,
+  "standard": 1.0,
+  "advance": 1.106,
+  "far_advance": 1.294
+}

@@ -51,7 +51,6 @@ MADRID_LON = -3.7038
 
 # Coastline shapefile for distance calculation
 COASTLINE_SHAPEFILE = None  # Lazy loaded
-COASTLINE_SHAPEFILE_PATH = "lib/data/GSHHS_shp/i/GSHHS_i_L1.shp"  # Intermediate resolution for speed
 
 
 # =============================================================================
@@ -118,7 +117,7 @@ def add_geographic_features(
     Add validated geographic features to DataFrame.
     
     Features added:
-    - dist_center_km: Distance from hotel to its OWN city center (not Madrid!)
+    - dist_center_km: Distance from hotel to its OWN city center
     - is_madrid_metro: Whether hotel is within 50km of Madrid (categorical)
     - is_coastal: Whether hotel is within 20km of coast (if distance_from_coast exists)
     - dist_coast_log: Log of distance to coast (if distance_from_coast exists)
@@ -471,15 +470,14 @@ def standardize_city(city_str: str) -> str:
 # =============================================================================
 
 def _load_coastline():
-    """Lazy load coastline shapefile."""
+    """Lazy load coastline shapefile, downloading if necessary."""
     global COASTLINE_SHAPEFILE
     if COASTLINE_SHAPEFILE is None:
         try:
             import geopandas as gpd
-            from pathlib import Path
+            from src.data.shapefile_downloader import get_coastline_path
             
-            project_root = Path(__file__).parent.parent.parent
-            shp_path = project_root / COASTLINE_SHAPEFILE_PATH
+            shp_path = get_coastline_path()
             
             if shp_path.exists():
                 # Load and clip to Spain bounding box for speed
@@ -614,13 +612,12 @@ def _load_cities_with_kdtrees():
     import json
     from pathlib import Path
     from scipy.spatial import cKDTree
+    from src.data.cities_downloader import load_cities500
     
-    cities_path = Path(__file__).parent.parent.parent / 'data' / 'cities500.json'
-    if not cities_path.exists():
+    try:
+        cities = load_cities500()
+    except Exception:
         return None
-    
-    with open(cities_path, 'r') as f:
-        cities = json.load(f)
     
     spain_cities = pd.DataFrame([c for c in cities if c.get('country') == 'ES'])
     spain_cities['pop'] = spain_cities['pop'].fillna(0)

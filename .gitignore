@@ -56,11 +56,12 @@ wheels/
 ehthumbs.db
 Thumbs.db
 
-#data
-data/*
+# Data files (keep cities500.json and CSVs)
+data/*.zip
 notebooks/eda/gshhg-shp-2.3.7.zip
 
-# Large geospatial files (use Git LFS or download separately)
+# Large geospatial files (auto-downloaded on first use)
+data/shapefiles/
 lib/data/GSHHS_shp/
 *.shp
 *.shx
@@ -69,3 +70,6 @@ lib/data/GSHHS_shp/
 
 # Large data outputs
 outputs/data/dbscan_labeled_bookings.csv
+
+# Unused outputs (archived but not tracked)
+outputs/unused/

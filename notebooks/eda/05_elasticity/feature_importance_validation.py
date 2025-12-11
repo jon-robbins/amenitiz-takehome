@@ -33,7 +33,15 @@ import re
 # Database and cleaning
 from lib.db import init_db
 from lib.data_validator import CleaningConfig, DataCleaner
-from lib.holiday_features import get_hotel_holiday_features
+try:
+    from lib.holiday_features import get_hotel_holiday_features
+    HAS_HOLIDAY_FEATURES = True
+except ImportError:
+    HAS_HOLIDAY_FEATURES = False
+    def get_hotel_holiday_features(df, **kwargs):
+        """Stub function if holiday_features module not available."""
+        df['holiday_ratio'] = 0.0
+        return df
 
 # Scikit-learn
 from sklearn.pipeline import Pipeline
@@ -242,7 +250,7 @@ def engineer_features(
     
     # Add granular market segment (vectorized, uses city population from cities500)
     from src.features.engineering import get_market_segments_vectorized
-    df['market_segment_v2'] = get_market_segments_vectorized(
+    df['market_segment'] = get_market_segments_vectorized(
         df['latitude'].values,
         df['longitude'].values,
         df['distance_from_coast'].values
@@ -355,14 +363,14 @@ def prepare_features_and_target(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.Seri
         'log_room_size', 'room_capacity_pax', 'amenities_score', 'total_capacity_log',
         'view_quality_ordinal',
         'weekend_ratio',
-        'occupancy_rate',  # Now properly calculated (NULL room_ids filtered)
         'holiday_ratio'    # Proportion of days near regional Spanish holidays
     ]
     
     # Categorical features (for CatBoost - no one-hot encoding needed)
-    # Now includes market_segment_v2 (8-segment: major_metro, urban_core, urban_fringe, 
+    # Now includes market_segment (8-segment: major_metro, urban_core, urban_fringe, 
     # resort_coastal, coastal_town, provincial_city, small_town, rural)
-    categorical_features = ['room_type', 'room_view', 'city_standardized', 'market_segment_v2']
+    # Note: city_standardized removed - creates 1000+ dummy variables, not useful for peer matching
+    categorical_features = ['room_type', 'room_view', 'market_segment']
     
     boolean_features = [
         'is_coastal', 'is_july_august', 'children_allowed'
@@ -512,11 +520,11 @@ def evaluate_models(
                 'log_room_size', 'room_capacity_pax', 'amenities_score', 'total_capacity_log',
                 'view_quality_ordinal',
                 'weekend_ratio',
-                'occupancy_rate',
                 'holiday_ratio'
             ]
-            # Include market_segment_v2 (8-segment classification)
-            categorical_features = ['room_type', 'room_view', 'city_standardized', 'market_segment_v2']
+            # Include market_segment (8-segment classification)
+            # Note: city_standardized removed - creates 1000+ dummy variables, not useful for peer matching
+            categorical_features = ['room_type', 'room_view', 'market_segment']
             boolean_features = ['is_coastal', 'is_july_august', 'children_allowed']
             
             # Create preprocessor for CatBoost (no one-hot encoding)

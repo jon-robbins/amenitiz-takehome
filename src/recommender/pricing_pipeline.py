@@ -26,6 +26,85 @@ from src.features.engineering import (
 )
 
 
+# =============================================================================
+# LEAD TIME BUCKET DEFINITIONS
+# =============================================================================
+
+# Lead time buckets with their day ranges
+LEAD_TIME_BUCKETS = {
+    'same_day': (0, 0),
+    'very_short': (1, 3),
+    'short': (4, 7),
+    'medium': (8, 14),
+    'standard': (15, 30),
+    'advance': (31, 60),
+    'far_advance': (61, 365),
+}
+
+# Default multipliers (fallback if no data available)
+# These are based on observed patterns: same-day ~0.65x, 30+ days ~1.25x
+DEFAULT_LEAD_TIME_MULTIPLIERS = {
+    'same_day': 0.65,
+    'very_short': 0.85,
+    'short': 0.90,
+    'medium': 0.95,
+    'standard': 1.00,  # Baseline
+    'advance': 1.15,
+    'far_advance': 1.25,
+}
+
+# Occupancy thresholds for conditional discounting
+# More conservative: Only discount when really struggling
+LEAD_TIME_OCCUPANCY_THRESHOLDS = {
+    'very_low_occupancy': 0.25,  # Below 25% → modest discounts (desperate)
+    'low_occupancy': 0.40,       # 25-40% → slight discount
+    'medium_occupancy': 0.55,    # 40-55% → hold price
+    'high_occupancy': 0.70,      # Above 70% → consider premium
+}
+
+# Lead time categories for conditional logic
+SHORT_TERM_BUCKETS = {'same_day', 'very_short', 'short'}  # ≤7 days
+ADVANCE_BUCKETS = {'advance', 'far_advance'}  # 31+ days
+
+
+def get_lead_time_bucket(lead_time_days: int) -> str:
+    """
+    Convert lead time in days to a bucket name.
+    
+    Args:
+        lead_time_days: Number of days between booking and arrival
+        
+    Returns:
+        Bucket name (e.g., 'same_day', 'very_short', 'standard')
+    """
+    if lead_time_days < 0:
+        lead_time_days = 0
+    
+    for bucket, (min_days, max_days) in LEAD_TIME_BUCKETS.items():
+        if min_days <= lead_time_days <= max_days:
+            return bucket
+    
+    # Default to far_advance for very long lead times
+    return 'far_advance'
+
+
+def get_lead_time_bucket_sql_case() -> str:
+    """
+    Generate SQL CASE statement for lead time bucketing.
+    
+    Returns:
+        SQL CASE statement string
+    """
+    cases = []
+    for bucket, (min_days, max_days) in LEAD_TIME_BUCKETS.items():
+        if min_days == max_days:
+            cases.append(f"WHEN lead_time_days = {min_days} THEN '{bucket}'")
+        else:
+            cases.append(f"WHEN lead_time_days BETWEEN {min_days} AND {max_days} THEN '{bucket}'")
+    
+    return "CASE " + " ".join(cases) + " ELSE 'far_advance' END"
+
+
 @dataclass
 class PricingConfig:
     """Configuration for pricing pipeline."""
@@ -34,6 +113,7 @@ class PricingConfig:
     price_steps: int = 30  # Number of price points to evaluate
     min_peer_bookings: int = 5  # Minimum bookings for peer to be considered
     include_cancelled: bool = True  # Include cancelled bookings in peer prices
+    max_price_change: float = 0.20  # Maximum price change per cycle (±20%)
 
 
 def load_segment_multipliers() -> Dict:
@@ -64,6 +144,7 @@ class ElasticityCalculator:
         self.con = con
         self._market_elasticity: Optional[float] = None
         self._segment_elasticity: Dict[str, float] = {}
+        self._lead_time_multipliers: Dict[str, Dict[str, float]] = {}
         self._fitted = False
     
     def fit_from_data(self, hotel_segments: pd.DataFrame) -> 'ElasticityCalculator':
@@ -80,10 +161,12 @@ class ElasticityCalculator:
         SELECT 
             b.hotel_id,
             DATE_TRUNC('week', b.arrival_date) as week_start,
+            -- Include cancelled bookings for price signal (willingness to pay)
             AVG(b.total_price / GREATEST(1, DATE_DIFF('day', b.arrival_date, b.departure_date))) as price,
-            COUNT(*) as bookings
+            -- Only count confirmed for demand signal
+            SUM(CASE WHEN b.status IN ('confirmed', 'Booked') THEN 1 ELSE 0 END) as bookings
         FROM bookings b
-        WHERE b.status IN ('confirmed', 'Booked')
+        WHERE b.status IN ('confirmed', 'Booked', 'cancelled')
         GROUP BY b.hotel_id, DATE_TRUNC('week', b.arrival_date)
         """
         bookings = self.con.execute(query).fetchdf()
@@ -155,14 +238,16 @@ class ElasticityCalculator:
             SELECT 
                 b.hotel_id,
                 DATE_TRUNC('week', b.arrival_date) as week_start,
+                -- Include cancelled for price signal (willingness to pay)
                 AVG(b.total_price / GREATEST(1, DATE_DIFF('day', b.arrival_date, b.departure_date))) as avg_price,
-                COUNT(DISTINCT b.id) as bookings,
+                -- Only count confirmed for demand signal
+                SUM(CASE WHEN b.status IN ('confirmed', 'Booked') THEN 1 ELSE 0 END) as bookings,
                 AVG(hc.total_rooms) as total_rooms
             FROM bookings b
             JOIN hotel_capacity hc ON b.id = hc.booking_id
-            WHERE b.status IN ('confirmed', 'Booked')
+            WHERE b.status IN ('confirmed', 'Booked', 'cancelled')
             GROUP BY b.hotel_id, DATE_TRUNC('week', b.arrival_date)
-            HAVING COUNT(DISTINCT b.id) >= 3
+            HAVING SUM(CASE WHEN b.status IN ('confirmed', 'Booked') THEN 1 ELSE 0 END) >= 3
         ),
         hotel_stats AS (
             SELECT 
@@ -270,6 +355,221 @@ class ElasticityCalculator:
             # Linear interpolation
             factor = 0.7 + (0.7 - current_occupancy) / 0.4 * 0.6
             return base_elasticity * factor
+    
+    def calculate_lead_time_multipliers(
+        self, 
+        hotel_segments: pd.DataFrame
+    ) -> Dict[str, Dict[str, float]]:
+        """
+        Calculate lead_time -> price_multiplier for each segment.
+        
+        Uses actual booking data to determine how prices vary by lead time
+        within each segment. The 'standard' bucket (15-30 days) is used as
+        the baseline (1.0x multiplier).
+        
+        Args:
+            hotel_segments: DataFrame with hotel_id and segment columns
+            
+        Returns:
+            Dict mapping segment -> {lead_bucket: multiplier}
+        """
+        # Query booking data with lead time
+        query = """
+        WITH booking_lead AS (
+            SELECT 
+                b.hotel_id,
+                b.total_price / GREATEST(1, DATE_DIFF('day', b.arrival_date, b.departure_date)) as price_per_night,
+                DATE_DIFF('day', b.created_at::DATE, b.arrival_date) as lead_time_days
+            FROM bookings b
+            WHERE b.status IN ('confirmed', 'Booked', 'cancelled')
+              AND b.created_at IS NOT NULL
+              AND DATE_DIFF('day', b.created_at::DATE, b.arrival_date) >= 0
+              AND DATE_DIFF('day', b.created_at::DATE, b.arrival_date) < 365
+              AND b.total_price > 0
+        )
+        SELECT 
+            hotel_id,
+            price_per_night,
+            lead_time_days,
+            CASE 
+                WHEN lead_time_days = 0 THEN 'same_day'
+                WHEN lead_time_days BETWEEN 1 AND 3 THEN 'very_short'
+                WHEN lead_time_days BETWEEN 4 AND 7 THEN 'short'
+                WHEN lead_time_days BETWEEN 8 AND 14 THEN 'medium'
+                WHEN lead_time_days BETWEEN 15 AND 30 THEN 'standard'
+                WHEN lead_time_days BETWEEN 31 AND 60 THEN 'advance'
+                ELSE 'far_advance'
+            END as lead_bucket
+        FROM booking_lead
+        """
+        
+        bookings_df = self.con.execute(query).fetchdf()
+        
+        # Merge with segments
+        df = bookings_df.merge(
+            hotel_segments[['hotel_id', 'segment']], 
+            on='hotel_id',
+            how='inner'
+        )
+        
+        # Calculate multipliers per segment
+        for segment in df['segment'].unique():
+            seg_data = df[df['segment'] == segment]
+            
+            # Get average price per bucket
+            bucket_prices = seg_data.groupby('lead_bucket')['price_per_night'].mean()
+            
+            # Use 'standard' (15-30 days) as baseline
+            if 'standard' in bucket_prices.index:
+                baseline = bucket_prices['standard']
+            else:
+                # Fallback to overall median
+                baseline = seg_data['price_per_night'].median()
+            
+            if baseline <= 0:
+                baseline = 1.0
+            
+            # Calculate multipliers relative to baseline
+            segment_multipliers = {}
+            for bucket in LEAD_TIME_BUCKETS.keys():
+                if bucket in bucket_prices.index:
+                    multiplier = bucket_prices[bucket] / baseline
+                    # Clamp to reasonable range
+                    segment_multipliers[bucket] = float(np.clip(multiplier, 0.4, 1.6))
+                else:
+                    # Use default multiplier if no data
+                    segment_multipliers[bucket] = DEFAULT_LEAD_TIME_MULTIPLIERS.get(bucket, 1.0)
+            
+            self._lead_time_multipliers[segment] = segment_multipliers
+        
+        # Save to JSON alongside other multipliers
+        self._save_lead_time_multipliers()
+        
+        return self._lead_time_multipliers
+    
+    def _save_lead_time_multipliers(self) -> None:
+        """Save lead time multipliers to JSON file."""
+        import json
+        
+        try:
+            # Load existing multipliers
+            with open('outputs/data/segment_multipliers.json', 'r') as f:
+                data = json.load(f)
+        except FileNotFoundError:
+            data = {}
+        
+        # Add lead time multipliers
+        data['lead_time'] = self._lead_time_multipliers
+        
+        # Save back
+        with open('outputs/data/segment_multipliers.json', 'w') as f:
+            json.dump(data, f, indent=2)
+    
+    def get_lead_time_multiplier(
+        self, 
+        segment: str, 
+        lead_time_days: int,
+        current_occupancy: Optional[float] = None
+    ) -> Tuple[float, str]:
+        """
+        Get the OCCUPANCY-CONDITIONAL price multiplier for lead time.
+        
+        Logic:
+        - ADVANCE bookings (31+ days): ALWAYS apply premium (free money)
+        - SHORT-TERM bookings (≤7 days): ONLY discount if occupancy is LOW
+        - MEDIUM bookings (8-30 days): Standard pricing
+        
+        Args:
+            segment: Market segment (e.g., 'coastal_town', 'urban_core')
+            lead_time_days: Days between booking and arrival
+            current_occupancy: Current occupancy rate (0-1). If None, uses segment default.
+            
+        Returns:
+            Tuple of (multiplier, reasoning)
+        """
+        lead_bucket = get_lead_time_bucket(lead_time_days)
+        
+        # Get base multiplier from data
+        if segment in self._lead_time_multipliers:
+            base_multiplier = self._lead_time_multipliers[segment].get(
+                lead_bucket, 
+                DEFAULT_LEAD_TIME_MULTIPLIERS.get(lead_bucket, 1.0)
+            )
+        else:
+            base_multiplier = DEFAULT_LEAD_TIME_MULTIPLIERS.get(lead_bucket, 1.0)
+        
+        # Default occupancy if not provided
+        if current_occupancy is None:
+            current_occupancy = 0.50  # Assume 50% as neutral
+        
+        # =================================================================
+        # CONDITIONAL LOGIC
+        # =================================================================
+        
+        # ADVANCE BOOKINGS (31+ days): Always apply premium
+        if lead_bucket in ADVANCE_BUCKETS:
+            # These are booking in advance - always charge premium
+            return base_multiplier, "advance_premium"
+        
+        # SHORT-TERM BOOKINGS (≤7 days): Revenue Management approach
+        # 
+        # Key insight: For an empty room, any booking > €0 is better than nothing.
+        # The question is: What's the probability of selling at full price?
+        # 
+        # If P(full_price_booking) × full_price < P(discount_booking) × discount_price
+        # Then DISCOUNT is optimal.
+        #
+        # Occupancy is a proxy for booking probability:
+        #   Low occupancy → Low demand → Low P(full price) → DISCOUNT
+        #   High occupancy → High demand → High P(full price) → PREMIUM
+        #
+        if lead_bucket in SHORT_TERM_BUCKETS:
+            # Estimate probability of full-price booking based on occupancy
+            # This is a simplified model; real implementation would use historical data
+            if current_occupancy < 0.30:
+                p_full = 0.15  # Very low demand
+            elif current_occupancy < 0.50:
+                p_full = 0.35  # Low demand
+            elif current_occupancy < 0.70:
+                p_full = 0.55  # Medium demand
+            else:
+                p_full = 0.80  # High demand
+            
+            # Assume 85% probability of booking at discounted price
+            p_discount = 0.85
+            
+            # Revenue management decision:
+            # Expected revenue from holding: p_full × 1.0 (full price)
+            # Expected revenue from discount: p_discount × base_multiplier
+            expected_hold = p_full * 1.0
+            expected_discount = p_discount * base_multiplier
+            
+            if expected_discount > expected_hold:
+                # Discount increases expected revenue → apply it
+                # But cap the discount to avoid extreme changes
+                capped_mult = max(0.80, base_multiplier)  # Max 20% discount
+                return capped_mult, f"low_demand_discount_ev{expected_discount:.2f}>{expected_hold:.2f}"
+            elif current_occupancy >= LEAD_TIME_OCCUPANCY_THRESHOLDS['high_occupancy']:
+                # High occupancy: Premium for last-minute demand
+                premium_mult = min(1.20, 1.0 + (1.0 - base_multiplier) * 0.5)
+                return premium_mult, f"high_demand_premium_ev{expected_hold:.2f}>{expected_discount:.2f}"
+            else:
+                # Medium occupancy: Hold price
+                return 1.0, f"medium_demand_hold_ev{expected_hold:.2f}~{expected_discount:.2f}"
+        
+        # MEDIUM-TERM (8-30 days): Standard pricing
+        return 1.0, "standard"
+    
+    def get_lead_time_multiplier_simple(
+        self, 
+        segment: str, 
+        lead_time_days: int
+    ) -> float:
+        """
+        Simple multiplier without occupancy conditioning (backward compatible).
+        """
+        multiplier, _ = self.get_lead_time_multiplier(segment, lead_time_days, None)
+        return multiplier
 
 
 class PeerMatcher:
@@ -300,14 +600,17 @@ class PeerMatcher:
     def fit(self) -> 'PeerMatcher':
         """Build the KNN index from hotel features including price tier."""
         # Load hotel features with average price
+        # Include cancelled bookings for price signal (willingness to pay)
         query = """
         WITH hotel_stats AS (
             SELECT 
                 b.hotel_id,
+                -- Include cancelled for price signal
                 AVG(b.total_price / GREATEST(1, DATE_DIFF('day', b.arrival_date, b.departure_date))) as avg_price,
-                COUNT(*) as bookings
+                -- Only count confirmed for booking volume
+                SUM(CASE WHEN b.status IN ('confirmed', 'Booked') THEN 1 ELSE 0 END) as bookings
             FROM bookings b
-            WHERE b.status IN ('confirmed', 'Booked')
+            WHERE b.status IN ('confirmed', 'Booked', 'cancelled')
               AND b.arrival_date >= '2023-01-01'
             GROUP BY b.hotel_id
         ),
@@ -460,7 +763,7 @@ class PricingPipeline:
         self._fitted = False
         
     def fit(self) -> 'PricingPipeline':
-        """Fit the pipeline (build indices, calculate elasticity from data)."""
+        """Fit the pipeline (build indices, calculate elasticity and lead time curves)."""
         print("Building peer matching index...")
         self.peer_matcher.fit()
         
@@ -474,6 +777,17 @@ class PricingPipeline:
                                 key=lambda x: x[1]):
             print(f"    {seg}: {elas:.3f}")
         print(f"  Market average: {self.elasticity_calc._market_elasticity:.3f}")
+        
+        print("\nCalculating segment-level lead time multipliers...")
+        lead_multipliers = self.elasticity_calc.calculate_lead_time_multipliers(hotel_segments)
+        
+        print("  Lead time multipliers (by segment):")
+        for seg in sorted(lead_multipliers.keys()):
+            mults = lead_multipliers[seg]
+            print(f"    {seg}:")
+            for bucket in ['same_day', 'very_short', 'short', 'medium', 'standard', 'advance', 'far_advance']:
+                if bucket in mults:
+                    print(f"      {bucket}: {mults[bucket]:.2f}x")
         
         self._fitted = True
         return self
@@ -508,17 +822,37 @@ class PricingPipeline:
         self, 
         peer_ids: List[int], 
         target_date: date,
+        lead_time_days: Optional[int] = None,
         lookback_days: int = 90
     ) -> pd.DataFrame:
         """
         Get peer prices for a target date, including cancelled bookings.
         
         Cancelled bookings are included because they show willingness to pay.
+        
+        Args:
+            peer_ids: List of peer hotel IDs
+            target_date: Target date for pricing
+            lead_time_days: Optional lead time filter (days before arrival)
+            lookback_days: How far back to look for booking data
+            
+        Returns:
+            DataFrame with peer pricing statistics
         """
         peer_ids_str = ','.join(map(str, peer_ids))
         
         # Include cancelled bookings - they show willingness to pay
         status_filter = "('confirmed', 'Booked', 'cancelled')" if self.config.include_cancelled else "('confirmed', 'Booked')"
+        
+        # Build lead time filter if specified
+        lead_time_filter = ""
+        if lead_time_days is not None:
+            lead_bucket = get_lead_time_bucket(lead_time_days)
+            min_days, max_days = LEAD_TIME_BUCKETS[lead_bucket]
+            lead_time_filter = f"""
+              AND DATE_DIFF('day', b.created_at::DATE, b.arrival_date) BETWEEN {min_days} AND {max_days}
+              AND b.created_at IS NOT NULL
+            """
         
         query = f"""
         WITH peer_bookings AS (
@@ -534,6 +868,7 @@ class PricingPipeline:
               AND b.status IN {status_filter}
               AND b.arrival_date >= '{target_date - timedelta(days=lookback_days)}'
               AND b.arrival_date <= '{target_date + timedelta(days=30)}'
+              {lead_time_filter}
         )
         SELECT 
             hotel_id,
@@ -546,6 +881,68 @@ class PricingPipeline:
         FROM peer_bookings
         GROUP BY hotel_id
         HAVING COUNT(*) >= {self.config.min_peer_bookings}
+        """
+        
+        return self.con.execute(query).fetchdf()
+    
+    def get_peer_lead_time_prices(
+        self, 
+        peer_ids: List[int], 
+        target_date: date,
+        lookback_days: int = 90
+    ) -> pd.DataFrame:
+        """
+        Get peer prices broken down by lead time bucket.
+        
+        Returns prices for each lead time bucket to calculate multipliers.
+        
+        Args:
+            peer_ids: List of peer hotel IDs
+            target_date: Target date for pricing
+            lookback_days: How far back to look for booking data
+            
+        Returns:
+            DataFrame with lead_bucket, avg_price, booking_count
+        """
+        peer_ids_str = ','.join(map(str, peer_ids))
+        status_filter = "('confirmed', 'Booked', 'cancelled')" if self.config.include_cancelled else "('confirmed', 'Booked')"
+        
+        query = f"""
+        WITH peer_bookings AS (
+            SELECT 
+                b.hotel_id,
+                b.total_price / GREATEST(1, DATE_DIFF('day', b.arrival_date, b.departure_date)) as price_per_night,
+                DATE_DIFF('day', b.created_at::DATE, b.arrival_date) as lead_time_days
+            FROM bookings b
+            WHERE b.hotel_id IN ({peer_ids_str})
+              AND b.status IN {status_filter}
+              AND b.arrival_date >= '{target_date - timedelta(days=lookback_days)}'
+              AND b.arrival_date <= '{target_date + timedelta(days=30)}'
+              AND b.created_at IS NOT NULL
+              AND DATE_DIFF('day', b.created_at::DATE, b.arrival_date) >= 0
+        ),
+        bucketed AS (
+            SELECT 
+                price_per_night,
+                lead_time_days,
+                CASE 
+                    WHEN lead_time_days = 0 THEN 'same_day'
+                    WHEN lead_time_days BETWEEN 1 AND 3 THEN 'very_short'
+                    WHEN lead_time_days BETWEEN 4 AND 7 THEN 'short'
+                    WHEN lead_time_days BETWEEN 8 AND 14 THEN 'medium'
+                    WHEN lead_time_days BETWEEN 15 AND 30 THEN 'standard'
+                    WHEN lead_time_days BETWEEN 31 AND 60 THEN 'advance'
+                    ELSE 'far_advance'
+                END as lead_bucket
+            FROM peer_bookings
+        )
+        SELECT 
+            lead_bucket,
+            AVG(price_per_night) as avg_price,
+            PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY price_per_night) as median_price,
+            COUNT(*) as booking_count
+        FROM bucketed
+        GROUP BY lead_bucket
         """
         
         return self.con.execute(query).fetchdf()
@@ -646,10 +1043,18 @@ class PricingPipeline:
     def recommend(
         self, 
         hotel_id: int, 
-        target_date: date
+        target_date: date,
+        lead_time_days: Optional[int] = None
     ) -> Dict:
         """
         Generate pricing recommendation for a hotel on a specific date.
+        
+        Args:
+            hotel_id: The hotel to get pricing for
+            target_date: The specific date for pricing
+            lead_time_days: Optional days between booking and arrival.
+                           If provided, adjusts price based on lead time.
+                           Default is None (uses baseline pricing without lead adjustment).
         
         Returns:
             Dict with recommendation details including:
@@ -657,6 +1062,7 @@ class PricingPipeline:
             - expected_revpar
             - performance_status (underperforming/on_par/outperforming)
             - recommendation_type (RAISE/LOWER/HOLD)
+            - lead_time_days, lead_bucket, lead_multiplier (if lead_time provided)
             - confidence
             - reasoning
         """
@@ -673,6 +1079,7 @@ class PricingPipeline:
             return {
                 'hotel_id': hotel_id,
                 'target_date': target_date,
+                'lead_time_days': lead_time_days,
                 'status': 'error',
                 'message': 'No peers found'
             }
@@ -680,12 +1087,21 @@ class PricingPipeline:
         peer_ids = peers['hotel_id'].tolist()
         
         # Get peer prices (including cancelled bookings)
-        peer_prices = self.get_peer_prices(peer_ids, target_date)
+        # If lead_time_days specified, get prices at that lead time
+        peer_prices = self.get_peer_prices(peer_ids, target_date, lead_time_days=lead_time_days)
+        
+        if len(peer_prices) == 0:
+            # Fallback: try without lead time filter
+            peer_prices = self.get_peer_prices(peer_ids, target_date, lead_time_days=None)
+            lead_signal_source = 'segment_curve'  # Will use segment curve instead
+        else:
+            lead_signal_source = 'peer_data' if lead_time_days is not None else None
         
         if len(peer_prices) == 0:
             return {
                 'hotel_id': hotel_id,
                 'target_date': target_date,
+                'lead_time_days': lead_time_days,
                 'status': 'error',
                 'message': 'No peer pricing data available'
             }
@@ -757,6 +1173,57 @@ class PricingPipeline:
             recommended_price = peer_prices['median_price'].median()
             reasoning = f"New hotel. Start at peer median €{recommended_price:.0f}."
         
+        # Cap price change at ±20% per cycle (ensures adoptability)
+        if hotel_perf['has_history'] and hotel_perf['avg_price'] > 0:
+            current_price = hotel_perf['avg_price']
+            max_price = current_price * (1 + self.config.max_price_change)
+            min_price = current_price * (1 - self.config.max_price_change)
+            
+            if recommended_price > max_price:
+                recommended_price = max_price
+                reasoning += f" (Capped at +{self.config.max_price_change*100:.0f}% for adoptability)"
+            elif recommended_price < min_price:
+                recommended_price = min_price
+                reasoning += f" (Capped at -{self.config.max_price_change*100:.0f}% for adoptability)"
+        
+        # Store base price before lead time adjustment
+        base_price = recommended_price
+        
+        # Apply OCCUPANCY-CONDITIONAL lead time adjustment if specified
+        lead_bucket = None
+        lead_multiplier = 1.0
+        lead_reasoning = None
+        if lead_time_days is not None:
+            lead_bucket = get_lead_time_bucket(lead_time_days)
+            
+            # Get occupancy-conditional multiplier
+            # Key insight: 
+            #   - Advance bookings (31+ days): ALWAYS premium (free money)
+            #   - Short-term (≤7 days): ONLY discount if occupancy is LOW
+            lead_multiplier, lead_reasoning = self.elasticity_calc.get_lead_time_multiplier(
+                segment, 
+                lead_time_days,
+                current_occupancy=current_occ
+            )
+            lead_signal_source = 'occupancy_conditional'
+            
+            # Apply lead time multiplier to recommended price
+            recommended_price = base_price * lead_multiplier
+            
+            # Build detailed reasoning
+            if lead_reasoning == 'advance_premium':
+                reasoning += f" Advance booking ({lead_bucket}): +{(lead_multiplier-1)*100:.0f}% premium."
+            elif lead_reasoning == 'low_occ_discount':
+                reasoning += f" Low occupancy ({current_occ*100:.0f}%) + short lead ({lead_bucket}): {(lead_multiplier-1)*100:+.0f}% to fill rooms."
+            elif lead_reasoning == 'medium_occ_partial':
+                reasoning += f" Medium occupancy ({current_occ*100:.0f}%) + short lead: partial discount ({lead_multiplier:.2f}x)."
+            elif lead_reasoning == 'high_occ_premium':
+                reasoning += f" High occupancy ({current_occ*100:.0f}%) + last-minute: hold/premium price."
+            elif lead_reasoning == 'hold_price':
+                reasoning += f" Standard lead time: holding base price."
+            else:
+                reasoning += f" Lead time adjustment: {lead_bucket} ({lead_multiplier:.2f}x)."
+        
         # Calculate expected RevPAR at recommended price
         if hotel_perf['has_history'] and recommended_price != hotel_perf['avg_price']:
             price_change = (recommended_price - hotel_perf['avg_price']) / hotel_perf['avg_price']
@@ -768,7 +1235,7 @@ class PricingPipeline:
         else:
             expected_revpar = recommended_price * 0.3  # Assume 30% for new
         
-        return {
+        result = {
             'hotel_id': hotel_id,
             'target_date': str(target_date),
             'segment': segment,
@@ -776,6 +1243,7 @@ class PricingPipeline:
             'recommendation': recommendation,
             'current_price': hotel_perf['avg_price'] if hotel_perf['has_history'] else None,
             'recommended_price': round(recommended_price, 2),
+            'base_price': round(base_price, 2),
             'current_revpar': round(hotel_revpar, 2) if hotel_revpar else None,
             'expected_revpar': round(expected_revpar, 2),
             'peer_median_price': round(peer_prices['median_price'].median(), 2),
@@ -786,6 +1254,17 @@ class PricingPipeline:
             'confidence': self._calculate_confidence(hotel_perf, len(peer_prices)),
             'n_peers': len(peer_prices)
         }
+        
+        # Add lead time info if provided
+        if lead_time_days is not None:
+            result['lead_time_days'] = lead_time_days
+            result['lead_bucket'] = lead_bucket
+            result['lead_multiplier'] = round(lead_multiplier, 3)
+            result['lead_signal_source'] = lead_signal_source
+            result['lead_strategy'] = lead_reasoning  # Why this multiplier was applied
+            result['occupancy_used'] = round(current_occ, 3)
+        
+        return result
     
     def _calculate_peer_revpar(
         self, 
@@ -893,17 +1372,19 @@ class PricingPipeline:
     def recommend_daily(
         self, 
         hotel_id: int, 
-        target_date: date
+        target_date: date,
+        lead_time_days: Optional[int] = None
     ) -> Dict:
         """
         Get the recommended price for a SPECIFIC DAY.
         
         This is the main API endpoint - returns the price for one day
-        with day-of-week and seasonal adjustments applied.
+        with day-of-week, seasonal, and lead time adjustments applied.
         
         Args:
             hotel_id: The hotel to get pricing for
             target_date: The specific date
+            lead_time_days: Optional days between booking and arrival
             
         Returns:
             Dict with:
@@ -911,6 +1392,7 @@ class PricingPipeline:
             - base_price: The baseline (mid-week) price
             - day_multiplier: The day-of-week multiplier
             - month_multiplier: The seasonal multiplier
+            - lead_multiplier: The lead time multiplier (if lead_time_days provided)
             - segment: The hotel's market segment
             - reasoning: Explanation of the price
         """
@@ -918,7 +1400,8 @@ class PricingPipeline:
             raise ValueError("Must call fit() before recommend_daily()")
         
         # Get base recommendation (uses weekly averages internally)
-        base_rec = self.recommend(hotel_id, target_date)
+        # Pass lead_time_days to get lead-time adjusted pricing
+        base_rec = self.recommend(hotel_id, target_date, lead_time_days=lead_time_days)
         
         if base_rec.get('status') == 'error':
             return base_rec
@@ -943,7 +1426,7 @@ class PricingPipeline:
         day_name = target_date.strftime('%A')
         month_name = target_date.strftime('%B')
         
-        return {
+        result = {
             'hotel_id': hotel_id,
             'date': str(target_date),
             'day_of_week': day_name,
@@ -960,12 +1443,24 @@ class PricingPipeline:
             'confidence': base_rec['confidence'],
             'reasoning': f"{base_rec['reasoning']} Daily adjustment: {day_name} ({dow_mult:.2f}x) × {month_name} ({month_mult:.2f}x)"
         }
+        
+        # Add lead time info if provided
+        if lead_time_days is not None:
+            result['lead_time_days'] = lead_time_days
+            result['lead_bucket'] = base_rec.get('lead_bucket')
+            result['lead_multiplier'] = base_rec.get('lead_multiplier')
+            result['lead_signal_source'] = base_rec.get('lead_signal_source')
+            result['lead_strategy'] = base_rec.get('lead_strategy')
+            result['occupancy_used'] = base_rec.get('occupancy_used')
+        
+        return result
     
     def recommend_date_range(
         self, 
         hotel_id: int, 
         start_date: date,
-        days: int = 7
+        days: int = 7,
+        lead_time_days: Optional[int] = None
     ) -> pd.DataFrame:
         """
         Get recommended prices for a date range.
@@ -974,6 +1469,7 @@ class PricingPipeline:
             hotel_id: The hotel to get pricing for
             start_date: First day of the range
             days: Number of days to return (default 7 = one week)
+            lead_time_days: Optional days between booking and arrival
             
         Returns:
             DataFrame with daily pricing for each date
@@ -982,7 +1478,7 @@ class PricingPipeline:
         
         for i in range(days):
             target_date = start_date + timedelta(days=i)
-            rec = self.recommend_daily(hotel_id, target_date)
+            rec = self.recommend_daily(hotel_id, target_date, lead_time_days=lead_time_days)
             recommendations.append(rec)
         
         return pd.DataFrame(recommendations)

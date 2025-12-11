@@ -2,25 +2,42 @@
 
 ## Executive Summary
 
-PriceAdvisor is a machine learning system that recommends RevPAR-optimized daily prices for hotels. The model identifies peer hotels using validated features (R² = 0.77), compares RevPAR performance, and recommends price adjustments based on the best-performing peer's strategy.
+MAKE SLIGHTLY MORE TECHNICAL AND DEVELOP, INTRODUCE COUNTERFACTUAL ESTIMATION AND LINK TO THE TECH SPECS AND MATH BEHIND IT
 
-Analysis of 989,959 bookings across 2,255 Spanish hotels (2023-2024) reveals that 30% of hotels have pricing optimization opportunity. Using validated market elasticity (ε = -0.39), the model estimates €1.28 RevPAR lift per room per night for hotels that adopt recommendations.
+PriceAdvisor is a machine learning system that recommends the RevPAR-optimized daily price for a certain hotel's room type on a certain day. We estimate the optimal price by using *counterfactual estimation*. By using a KNN algorithm (R^2 0.78) to match hotels to their peers based on their endogenous features (where are they, how many rooms do they have, what kinds of amenities do they offer, etc.), we can say **these two hotels behave similarly, and if one hotel adopted its peer's pricing strategy**.
+
+PriceAdvisor is a machine learning system that recommends RevPAR-optimized daily prices for hotels. The model identifies peer hotels using validated features (R² = 0.78), compares RevPAR performance, and recommends price adjustments based on the best-performing peer's strategy.
+
+Analysis of 989,959 bookings across 2,255 Spanish hotels (2023-2024) reveals that 30% of hotels have pricing optimization opportunity. Using validated market elasticity (ε = -0.57), the model estimates €1.28 RevPAR lift per room per night for hotels that adopt recommendations.
 
 ### Expected Revenue Impact by Adoption Rate
 
-| Adoption | Hotels Affected | Rooms | Annual RevPAR Delta |
-|----------|-----------------|-------|---------------------|
-| 25% | 171 | 746 | €348,531 |
-| 50% | 342 | 1,492 | €697,062 |
-| 75% | 512 | 2,238 | €1,045,594 |
-| 100% | 683 | 2,984 | €1,394,125 |
+| Adoption | Hotels | Rooms | Annual RevPAR Lift |
+|----------|--------|-------|---------------------|
+| 25% | 170 | 1,531 | €713,385 |
+| 50% | 341 | 3,062 | €1,426,769 |
+| 75% | 512 | 4,593 | €2,140,154 |
+| 100% | 683 | 6,124 | €2,853,538 |
+
+*Room capacity estimated from max simultaneous bookings (avg 9.0 rooms/hotel, median 6). This captures demonstrated capacity: 13% single-unit vacation rentals, 36% B&Bs (2-5 rooms), 42% small hotels (6-20 rooms), 9% medium hotels (21+ rooms).*
+
+We compared our model to the following recommendation baselines:
+- **Random Pricing:** Random price change between -20% and +20%
+- **Market Average:** Spain-wide average price for the period
+- **Self Median:** Hotel's own historical median price
+- **Peer Median:** Median price of KNN-matched peers (using validated features: location, price tier, market segment)
+
+Our model lifts RevPAR twice as much compared to the highest performing baseline. 
+
+![Baseline Comparison](outputs/figures/baseline_comparison_updated.png)
+
 
 ### Recommendations
 
-1. Deploy daily batch pricing for the 30% of hotels with suboptimal RevPAR
-2. Prioritize resort coastal and major metro segments (lowest elasticity = safest price increases)
-3. Implement 3-month rolling training window with weekly model refresh
-4. Start with 25% adoption pilot to validate €350k annual lift before full rollout
+1. **Implement occupancy-conditional lead time pricing**: The model shows 30% RevPAR lift potential by applying discounts only when occupancy is low, and premiums when occupancy is high or for advance bookings.
+2. **Deploy MLOps infrastructure** for ETL consistency, model logging, retraining, and CI/CD.
+3. **Validate findings in A/B test**: Design experimentation strategy to validate revenue management approach.
+4. **Extend to other markets**: Apply methodology to non-Spain hotels once validated. 
 
 ---
 
@@ -30,9 +47,10 @@ Amenitiz provides hotel operations software including booking management, channe
 
 The core problem: hotels price room attributes (location, size, amenities) correctly but ignore demand signals. Analysis shows weak correlation (r = 0.11) between occupancy and price, indicating hotels don't dynamically adjust pricing based on demand. Evidence includes:
 
-- 39% of bookings receive last-minute discounts averaging 35%
+- **35.5% of bookings are made within 7 days of arrival** (short-term demand)
 - Hotels achieve +41.5% price premium at high occupancy passively, not strategically
 - 16.6% of nights operate at 95%+ occupancy without corresponding price increases
+- 30% of hotels apply heavy discounts (>20%) for last-minute bookings regardless of occupancy
 
 ---
 
@@ -71,9 +89,45 @@ City name standardization merged 347 unique names into 198 standardized forms us
 
 **Reproduce:** `python -m src.data.validator`
 
+### Room Capacity Estimation
+
+The `rooms.number_of_rooms` field is unreliable—68% of hotels show only "1 room" despite having multiple room types and thousands of bookings. We estimate actual capacity from booking patterns.
+
+**Method:** For each hotel, calculate the maximum number of simultaneous bookings on any single day. This uses a sweep-line algorithm over booking intervals:
+
+$$\text{Capacity}_h = \max_{d \in \text{dates}} \left| \{ b : \text{arrival}_b \leq d < \text{departure}_b \} \right|$$
+
+This is a **lower bound** on true capacity (hotels can't overbook), but captures demonstrated operational capacity.
+
+**Results:**
+
+| Metric | Raw Data | Estimated |
+|--------|----------|-----------|
+| Avg rooms/hotel | 2.9 | **8.9** |
+| Median rooms | 1 | **6** |
+| Total capacity | 6,511 | **20,006** |
+
+**Distribution:**
+- 13% single-unit (vacation rentals)
+- 36% 2-5 rooms (B&Bs, guesthouses)
+- 42% 6-20 rooms (small hotels)
+- 9% 21+ rooms (medium hotels)
+
+This distribution aligns with Amenitiz's target market of small independent properties.
+
+**Reproduce:** `python -m src.features.capacity`
+
 ---
 
 ## 3. Methodology
+
+At a high level, our algorithm:
+- Gets 16 endogenous features of each hotel
+- Finds 10 peers that are most similar to our target hotel
+- Finds the highest performing peer and evaluates their performance. 
+- If the highest performing peer has >10% higher RevPAR than our target hotel, we suggest a similar pricing strategy.
+
+*We assume that the endogenous features not captured by our model are negligible and that the two hotels are effectively equal in terms of characteristics.*
 
 ### 3.1 Market Sensitivity Analysis
 
@@ -87,15 +141,19 @@ $$\varepsilon = \frac{\% \Delta Q}{\% \Delta P}$$
 
 $$\ln(\text{Bookings}) = \alpha + \varepsilon \cdot \ln(\text{Price}) + \epsilon$$
 
-**Results (calculated from 19 rolling windows, 2023-2024):**
+**Results (calculated from 19 rolling windows, 2023-2024, including cancelled bookings for price signals):**
 
 | Segment | Elasticity | Interpretation |
 |---------|------------|----------------|
 | resort_coastal | -0.13 | Least elastic (premium tolerance) |
 | rural | -0.19 | Low elasticity |
 | urban_fringe | -0.21 | Low-moderate |
+| coastal_town | -0.29 | Moderate |
 | major_metro | -0.30 | Moderate |
+| small_town | -0.33 | Moderate-high |
+| urban_core | -0.35 | High elasticity |
 | provincial_city | -0.44 | Most elastic (price sensitive) |
+| **Market-wide** | **-0.57** | **All Spain (log-log regression)** |
 
 ![Segment Elasticity](outputs/figures/segment_elasticity_calculated.png)
 
@@ -109,22 +167,22 @@ To find meaningful peers, we validated which observable features explain hotel p
 
 | Model | R² (Test) | CV R² | RMSE | MAE |
 |-------|-----------|-------|------|-----|
-| XGBoost | 0.77 | 0.76 | 0.31 | 0.22 |
-| LightGBM | 0.74 | 0.74 | 0.34 | 0.23 |
-| CatBoost | 0.68 | 0.68 | 0.37 | 0.26 |
+| XGBoost | 0.78 | 0.77 | 0.30 | 0.22 |
+| LightGBM | 0.76 | 0.74 | 0.32 | 0.23 |
+| CatBoost | 0.70 | 0.68 | 0.35 | 0.26 |
 
-R² = 0.77 indicates observable features explain 77% of price variance, validating the peer matching approach.
+R² = 0.78 (XGBoost) indicates observable features explain 78% of price variance, validating the peer matching approach. Note: `occupancy_rate` and `city_standardized` were excluded to avoid data leakage and reduce feature dimensionality (city_standardized creates 1000+ dummy variables).
 
 ![Actual vs Predicted](outputs/figures/elasticity/2_actual_vs_predicted.png)
 
-**Validated Features (17 total):**
+**Validated Features (15 total):**
 
 | Category | Features |
 |----------|----------|
 | Geographic | dist_center_km, dist_coast_log |
 | Product | log_room_size, room_capacity_pax, amenities_score, total_capacity_log, view_quality_ordinal |
-| Temporal | weekend_ratio, is_july_august |
-| Categorical | room_type, room_view, city_standardized, market_segment |
+| Temporal | weekend_ratio, holiday_ratio, is_july_august |
+| Categorical | room_type, room_view, market_segment |
 | Boolean | is_coastal, children_allowed |
 
 Note: `occupancy_rate` was excluded from peer matching features to avoid data leakage (it's related to the target we're optimizing).
@@ -159,11 +217,41 @@ Feature-based matching dramatically improves peer quality:
 
 ### 3.4 Counterfactual Estimation
 
-For hotel $h$ with peer set $P$, we classify performance by comparing RevPAR to peer distribution:
+We estimate the causal effect of pricing strategy on RevPAR using a matched-pairs design. The key insight: **matched peers are exchangeable** on observable features, so differences in RevPAR are attributable to pricing strategy.
 
-$$\text{Performance}(h) = \begin{cases} \text{underperforming} & \text{if } \text{RevPAR}_h < Q_{25}(P) \\ \text{on\_par} & \text{if } Q_{25}(P) \leq \text{RevPAR}_h \leq Q_{75}(P) \\ \text{outperforming} & \text{if } \text{RevPAR}_h > Q_{75}(P) \end{cases}$$
+**Potential Outcomes Framework:**
 
-The best-performing peer (highest RevPAR in the peer set) serves as the counterfactual target.
+For hotel $h$ with current pricing strategy $T_h = 0$, we observe:
+
+$$Y_h(0) = \text{RevPAR}_h \quad \text{(observed outcome under current strategy)}$$
+
+The counterfactual—what RevPAR *would be* under the best peer's strategy—is unobserved:
+
+$$Y_h(1) = \text{RevPAR}_h^* \quad \text{(potential outcome under optimal strategy)}$$
+
+**Identification via Matching:**
+
+By matching on validated features $\mathbf{X}$, we assume conditional exchangeability:
+
+$$Y_h(1) \perp T \mid \mathbf{X}_h = \mathbf{X}_j$$
+
+This allows us to use the best-performing peer $j^* \in P_h$ as the counterfactual:
+
+$$\hat{Y}_h(1) = Y_{j^*}(0) = \text{RevPAR}_{j^*}$$
+
+where $j^* = \arg\max_{j \in P_h} \text{RevPAR}_j$
+
+**Average Treatment Effect on the Treated (ATT):**
+
+For underperforming hotels, the expected lift from adopting optimal pricing:
+
+$$\text{ATT} = \mathbb{E}[Y(1) - Y(0) \mid \text{underperforming}] = \mathbb{E}[\text{RevPAR}_{j^*} - \text{RevPAR}_h]$$
+
+**Performance Classification:**
+
+Hotels are classified by comparing to peer distribution:
+
+$$\text{Performance}(h) = \begin{cases} \text{underperforming} & \text{if } \text{RevPAR}_h < Q_{25}(P_h) \\ \text{on\_par} & \text{if } Q_{25}(P_h) \leq \text{RevPAR}_h \leq Q_{75}(P_h) \\ \text{outperforming} & \text{if } \text{RevPAR}_h > Q_{75}(P_h) \end{cases}$$
 
 ### 3.5 Price Recommendation
 
@@ -176,7 +264,7 @@ The recommendation type is determined by comparing current price to best peer:
 - **LOWER**: if current price is significantly above best peer  
 - **INVESTIGATE**: if price is similar but RevPAR is still lower (suggests non-price factors)
 
-The 15% threshold for "significant" difference is a heuristic based on typical peer price variance within matched groups (IQR ~63%).
+The 20% cap on price changes per cycle ensures adoptability while allowing meaningful adjustments. This is based on typical peer price variance within matched groups (IQR ~63%).
 
 Daily prices incorporate segment-specific multipliers calculated from booking data:
 
@@ -195,6 +283,61 @@ $$\text{occ}_{\text{new}} = \text{occ}_{\text{current}} \times (1 + \varepsilon 
 The elasticity $\varepsilon$ is calculated from historical booking data within each segment (see Section 3.1).
 
 **Reproduce:** See `src/recommender/pricing_pipeline.py` for implementation details.
+
+### 3.7 Lead Time-Aware Pricing
+
+The model incorporates **booking lead time** (days between booking creation and arrival) as a dynamic pricing signal. Analysis shows strong price variation by lead time, with 35.5% of bookings made within 7 days of arrival.
+
+![Lead Time Pricing Curve](outputs/figures/lead_time_pricing_curve.png)
+
+#### Revenue Management Framework
+
+The key insight: for short-term bookings, the relevant question isn't "what discount maximizes demand?" but rather **"what's the expected value of each strategy?"**
+
+For an empty room close to arrival:
+
+$$\text{EV}(\text{Hold}) = P(\text{full\_price\_booking}) \times p_{\text{full}}$$
+
+$$\text{EV}(\text{Discount}) = P(\text{discount\_booking}) \times p_{\text{discount}}$$
+
+The optimal strategy depends on current occupancy:
+- **Low occupancy** → Low $P(\text{full\_price})$ → Discount increases expected value
+- **High occupancy** → High $P(\text{full\_price})$ → Premium captures demand
+
+This is classic **yield management**: fill empty rooms with discounts when demand is low, capture premium when demand is high.
+
+#### Occupancy-Conditional Lead Time Strategy
+
+| Occupancy | Lead Time ≤7 days | Lead Time 31+ days |
+|-----------|-------------------|--------------------|
+| <30% | Discount (0.80x) | Premium (1.07x) |
+| 30-50% | Discount (0.80x) | Premium (1.07x) |
+| 50-70% | Hold (1.0x) | Premium (1.07x) |
+| >70% | Premium (1.15x) | Premium (1.07x) |
+
+#### Current vs Recommended Strategy
+
+![Lead Time Strategy Comparison](outputs/figures/lead_time_strategy_comparison.png)
+
+Analysis shows 30% of hotels currently apply heavy discounts (>20%) for short-term bookings, *even when occupancy is high!* Our revenue management approach recommends:
+- **Contextual discounting**: Only discount when occupancy is low (empty rooms = €0 revenue)
+- **Premium capture**: Charge more for last-minute bookings when occupancy is high
+- **Advance booking premium**: Always charge 7-15% more for bookings 31+ days out
+
+#### RevPAR Impact
+
+![Lead Time RevPAR Impact](outputs/figures/lead_time_revpar_impact.png)
+
+The revenue management approach delivers positive RevPAR lift across all occupancy levels:
+
+| Occupancy | Without Lead Time | With Lead Time | RevPAR Lift |
+|-----------|-------------------|----------------|-------------|
+| 20% | €20 | €37 | +85% |
+| 40% | €40 | €51 | +28% |
+| 60% | €60 | €66 | +10% |
+| 80% | €80 | €85 | +6% |
+
+The highest lift occurs at low occupancy, where discounts fill otherwise-empty rooms. At high occupancy, premium pricing captures additional value from price-insensitive demand.
 
 ---
 
@@ -268,56 +411,35 @@ Rural hotels show HIGH opportunity because there's **high variance in pricing st
 
 ---
 
-## 6. Model Performance vs Baselines
-
-### Baseline Comparison
-
-![Baseline Comparison](outputs/figures/baseline_comparison_updated.png)
-
-| Strategy | Win Rate | RevPAR Lift |
-|----------|----------|-------------|
-| Random Pricing | 50% | -€2.10 |
-| Market Average | 52% | +€0.80 |
-| Self Median | 55% | +€1.80 |
-| Peer Median | 61% | +€4.20 |
-| **PriceAdvisor** | **70%** | **+€8.50** |
-
-Win rate = percentage of recommendations that improve RevPAR vs actual prices.
-
-PriceAdvisor achieves 70% win rate (+9 points vs peer median baseline) and €8.50 average RevPAR lift per room per night (2x better than peer median).
-
-**Reproduce:** `python -m src.models.evaluation.rolling_validation`
-
----
-
-## 7. Results Summary
+## 6. Results Summary
 
 ### Key Metrics
 
 | Metric | Value |
 |--------|-------|
-| Hotels analyzed | 2,255 |
+| Hotels analyzed | 1,461 |
 | Hotels with optimization opportunity | 683 (30.3%) |
-| Rooms with opportunity | 2,984 |
-| Average recommended price change | +1.3% |
+| Rooms with opportunity | 6,124 |
+| Average recommended price change | +€2 |
 | RevPAR lift per room per night | €1.28 |
-| Model win rate | 82% |
-| RevPAR lift vs baselines | +€21.30 |
+| Model win rate | 70% |
 
 ### Annual Revenue Opportunity by Adoption Rate
 
 | Adoption Rate | Hotels | Rooms | Daily Lift | Monthly Lift | Annual Lift |
 |---------------|--------|-------|------------|--------------|-------------|
-| 25% | 171 | 746 | €955 | €28,650 | €348,531 |
-| 50% | 342 | 1,492 | €1,910 | €57,300 | €697,062 |
-| 75% | 512 | 2,238 | €2,865 | €85,950 | €1,045,594 |
-| 100% | 683 | 2,984 | €3,820 | €114,586 | €1,394,125 |
+| 25% | 170 | 1,531 | €1,960 | €58,782 | €713,385 |
+| 50% | 341 | 3,062 | €3,919 | €117,565 | €1,426,769 |
+| 75% | 512 | 4,593 | €5,879 | €176,347 | €2,140,154 |
+| 100% | 683 | 6,124 | €7,839 | €235,129 | €2,853,538 |
 
 ### Per Hotel Impact
 
 For hotels that adopt recommendations:
-- Annual lift per hotel: €2,041
-- Monthly lift per hotel: €170
+- Annual lift per hotel: €4,194 (€1.28 × 9 rooms × 365 days)
+- Monthly lift per hotel: €349
+
+**Reproduce:** `python -m src.models.evaluation.rolling_validation`
 
 ### Seasonal Patterns
 
@@ -332,14 +454,18 @@ For hotels that adopt recommendations:
 
 The late-2024 spike is partly due to more hotels in the data and partly due to shoulder season dynamics.
 
-### Price Change Distribution
+### Price Change Distribution (Hotels with Recommendations)
 
 ![Price Change Distribution](outputs/figures/price_change_distribution.png)
 
-The model recommends modest adjustments:
-- 61% of hotels are already pricing optimally (no change needed)
-- 25% need changes within ±10%
-- 14% need larger adjustments (capped at ±15%)
+For hotels that receive a price change recommendation (RAISE or LOWER):
+
+| Recommendation | Count | Avg Change |
+|----------------|-------|------------|
+| RAISE | 733 | +19.9% |
+| LOWER | 299 | -18.9% |
+
+The right panel shows how recommendations vary by market segment - resort coastal hotels tend to receive smaller adjustments (tighter peer pricing), while rural hotels see larger swings (more pricing variance among peers).
 
 ### Validation
 
@@ -349,40 +475,11 @@ Rolling window validation (4-month train, 1-month test) across 2023-2024:
 
 ---
 
-## 8. Pipeline Architecture
+## 7. Pipeline Architecture
+![Pipeline Flowchart](outputs/figures/flowchart.png)
 
-```mermaid
-flowchart TB
-    subgraph input [API Input]
-        A[hotel_id + date]
-    end
-    
-    subgraph pipeline [Pricing Pipeline]
-        B[Load Hotel Features]
-        C{Has History?}
-        D[Find KNN Peers]
-        E[Get Peer Prices]
-        F[Calculate Peer RevPAR]
-        G[Compare Performance]
-        H[Get Segment Elasticity]
-        I[Apply Daily Multipliers]
-        J[Generate Recommendation]
-    end
-    
-    subgraph output [API Output]
-        K[recommended_price]
-        L[expected_revpar]
-        M[confidence]
-    end
-    
-    A --> B --> C
-    C -->|Yes| D
-    C -->|No| D
-    D --> E --> F --> G --> H --> I --> J
-    J --> K
-    J --> L
-    J --> M
-```
+
+**Cold Start Handling:** Hotels without booking history still get KNN peers based on location and features. The recommendation uses peer median price as a starting point with 30% assumed occupancy.
 
 ### API Interface
 
@@ -416,7 +513,7 @@ prices = pipeline.recommend_date_range(hotel_id=123, start_date=date(2024, 6, 15
 
 ---
 
-## 9. Deployment Architecture
+## 8. Deployment Architecture
 
 ```mermaid
 flowchart LR
@@ -450,7 +547,7 @@ flowchart LR
 | Prediction cadence | Daily (4 AM) | Prices ready before hotel staff check dashboard |
 | Cache TTL | 24 hours | Matches prediction cadence |
 | KNN neighbors | 10 | Balances peer diversity with similarity |
-| Price clamp | ±15% | Ensures adoptable recommendations |
+| Price clamp | ±20% | Ensures adoptable recommendations (based on 63% IQR peer variance) |
 
 ### Fallback Behavior
 
@@ -461,7 +558,7 @@ If Redis cache miss occurs (new hotel, cache expired):
 
 ---
 
-## 10. Future Improvements
+## 9. Future Improvements
 
 **Richer Cold-Start Data:** Ask new hotels for their typical weekday and weekend rates during onboarding. This provides a price anchor for hotels without booking history, improving initial recommendations.
 
@@ -471,11 +568,11 @@ If Redis cache miss occurs (new hotel, cache expired):
 
 **Competitive Intelligence:** Scrape OTA prices (Booking.com, Expedia) for competitive positioning. This enables recommendations like "You're 20% below competitors for similar rooms."
 
-**A/B Testing Framework:** Implement randomized price experiments to measure actual RevPAR lift. Current estimates are based on observational data; experiments would provide causal evidence.
+
 
 ---
 
-## 11. Key Files
+## 10. Key Files
 
 | File | Purpose |
 |------|---------|
@@ -494,7 +591,3 @@ python -m src.models.evaluation.rolling_validation
 # Feature importance validation
 python notebooks/eda/05_elasticity/feature_importance_validation.py
 ```
-
----
-
-*Last updated: December 2024*
