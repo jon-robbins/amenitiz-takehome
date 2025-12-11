@@ -1,13 +1,16 @@
 [tool.poetry]
-name = "ml-project"
+name = "amenitiz-price-recommender"
 version = "0.1.0"
-description = "End-to-end ML Pipeline Implementation"
+description = "Price Recommender API for Amenitiz"
 authors = ["Jon Robbins <jrrobbins@gmail.com>"]
 readme = "README.md"
 packages = [
-    { include = "ml_pipeline" },
-    { include = "visualization" },
-    { include = "tests" }
+    { include = "data", from = "src" },
+    { include = "features", from = "src" },
+    { include = "models", from = "src" },
+    { include = "recommender", from = "src" },
+    { include = "visualization", from = "src" },
+    { include = "lib" }
 ]
 
 [tool.poetry.dependencies]
