@@ -70,6 +70,9 @@ lib/data/GSHHS_shp/
 
 # Large data outputs
 outputs/data/dbscan_labeled_bookings.csv
+data/ds_bookings.csv
+data/ds_booked_rooms.csv
+notebooks/eda/outputs/hotspots/dbscan_labeled_bookings.csv
 
 # Unused outputs (archived but not tracked)
 outputs/unused/
