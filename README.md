@@ -93,7 +93,7 @@ The `rooms.number_of_rooms` field is unreliable—68% of hotels show only "1 roo
 
 **Method:** For each hotel, calculate the maximum number of simultaneous bookings on any single day. This uses a sweep-line algorithm over booking intervals:
 
-$$\text{Capacity}_h = \max_{d \in \text{dates}} \left| \{ b : \text{arrival}_b \leq d < \text{departure}_b \} \right|$$
+$$\text{Capacity}(h) = \max_{d} | \{ b : \text{arrival}(b) \leq d < \text{departure}(b) \} |$$
 
 This is a **lower bound** on true capacity (hotels can't overbook), but captures demonstrated operational capacity.
 
@@ -200,9 +200,9 @@ Top drivers of hotel pricing:
 
 ### 3.3 Peer Matching
 
-Hotels are matched using K-Nearest Neighbors on the validated feature space. For hotel $i$ with feature vector $\mathbf{x}_i$, peers are the $k$ hotels minimizing Euclidean distance in standardized feature space:
+Hotels are matched using K-Nearest Neighbors on the validated feature space. For hotel *i* with feature vector **x**, peers are the *k* hotels minimizing Euclidean distance in standardized feature space:
 
-$$\text{Peers}(i) = \underset{j \neq i}{\text{argmin}_k} \|\text{scale}(\mathbf{x}_i) - \text{scale}(\mathbf{x}_j)\|_2$$
+$$\text{Peers}(i) = \underset{j \neq i}{\text{argmin}} || \text{scale}(\mathbf{x}_i) - \text{scale}(\mathbf{x}_j) ||$$
 
 Feature-based matching dramatically improves peer quality:
 
@@ -219,43 +219,32 @@ We estimate the causal effect of pricing strategy on RevPAR using a matched-pair
 
 **Potential Outcomes Framework:**
 
-For hotel $h$ with current pricing strategy $T_h = 0$, we observe:
-
-$$Y_h(0) = \text{RevPAR}_h \quad \text{(observed outcome under current strategy)}$$
-
-The counterfactual—what RevPAR *would be* under the best peer's strategy—is unobserved:
-
-$$Y_h(1) = \text{RevPAR}_h^* \quad \text{(potential outcome under optimal strategy)}$$
+For hotel *h* with current pricing strategy T=0, we observe Y(0) = RevPAR (observed outcome). The counterfactual—what RevPAR *would be* under the best peer's strategy—is Y(1) = RevPAR* (potential outcome under optimal strategy).
 
 **Identification via Matching:**
 
-By matching on validated features $\mathbf{X}$, we assume conditional exchangeability:
+By matching on validated features **X**, we assume conditional exchangeability. This allows us to use the best-performing peer j* as the counterfactual:
 
-$$Y_h(1) \perp T \mid \mathbf{X}_h = \mathbf{X}_j$$
-
-This allows us to use the best-performing peer $j^* \in P_h$ as the counterfactual:
-
-$$\hat{Y}_h(1) = Y_{j^*}(0) = \text{RevPAR}_{j^*}$$
-
-where $j^* = \arg\max_{j \in P_h} \text{RevPAR}_j$
+$$\hat{Y}(1) = \text{RevPAR}(\text{best peer})$$
 
 **Average Treatment Effect on the Treated (ATT):**
 
 For underperforming hotels, the expected lift from adopting optimal pricing:
 
-$$\text{ATT} = \mathbb{E}[Y(1) - Y(0) \mid \text{underperforming}] = \mathbb{E}[\text{RevPAR}_{j^*} - \text{RevPAR}_h]$$
+$$\text{ATT} = E[\text{RevPAR(best peer)} - \text{RevPAR(hotel)}]$$
 
 **Performance Classification:**
 
 Hotels are classified by comparing to peer distribution:
-
-$$\text{Performance}(h) = \begin{cases} \text{underperforming} & \text{if } \text{RevPAR}_h < Q_{25}(P_h) \\ \text{on\_par} & \text{if } Q_{25}(P_h) \leq \text{RevPAR}_h \leq Q_{75}(P_h) \\ \text{outperforming} & \text{if } \text{RevPAR}_h > Q_{75}(P_h) \end{cases}$$
+- **Underperforming**: RevPAR < 25th percentile of peers
+- **On par**: RevPAR between 25th and 75th percentile of peers
+- **Outperforming**: RevPAR > 75th percentile of peers
 
 ### 3.5 Price Recommendation
 
 For underperforming hotels, the recommended price is based on the best-performing peer (highest RevPAR):
 
-$$p^* = p_{\text{best\_peer}}$$
+$$p^* = p(\text{best peer})$$
 
 The recommendation type is determined by comparing current price to best peer:
 - **RAISE**: if current price is significantly below best peer
@@ -266,17 +255,17 @@ The 20% cap on price changes per cycle ensures adoptability while allowing meani
 
 Daily prices incorporate segment-specific multipliers calculated from booking data:
 
-$$p_{\text{daily}} = p^* \times \mu_{\text{dow}}(\text{segment}, \text{day}) \times \mu_{\text{month}}(\text{segment}, \text{month})$$
+$$p(\text{daily}) = p^* \times \mu(\text{segment, day}) \times \mu(\text{segment, month})$$
 
 ### 3.6 Expected RevPAR Calculation
 
 When a price change is recommended, expected RevPAR is calculated using segment elasticity:
 
-$$\text{RevPAR}_{\text{expected}} = p^* \times \text{occ}_{\text{new}}$$
+$$\text{RevPAR(expected)} = p^* \times \text{occupancy(new)}$$
 
 Where:
 
-$$\text{occ}_{\text{new}} = \text{occ}_{\text{current}} \times (1 + \varepsilon \times \Delta p\%)$$
+$$\text{occupancy(new)} = \text{occupancy(current)} \times (1 + \varepsilon \times \Delta p)$$
 
 The elasticity $\varepsilon$ is calculated from historical booking data within each segment (see Section 3.1).
 
@@ -294,13 +283,13 @@ The key insight: for short-term bookings, the relevant question isn't "what disc
 
 For an empty room close to arrival:
 
-$$\text{EV}(\text{Hold}) = P(\text{full\_price\_booking}) \times p_{\text{full}}$$
+$$\text{EV(Hold)} = P(\text{full price booking}) \times p$$
 
-$$\text{EV}(\text{Discount}) = P(\text{discount\_booking}) \times p_{\text{discount}}$$
+$$\text{EV(Discount)} = P(\text{discount booking}) \times p(\text{discounted})$$
 
 The optimal strategy depends on current occupancy:
-- **Low occupancy** → Low $P(\text{full\_price})$ → Discount increases expected value
-- **High occupancy** → High $P(\text{full\_price})$ → Premium captures demand
+- **Low occupancy** → Low P(full price) → Discount increases expected value
+- **High occupancy** → High P(full price) → Premium captures demand
 
 This is classic **yield management**: fill empty rooms with discounts when demand is low, capture premium when demand is high.
 
