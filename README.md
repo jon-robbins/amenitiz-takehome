@@ -6,16 +6,16 @@ PriceAdvisor is a machine learning system that recommends the RevPAR-optimized d
 
 PriceAdvisor is a machine learning system that recommends RevPAR-optimized daily prices for hotels. The model identifies peer hotels using validated features (R² = 0.78), compares RevPAR performance, and recommends price adjustments based on the best-performing peer's strategy.
 
-Analysis of 989,959 bookings across 2,255 Spanish hotels (2023-2024) reveals that 30% of hotels have pricing optimization opportunity. Using validated market elasticity (ε = -0.57), the model estimates €1.28 RevPAR lift per room per night for hotels that adopt recommendations.
+Analysis of 989,959 bookings across 2,255 Spanish hotels (2023-2024) reveals that 30% of hotels have pricing optimization opportunity. Using validated market elasticity (ε = -0.57), the model estimates **€1.64 RevPAR lift per room per night** for hotels that adopt recommendations (68% win rate).
 
 ### Expected Revenue Impact by Adoption Rate
 
 | Adoption | Hotels | Rooms | Annual RevPAR Lift |
 |----------|--------|-------|---------------------|
-| 25% | 170 | 1,531 | €713,385 |
-| 50% | 341 | 3,062 | €1,426,769 |
-| 75% | 512 | 4,593 | €2,140,154 |
-| 100% | 683 | 6,124 | €2,853,538 |
+| 25% | 170 | 1,531 | €916,510 |
+| 50% | 341 | 3,062 | €1,833,021 |
+| 75% | 512 | 4,593 | €2,749,531 |
+| 100% | 683 | 6,124 | €3,666,042 |
 
 *Room capacity estimated from max simultaneous bookings (avg 9.0 rooms/hotel, median 6). This captures demonstrated capacity: 13% single-unit vacation rentals, 36% B&Bs (2-5 rooms), 42% small hotels (6-20 rooms), 9% medium hotels (21+ rooms).*
 
